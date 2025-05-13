@@ -13,6 +13,8 @@
 * The one library to rule them all
 */
 #include <open.mp>
+// omp NPC
+#include <omp-npc>
 
 /*
 * YSI Libraries
@@ -58,6 +60,11 @@
 */
 #include "modules/player_cmds.pwn"
 #include "modules/admin_cmds.pwn"
+
+/*
+* NPCs
+*/
+#include "modules/npc.pwn"
 
 /*
 * Start gamemode
@@ -150,6 +157,11 @@ public OnGameModeInit()
     SetTimer("PlayerChecks", 500, true);
 	SetTimer("ServerTime", 1000, true);
 	SetTimer("ServerWeather", 3600000, true);
+    
+    /*
+    * Create NPCs
+    */
+    CreateServerNpcs();
 	return 1;
 }
 
@@ -161,9 +173,8 @@ public OnGameModeExit()
 
 public OnPlayerConnect(playerid)
 {
-	// no NPCs here... for now
     if(IsPlayerNPC(playerid))
-		return Kick(playerid);
+		return 1;
 
 	/*
 	* Reset player variables

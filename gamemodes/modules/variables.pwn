@@ -105,6 +105,15 @@ enum E_PLAYERS
 new player[MAX_PLAYERS][E_PLAYERS];
 
 /*
+* NpcData
+*/
+enum E_NPCS
+{
+    npcId,
+};
+new serverNpc[MAX_NPCS][E_NPCS];
+
+/*
 * Interior Data
 */
 enum E_INTERIORS
