@@ -347,7 +347,7 @@ bool:IsPlayerAtFuelPump(playerid)
 * Misc
 */
 RandomRange(min, max)
-{    
+{
     new rand = random(max-min)+min;    
     return rand;
 }
@@ -415,76 +415,11 @@ ReturnItemIdByName(const itemName[])
 
 CreateInteriorPickup(interiorid)
 {
-    if(srvInterior[interiorid][intPrice] > 0) // if the price is more than 0 that means it's a specific interior type
-	{
-		new labelText[128];
-		if(strcmp("Vacant", srvInterior[interiorid][intOwner]) == 0)
-		{
-			format(labelText, sizeof(labelText), "Owner: Vacant\nPrice: $%d\nLocked: Yes", srvInterior[interiorid][intPrice]);
-		}
-		else
-		{
-			if(srvInterior[interiorid][intLocked] == 1)
-			{
-				format(labelText, sizeof(labelText), "Owner: %s\nLocked: Yes", srvInterior[interiorid][intOwner]);
-			}
-			else
-			{
-				format(labelText, sizeof(labelText), "Owner: %s\nLocked: No", srvInterior[interiorid][intOwner]);
-			}
-		}
-
-		/*
-		* Create the arrows to show where the entrances are
-		*/
-		switch(srvInterior[interiorid][intType])
-		{
-			case INTERIOR_TYPE_PLAYERHOME:
-			{
-				if(strcmp("Vacant", srvInterior[interiorid][intOwner]) == 0)
-				{
-					interiorEnterPickup[interiorid] = CreateDynamicPickup(UNOWNED_PLAYERHOME_PICKUP, 1, srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 
-						srvInterior[interiorid][intExitVirWorld], srvInterior[interiorid][intExitWorld]);
-				}
-				else
-				{
-					interiorEnterPickup[interiorid] = CreateDynamicPickup(OWNED_PROPERTY_PICKUP, 1, srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 
-						srvInterior[interiorid][intExitVirWorld], srvInterior[interiorid][intExitWorld]);
-				}
-
-				srvInterior[interiorid][intInfo] = CreateDynamic3DTextLabel(labelText, COLOR_WHITE, srvInterior[interiorid][intEnter][0], 
-					srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 20.0, .testlos = 1, .worldid = srvInterior[interiorid][intExitVirWorld], 
-					.interiorid = srvInterior[interiorid][intExitWorld]);
-			}
-			case INTERIOR_TYPE_FACTIONBASE:
-			{
-				if(strcmp("Vacant", srvInterior[interiorid][intOwner]) == 0)
-				{
-					interiorEnterPickup[interiorid] = CreateDynamicPickup(UNOWNED_FACTIONBASE_PICKUP, 1, srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 
-						srvInterior[interiorid][intExitVirWorld], srvInterior[interiorid][intExitWorld]);
-				}
-				else
-				{
-					interiorEnterPickup[interiorid] = CreateDynamicPickup(OWNED_PROPERTY_PICKUP, 1, srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 
-						srvInterior[interiorid][intExitVirWorld], srvInterior[interiorid][intExitWorld]);
-				}
-
-				srvInterior[interiorid][intInfo] = CreateDynamic3DTextLabel(labelText, COLOR_WHITE, srvInterior[interiorid][intEnter][0], 
-					srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 20.0, .testlos = 1, .worldid = srvInterior[interiorid][intExitVirWorld], 
-					.interiorid = srvInterior[interiorid][intExitWorld]);
-			}
-			case INTERIOR_TYPE_PUBLIC:
-			{
-				interiorEnterPickup[interiorid] = CreateDynamicPickup(OWNED_PROPERTY_PICKUP, 1, srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 
-					srvInterior[interiorid][intExitVirWorld], srvInterior[interiorid][intExitWorld]);
-			}
-		}
-	}
-	else
-	{
-		interiorEnterPickup[interiorid] = CreateDynamicPickup(ENTER_EXIT_INTERIOR_PICKUP, 1, srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 
-			srvInterior[interiorid][intExitVirWorld], srvInterior[interiorid][intExitWorld]);
-	}
+    /*
+    * Create the arrows to show where the entrances are
+    */
+    interiorEnterPickup[interiorid] = CreateDynamicPickup(ENTER_EXIT_INTERIOR_PICKUP, 1, srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], 
+		srvInterior[interiorid][intExitVirWorld], srvInterior[interiorid][intExitWorld]);
 
 	// every interior has an arrow for the exit point
 	interiorExitPickup[interiorid] = CreateDynamicPickup(ENTER_EXIT_INTERIOR_PICKUP, 1, srvInterior[interiorid][intExit][0], srvInterior[interiorid][intExit][1], srvInterior[interiorid][intExit][2], 
@@ -492,11 +427,57 @@ CreateInteriorPickup(interiorid)
 	return 1;
 }
 
-/*CreateInteriorMapIcon(interiorid)
+/*
+* Scavenging Locations
+*/
+LoadScavArea(scavAreaId)
 {
-	if(srvInterior[interiorid][mapIconId] == 0)
-		return 1;
+    new DBResult:Result;
+    Result = DB_ExecuteQuery(database, "SELECT * FROM scavareas WHERE id = '%d'", scavAreaId);
 
-	srvInterior[interiorid][mapIcon] = CreateDynamicMapIcon(srvInterior[interiorid][intEnter][0], srvInterior[interiorid][intEnter][1], srvInterior[interiorid][intEnter][2], srvInterior[interiorid][mapIconId], 0, 0);
-	return 1;
-}*/
+	if(DB_GetFieldCount(Result) > 0)
+    {
+        scavArea[scavAreaId][scavPos][0] = DB_GetFieldFloatByName(Result, "posx");
+        scavArea[scavAreaId][scavPos][1] = DB_GetFieldFloatByName(Result, "posy");
+        scavArea[scavAreaId][scavPos][2] = DB_GetFieldFloatByName(Result, "posz");
+        scavArea[scavAreaId][scavInterior] = DB_GetFieldIntByName(Result, "interior");
+        scavArea[scavAreaId][scavWorld] = DB_GetFieldIntByName(Result, "world");
+        scavArea[scavAreaId][scavType] = DB_GetFieldIntByName(Result, "type");
+        scavArea[scavAreaId][areaActive] = true;
+    }
+    DB_FreeResultSet(Result);
+    
+    // create the text label
+    scavTextLabel[scavAreaId] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavArea[scavAreaId][scavPos][0], scavArea[scavAreaId][scavPos][1], scavArea[scavAreaId][scavPos][2], 20.0, 
+        .testlos = 1, .worldid = scavArea[scavAreaId][scavWorld], .interiorid = scavArea[scavAreaId][scavInterior]);
+    return 1;
+}
+
+CreateScavArea(Float:scavPosX, Float:scavPosY, Float:scavPosZ, scavIntWorld, scavVirWorld, areaType)
+{
+    new tmpScavId, DBResult:Result;
+    DB_ExecuteQuery(database, "INSERT INTO scavareas (posx, posy, posz, interior, world, type) \
+        VALUES ('%f', '%f', '%f', '%d', '%d', '%d')", scavPosX, scavPosY, scavPosZ, scavIntWorld, scavVirWorld, areaType);
+
+    // get the ID of the 
+    Result = DB_ExecuteQuery(database, "SELECT last_insert_rowid() FROM scavareas");
+    tmpScavId = DB_GetFieldInt(Result);
+    DB_FreeResultSet(Result);
+
+    // update the array size
+    scavAreaCount = scavAreaCount + 1;
+    
+    // set the data for this new scav area
+    scavArea[tmpScavId][scavPos][0] = scavPosX;
+    scavArea[tmpScavId][scavPos][1] = scavPosY;
+    scavArea[tmpScavId][scavPos][2] = scavPosZ;
+    scavArea[tmpScavId][scavInterior] = scavIntWorld;
+    scavArea[tmpScavId][scavWorld] = scavVirWorld;
+    scavArea[tmpScavId][scavType] = areaType;
+    scavArea[tmpScavId][areaActive] = true;
+    
+    // create the text label
+    scavTextLabel[tmpScavId] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavPosX, scavPosY, scavPosZ, 20.0, 
+        .testlos = 1, .worldid = scavVirWorld, .interiorid = scavIntWorld);
+    return 1;
+}

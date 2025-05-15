@@ -3,7 +3,6 @@
 * (C) 2025 Zombie Outbreak Development Contributors
 * GNU General Public License v3.0
 */
-
 #define SAMP_CONST_CORRECT
 #define NO_TAGS
 #define CGEN_MEMORY 20000
@@ -11,6 +10,7 @@
 
 /*
 * Max ColAndreas Objects
+* This is the maximum number of objects that the plugin can add collisions for
 */
 #define MAX_CA_OBJECTS 50000
 
@@ -128,7 +128,7 @@
 */
 #define MAX_ITEMS 30
 #define INVALID_ITEM 0
-#define MAX_SCAV_AREAS 158
+#define MAX_SCAV_AREAS 5000 // increase if required.
 #define INV_CATEGORY_UNKNOWN -1
 #define CATEGORY_GENERAL 0
 #define CATEGORY_FOOD 1

@@ -58,7 +58,10 @@ ParseMapFiles()
     new iNpcIDEnd = MAX_NPCS - 1;
     new tempNpcIdNum = 999;*/
 
+    // although this data is not loaded from the map, it looks tidier in the logs on startup to show all the stats here
     printf("|-> Vehicle Respawn Delay: %d", VEHICLE_RESPAWN_TIME);
+    printf("|-> Interiors Loaded: %d/%d", serverInteriorCount, MAX_SERVER_INTERIORS);
+    printf("|-> Scav Areas Loaded: %d/%d", scavAreaCount, MAX_SCAV_AREAS);
 
     format(mapDirectory, sizeof(mapDirectory), "%s", MAP_DIRECTORY);
     new dir:dDir = dir_open(mapDirectory);
@@ -69,7 +72,7 @@ ParseMapFiles()
         if (0 > strfind(dItem, ".map")) continue;
 
         format(cMapName, sizeof(cMapName), "/maps/%s", dItem);
-        printf("   |-> Parsing: %s", cMapName);
+        printf("|-> Parsing: %s", cMapName);
 
         new File:fMap = fopen(cMapName, io_read);
         if(fMap)
@@ -164,13 +167,12 @@ ParseMapFiles()
                 }*/
             }
             fclose(fMap);
-            printf("      |-> Objects Parsed: %d", iObjects);
-            printf("      |-> Vehicles Parsed: %d/%d", iVehicles, MAX_VEHICLES);
-            printf("      |-> Objects Removed: %d/%d", removedObjects, MAX_REMOVED_OBJECTS); //doesn't include LOD Models as the MTA map file contains both IDs for one line of removeWorldObject
-            //printf("      |-> NPCs Parsed: %d", iNpcs);
-            printf("      |-> Interiors Loaded: %d/%d", serverInteriorCount, MAX_SERVER_INTERIORS);
+            printf("    |-> Objects Parsed: %d/%d", iObjects, MAX_CA_OBJECTS);
+            printf("    |-> Vehicles Parsed: %d/%d", iVehicles, MAX_VEHICLES);
+            printf("    |-> Objects Removed: %d/%d", removedObjects, MAX_REMOVED_OBJECTS); //doesn't include LOD Models as the MTA map file contains both IDs for one line of removeWorldObject
+            //printf("    |-> NPCs Parsed: %d", iNpcs);
         }
-        else print("      |-> Parsing Failed!");
+        else print("    |-> Parsing Failed!");
     }
     dir_close(dDir);
 

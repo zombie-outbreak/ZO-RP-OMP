@@ -36,7 +36,7 @@
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/aban");
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/ipban");
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/rconbanip /unbanip /dsetpw");
-            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/fly /createinterior /icis /setintvirworld /showinteriors /cancelinterior");
+            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/fly /createinterior /icis /setintvirworld /showinteriors /cancelinterior /scavcreate");
         }
     }
     return 1;
@@ -323,38 +323,6 @@
 	return 1;
 }
 
-/*@cmd() setnpcname(playerid, params[], help)
-{
-    new npcid, newName[MAX_PLAYER_NAME];
-    if(player[playerid][admin] < 5)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-
-    if(sscanf(params, "is[24]", npcid, newName)) 
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Syntax error. Correct usage: /setnpcname [npcid] [new name]");
-
-    if(strlen(newName) > MAX_PLAYER_NAME)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Entered name is too long.");
-
-    WriteNewNpcName(npcid, newName);
-	return 1;
-}
-
-@cmd() setnpcvirworld(playerid, params[], help)
-{
-    new npcid, newvirworld;
-    if(player[playerid][admin] < 5)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-
-    if(sscanf(params, "ii", npcid, newvirworld)) 
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Syntax error. Correct usage: /setnpcvirworld [npcid] [virtual world id]");
-
-    if(newvirworld < 0 || newvirworld > 2147483646)
-        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You cannot set a negative virtual world ID. Valid IDs 0 - 2147483646");
-
-    WriteNewNpcVirtualWorld(npcid, newvirworld);
-	return 1;
-}*/
-
 /*
 * Creating and editing interiors
 */
@@ -560,6 +528,27 @@
 
     SetPlayerVirtualWorld(playerid, 0);
     SendClientMessage(playerid, COLOR_ADMINISTRATOR, "You reset your Virtual world to 0.");
+    return 1;
+}
+
+@cmd() scavcreate(playerid, params[], help)
+{
+    new Float:tmpPos[3], tmpType;
+    
+    if(player[playerid][admin] < 5)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
+    
+    if(sscanf(params, "i", tmpType))
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Syntax error. Correct usage: /scavcreate [type]");
+        
+    if(scavAreaCount >= MAX_SCAV_AREAS)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "The server has reached its maximum amount of scav areas.");
+    
+    // get the location data
+    GetPlayerPos(playerid, tmpPos[0], tmpPos[1], tmpPos[2]);
+    
+    // create the scav area
+    CreateScavArea(tmpPos[0], tmpPos[1], tmpPos[2], GetPlayerInterior(playerid), GetPlayerVirtualWorld(playerid), tmpType);
     return 1;
 }
 

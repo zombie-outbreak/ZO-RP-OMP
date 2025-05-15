@@ -82,14 +82,14 @@
     if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You can only use this command while on foot.");
 
-    for(new i = 0; i < MAX_SCAV_AREAS; i++)
+    for(new i = 1; i <= scavAreaCount; i++)
     {
-        if(IsPlayerInRangeOfPoint(playerid, 2.5, scavAreas[i][0], scavAreas[i][1], scavAreas[i][2]))
+        if(IsPlayerInRangeOfPoint(playerid, 2.5, scavArea[i][scavPos][0], scavArea[i][scavPos][1], scavArea[i][scavPos][2]))
         {
-            if(!locationActive[i])
+            if(!scavArea[i][areaActive])
                 return SendClientMessage(playerid, COLOR_RED, "This location is not currently active.");
 
-            switch(scavAreaType[i])
+            switch(scavArea[i][scavType])
             {
                 case SCAV_AREA_SCRAP:
                 {
@@ -125,9 +125,18 @@
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
                     itemIdFound = lootTableBody[random(CHANCE)];
+                    new scrapItemId = ReturnItemIdByName("Scrap");
+                    new moneyItemId = ReturnItemIdByName("Money");
                     if(itemIdFound != INVALID_ITEM) // item found
                     {
-                        amountFound = random(15) + 1;
+                        if(itemIdFound == scrapItemId || itemIdFound == moneyItemId)
+                        {
+                            amountFound = random(25) + 1; // 1 - 25
+                        }
+                        else
+                        {
+                            amountFound = 1;
+                        }
                         playerInventory[playerid][itemIdFound] = playerInventory[playerid][itemIdFound] + amountFound;
                         
                         if(amountFound <= 1)
@@ -318,83 +327,10 @@
             * Set location's active to false so it cannot be searched again for X amount of time.
             */
             UpdateDynamic3DTextLabelText(scavTextLabel[i], COLOR_RED, "Looted");
-            locationActive[i] = false;
-            SetTimerEx("ResetSearchZone", 15000, false, "d", i); // SHOULD BE A LOT SLOWER, SET TO A LOW AMOUNT OF TESTING PURPOSES
+            scavArea[i][areaActive] = false;
+            SetTimerEx("ResetSearchZone", 15000, false, "d", i); // SHOULD BE A LOT SLOWER, SET TO A LOW AMOUNT FOR TESTING PURPOSES
         }
     }
-    return 1;
-}
-
-/*
-* Property commands
-*/
-@cmd() purchaseproperty(playerid, params[], help)
-{
-	new itemMoneyId = ReturnItemIdByName("Money");
-
-    if(!player[playerid][isSpawned])
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this command if you are not spawned as a character.");
-
-    if(player[playerid][iszombie] == 1)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
-
-	if(player[playerid][atProperty] == 1)
-		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You are not at a purchasable location.");
-
-	if(strcmp("Vacant", srvInterior[player[playerid][atProperty]][intOwner]) == 1)
-		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You cannot purchase a property that is already owned.");
-
-	if(playerInventory[playerid][itemMoneyId] < srvInterior[player[playerid][atProperty]][intPrice])
-		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You do not heve enough money to purchase this property.");
-
-    if(srvInterior[player[playerid][atProperty]][intType] == INTERIOR_TYPE_PUBLIC)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You cannot purchase this property.");
-
-	/*
-	* Purchase the property - first take the player's money
-	*/
-	playerInventory[playerid][itemMoneyId] = playerInventory[playerid][itemMoneyId] - srvInterior[player[playerid][atProperty]][intPrice];
-    UpdatePlayerInventoryEntry(playerid, itemMoneyId, player[playerid][chosenChar]);
-
-	/*
-	* Update the interiors database
-	*/
-	DB_ExecuteQuery(database, "UPDATE interiors SET owner = '%q' WHERE id = '%d'", player[playerid][chosenChar], player[playerid][atProperty]);
-
-	DestroyDynamicPickup(interiorEnterPickup[player[playerid][atProperty]]);
-	DestroyDynamicPickup(interiorExitPickup[player[playerid][atProperty]]);
-	DestroyDynamic3DTextLabel(srvInterior[player[playerid][atProperty]][intInfo]);
-
-	/*
-	* Respawn the interior pickup and 3D text
-	*/
-	LoadInteriorData(player[playerid][atProperty]);
-	return 1;
-}
-
-@cmd() myproperties(playerid, params[], help)
-{
-    new tmpPropertyName[64], DBResult:Result;
-
-    if(!player[playerid][isSpawned])
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this command if you are not spawned as a character.");
-
-    if(player[playerid][iszombie] == 1)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
-
-    for(new i = 0; i < MAX_SERVER_INTERIORS; i++)
-    {
-        Result = DB_ExecuteQuery(database, "SELECT name FROM interiors WHERE owner = '%q' AND id = '%d'", player[playerid][chosenChar], i);
-
-        if(DB_GetFieldCount(Result) > 0)
-        {
-            DB_GetFieldStringByName(Result, "name", tmpPropertyName, 64);
-            AddDialogListitem(playerid, tmpPropertyName);
-        }
-        DB_FreeResultSet(Result);
-    }
-
-    ShowPlayerDialogPages(playerid, "ShowPlayerOwnedProperties", DIALOG_STYLE_LIST, "Your Properties", "Select", "Close", 15);
     return 1;
 }
 
@@ -422,7 +358,7 @@
     }
     else // not in a faction 
     {
-        Dialog_ShowCallback(playerid, using public CreateFactionQuestion<iiiis>, DIALOG_STYLE_MSGBOX, "Create a Faction?", "To create a faction you will need $100,000, $75,000 of which is kept within the newly created faction's coffers.", "Yes", "No");
+        Dialog_ShowCallback(playerid, using public CreateFactionQuestion<iiiis>, DIALOG_STYLE_MSGBOX, "Create a Faction?", "You are not in a faction. Would you like to create one?", "Yes", "No");
     }
     return 1;
 }

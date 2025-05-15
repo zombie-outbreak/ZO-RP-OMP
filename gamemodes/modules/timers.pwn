@@ -240,7 +240,7 @@ public OnLoginTimeout(playerid)
 public ResetSearchZone(zoneid)
 {
     UpdateDynamic3DTextLabelText(scavTextLabel[zoneid], COLOR_GREEN, "/search");
-    locationActive[zoneid] = true;
+    scavArea[zoneid][areaActive] = true;
     return 1;
 }
 

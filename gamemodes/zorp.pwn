@@ -106,6 +106,13 @@ public OnGameModeInit()
     Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM interiors");
 	serverInteriorCount = DB_GetFieldInt(Result);
 	DB_FreeResultSet(Result);
+    
+    /*
+    * Get scav area count
+    */
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM scavareas");
+    scavAreaCount = DB_GetFieldInt(Result);
+    DB_FreeResultSet(Result);
 
 	/*
     * Parse MTA Maps
@@ -135,10 +142,9 @@ public OnGameModeInit()
             .testlos = 1, .worldid = lockerVirWorld[i], .interiorid = lockerInterior[i]);
     }
 
-    for(new i = 0; i < MAX_SCAV_AREAS; i++)
+    for(new i = 1; i <= scavAreaCount; i++)
     {
-        scavTextLabel[i] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavAreas[i][0], scavAreas[i][1], scavAreas[i][2], 20.0, 
-            .testlos = 1, .worldid = scavVirWorld[i], .interiorid = scavInterior[i]);
+        LoadScavArea(i);
     }
 
 	/*

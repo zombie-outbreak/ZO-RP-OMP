@@ -30,9 +30,7 @@ forward InventoryDropAmount(playerid, dialogid, response, listitem, string:input
 forward InteriorOptions(playerid, dialogid, response, listitem, string:inputtext[]);
 forward InteriorSetName(playerid, dialogid, response, listitem, string:inputtext[]);
 forward InteriorSetVirWorld(playerid, dialogid, response, listitem, string:inputtext[]);
-forward InteriorSetMapIcon(playerid, dialogid, response, listitem, string:inputtext[]);
 forward InteriorDeleteQuestion(playerid, dialogid, response, listitem, string:inputtext[]);
-forward PlayerInteriorOptions(playerid, dialogid, response, listitem, string:inputtext[]);
 forward CreateFactionQuestion(playerid, dialogid, response, listitem, string:inputtext[]);
 forward CreateFactionName(playerid, dialogid, response, listitem, string:inputtext[]);
 forward FactionMain_Leader(playerid, dialogid, response, listitem, string:inputtext[]);
@@ -822,11 +820,7 @@ public InteriorOptions(playerid, dialogid, response, listitem, string:inputtext[
 		{
 			Dialog_ShowCallback(playerid, using public InteriorSetVirWorld<iiiis>, DIALOG_STYLE_INPUT, "Interior Virtual World", "Input a new virtual world ID for this interior.", "Confirm", "Close");
 		}
-		case 2: // set map icon
-		{
-			Dialog_ShowCallback(playerid, using public InteriorSetMapIcon<iiiis>, DIALOG_STYLE_INPUT, "Interior Map Icon", "Input an ID for this interior's Map Icon.", "Confirm", "Close");
-		}
-		case 3: // delete
+		case 2: // delete
 		{
 			Dialog_ShowCallback(playerid, using public InteriorDeleteQuestion<iiiis>, DIALOG_STYLE_MSGBOX, "Delete Interior", "Are you sure you wish to delete this interior? You cannot recover it without recreating it.", "Yes", "No");
 		}
@@ -898,36 +892,6 @@ public InteriorSetVirWorld(playerid, dialogid, response, listitem, string:inputt
 	return 1;
 }
 
-public InteriorSetMapIcon(playerid, dialogid, response, listitem, string:inputtext[])
-{
-	if(!response) // don't change
-		return 1;
-
-	new tmpIntId, string[128];
-	format(string, sizeof(string), "%s Options", player[playerid][tmpIntName]);
-
-	if(strval(inputtext) < 0 || strval(inputtext) == 1 || strval(inputtext) == 2 || strval(inputtext) == 3 || strval(inputtext) == 4 || strval(inputtext) == 56 || strval(inputtext) > 63)
-	{
-		SendClientMessage(playerid, COLOR_RED, "ID cannot be less than 0 or more than 63 nor can it be ID's 1, 2, 3, 4, and 56.");
-		Dialog_ShowCallback(playerid, using public InteriorOptions<iiiis>, DIALOG_STYLE_LIST, string, "Change Name\nSet Virtual World\nSet Map Icon\nDelete", "Select", "Close");
-		return 1;
-	}
-
-	// update the map icon ID
-    DB_ExecuteQuery(database, "UPDATE interiors SET mapicon = '%d' WHERE name = '%q'", strval(inputtext), player[playerid][tmpIntName]);
-	srvInterior[tmpIntId][mapIconId] = strval(inputtext);
-
-	SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You updated the interior map icon.");
-
-	// delete and recreate the map icon
-	/*if(IsValidDynamicMapIcon(srvInterior[tmpIntId][mapIcon]))
-	{
-		DestroyDynamicMapIcon(srvInterior[tmpIntId][mapIcon]);
-	}
-	CreateInteriorMapIcon(tmpIntId);*/
-	return 1;
-}
-
 public InteriorDeleteQuestion(playerid, dialogid, response, listitem, string:inputtext[])
 {
 	if(!response) // don't delete
@@ -947,7 +911,6 @@ public InteriorDeleteQuestion(playerid, dialogid, response, listitem, string:inp
 	// destroy the old pickups
 	DestroyDynamicPickup(interiorEnterPickup[tmpIntId]);
 	DestroyDynamicPickup(interiorExitPickup[tmpIntId]);
-	DestroyDynamic3DTextLabel(srvInterior[tmpIntId][intInfo]);
 
 	/*
 	* Now Delete interior from the table
@@ -956,63 +919,6 @@ public InteriorDeleteQuestion(playerid, dialogid, response, listitem, string:inp
 	DB_FreeResultSet(Result);
 
 	SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You deleted the interior.");
-	return 1;
-}
-
-public PlayerInteriorOptions(playerid, dialogid, response, listitem, string:inputtext[])
-{
-	if(!response)
-		return 1;
-
-	new tmpIntId, DBResult:Result;
-
-    if(!player[playerid][isSpawned])
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this command if you are not spawned as a character.");
-    
-	Result = DB_ExecuteQuery(database, "SELECT id FROM interiors WHERE name = '%q'", player[playerid][chosenProperty]);
-
-	if(DB_GetFieldCount(Result) > 0)
-	{
-		tmpIntId = DB_GetFieldIntByName(Result, "id");
-	}
-	DB_FreeResultSet(Result);
-
-	switch(listitem)
-	{
-		case 0: // Toggle Lock on property
-		{
-			if(srvInterior[tmpIntId][intLocked] == 0) // it's unlocked so lock it
-			{
-				srvInterior[tmpIntId][intLocked] = 1;
-				SendClientMessage(playerid, COLOR_GREEN, "You locked %s.", srvInterior[tmpIntId][intName]);
-			}
-			else // it's locked so unlock it
-			{
-				srvInterior[tmpIntId][intLocked] = 0;
-				SendClientMessage(playerid, COLOR_RED, "You unlocked %s.", srvInterior[tmpIntId][intName]);
-			}
-
-			// update the database entry
-			DB_ExecuteQuery(database, "UPDATE interiors SET islocked = '%d' WHERE id = '%d'", srvInterior[tmpIntId][intLocked], tmpIntId);
-
-			// update the 3D text
-			new labelText[128];
-			if(srvInterior[tmpIntId][intLocked] == 1)
-			{
-				format(labelText, sizeof(labelText), "Owner: %s\nLocked: Yes", srvInterior[tmpIntId][intOwner]);
-			}
-			else
-			{
-				format(labelText, sizeof(labelText), "Owner: %s\nLocked: No", srvInterior[tmpIntId][intOwner]);
-			}
-			UpdateDynamic3DTextLabelText(srvInterior[tmpIntId][intInfo], COLOR_WHITE, labelText);
-		}
-		case 1: // Sell
-		{
-			SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "...COMING SOON...");
-			//Dialog_ShowCallback(playerid, PropertySellQuestion, DIALOG_STYLE_MSGBOX, "Sell Property", "Are you sure you wish to sell this property?", "Yes", "No");
-		}
-	}
 	return 1;
 }
 
@@ -1033,18 +939,27 @@ public CreateFactionName(playerid, dialogid, response, listitem, string:inputtex
 	if(!response)
 		return 1;
 
-	new DBResult:Result, tmpFactionId;
-	DB_ExecuteQuery(database, "INSERT INTO factions (name, creator) VALUES ('%q', '%q')", inputtext, player[playerid][chosenChar]);
-	Result = DB_ExecuteQuery(database, "SELECT last_insert_rowid()");
-	tmpFactionId = DB_GetFieldInt(Result);
-	DB_FreeResultSet(Result);
+	new DBResult:Result, tmpFactionId, bool:factionFound = false;
+    Result = DB_ExecuteQuery(database, "SELECT * FROM factions WHERE name = '%q'", inputtext);
 
-	/*
-	* Take the player's money
-	*/
-	new itemMoneyId = ReturnItemIdByName("Money");
-	playerInventory[playerid][itemMoneyId] = playerInventory[playerid][itemMoneyId] - FACTION_CREATION_PRICE;
-    UpdatePlayerInventoryEntry(playerid, itemMoneyId, player[playerid][chosenChar]);
+	if(DB_GetFieldCount(Result) > 0) // a faction exists with this name already
+    {
+        factionFound = true;
+    }
+    DB_FreeResultSet(Result);
+    
+    if(factionFound)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "A faction with that name already exists.");
+        return 1;
+    }
+    else
+    {
+        DB_ExecuteQuery(database, "INSERT INTO factions (name, creator) VALUES ('%q', '%q')", inputtext, player[playerid][chosenChar]);
+        Result = DB_ExecuteQuery(database, "SELECT last_insert_rowid()");
+        tmpFactionId = DB_GetFieldInt(Result);
+        DB_FreeResultSet(Result);
+    }
 
 	/*
 	* Load the new faction's data and update the character's faction data
@@ -1147,6 +1062,12 @@ public EditFactionMember(playerid, dialogid, response, listitem, string:inputtex
 		}
 		case 1: // kick
 		{
+            if(strcmp(player[playerid][facChosenChar], player[playerid][chosenChar]) == 0) // if the player is trying to kick themselves
+            {
+                SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot kick yourself from your faction.");
+                return 1;
+            }
+
 			if(IsPlayerConnected(GetPlayerIdFromName(player[playerid][facChosenChar])))
 			{
 				player[GetPlayerIdFromName(player[playerid][facChosenChar])][plrFaction] = 0;
@@ -1215,17 +1136,7 @@ DialogPages:ShowInteriorsDialog(playerid, response, listitem, inputtext[])
 	new string[128];
     format(player[playerid][tmpIntName], 64, "%s", inputtext);
 	format(string, sizeof(string), "%s Options", inputtext);
-	Dialog_ShowCallback(playerid, using public InteriorOptions<iiiis>, DIALOG_STYLE_LIST, string, "Change Name\nSet Virtual World\nSet Map Icon\nDelete", "Select", "Close");
-	return 1;
-}
-
-DialogPages:ShowPlayerOwnedProperties(playerid, response, listitem, inputtext[])
-{
-	if(!response)
-		return 1;
-
-	format(player[playerid][chosenProperty], 64, "%s", inputtext);
-	Dialog_ShowCallback(playerid, using public PlayerInteriorOptions<iiiis>, DIALOG_STYLE_LIST, "My Properties", "Toggle Lock\nSell", "Select", "Close");
+	Dialog_ShowCallback(playerid, using public InteriorOptions<iiiis>, DIALOG_STYLE_LIST, string, "Change Name\nSet Virtual World\nDelete", "Select", "Close");
 	return 1;
 }
 
