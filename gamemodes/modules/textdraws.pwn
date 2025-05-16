@@ -388,12 +388,12 @@ UpdateHudElementForPlayer(playerid, hudElement)
 			*/
 			if(player[playerid][iszombie] == 1)
 			{
-				format(string, sizeof string, "ID:_%d_I_LEVEL:_%d_I_MUTATION_POINTS:_%d", playerid, player[playerid][level], player[playerid][perkPoints]);
+				format(string, sizeof string, "ID:_%d_I_LEVEL:_%d_I_MUTATION_POINTS:_%d_I_EXP:_%d/%d", playerid, player[playerid][level], player[playerid][perkPoints], player[playerid][exp], expForNextLevel[player[playerid][level]]);
 				PlayerTextDrawSetString(playerid, infoBar[playerid], string);
 			}
 			else
 			{
-				format(string, sizeof string, "ID:_%d_I_LEVEL:_%d_I_PERK_POINTS:_%d", playerid, player[playerid][level], player[playerid][perkPoints]);
+				format(string, sizeof string, "ID:_%d_I_LEVEL:_%d_I_PERK_POINTS:_%d_I_EXP:_%d/%d", playerid, player[playerid][level], player[playerid][perkPoints], player[playerid][exp], expForNextLevel[player[playerid][level]]);
 				PlayerTextDrawSetString(playerid, infoBar[playerid], string);
 			}
 		}

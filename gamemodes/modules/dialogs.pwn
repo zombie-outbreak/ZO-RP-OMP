@@ -266,7 +266,36 @@ public InventoryGeneralOpts(playerid, dialogid, response, listitem, string:input
 			}
 			else if(player[playerid][chosenItemId] == scrapId)
 			{
-				Dialog_ShowCallback(playerid, using public ScrapOptions<iiiis>, DIALOG_STYLE_LIST, "Select An Option", "Fix Tyres\nFix Doors\nFix Lights\nFix Panels\nFix Health", "Select", "Close");
+                new string[128];
+                new scrapRequired = ScrapRequiredToRepairVeh(playerid);
+                
+                GetVehiclePos(player[playerid][lastInVehId], player[playerid][tmpVehPos][0], player[playerid][tmpVehPos][1], player[playerid][tmpVehPos][2]);
+                if(!IsPlayerInRangeOfPoint(playerid, 5.0, player[playerid][tmpVehPos][0], player[playerid][tmpVehPos][1], player[playerid][tmpVehPos][2]))
+                {
+                    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You are not close enough to your vehicle.");
+                    Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
+                    return 1;
+                }
+                
+                if(scrapRequired == 0) // doesn't need repairing
+                {
+                    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You are not close enough to your vehicle.");
+                    Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
+                    return 1;
+                }
+                
+                if(playerInventory[playerid][scrapId] < scrapRequired)
+                {
+                    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have enough scrap to perform this action.");
+                    format(string, sizeof(string), "You require %d scrap to repair this vehicle.", scrapRequired);
+                    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, string);
+                    Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
+                    return 1;
+                }
+                
+                // has passed all the checks so ask the player whether they wish to fix their vehicle
+                format(string, sizeof(string), "Would you like to try and fix your vehicle?\nIt will cost %d scrap.", scrapRequired);
+				Dialog_ShowCallback(playerid, using public ScrapOptions<iiiis>, DIALOG_STYLE_MSGBOX, "Fix vehicle?", string, "Yes", "No");
 			}
 		}
 	}
@@ -372,94 +401,10 @@ public ScrapOptions(playerid, dialogid, response, listitem, string:inputtext[])
 		Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
 		return 1;
 	}
-
-	switch(listitem)
-	{
-		case 0: // fix tyres
-		{
-			if(playerInventory[playerid][scrapId] < 16)
-			{
-				SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have enough scrap to perform this action.");
-				Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-				return 1;
-			}
-
-			SendClientMessage(playerid, COLOR_GREEN, "You fixed your vehicle's tyres.");
-			playerInventory[playerid][scrapId] = playerInventory[playerid][scrapId] - 16;
-			GetVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-			serverVehicle[player[playerid][lastInVehId]][tires] = encode_tires(0, 0, 0, 0);
-			UpdateVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-		}
-		case 1: // fix doors
-		{
-			if(playerInventory[playerid][scrapId] < 16)
-			{
-				SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have enough scrap to perform this action.");
-				Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-				return 1;
-			}
-
-			SendClientMessage(playerid, COLOR_GREEN, "You fixed your vehicle's doors.");
-			playerInventory[playerid][scrapId] = playerInventory[playerid][scrapId] - 16;
-			GetVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-			serverVehicle[player[playerid][lastInVehId]][doors] = encode_doors(0, 0, 0, 0, 0, 0);
-			UpdateVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-		}
-		case 2: // fix lights
-		{
-			if(playerInventory[playerid][scrapId] < 16)
-			{
-				SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have enough scrap to perform this action.");
-				Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-				return 1;
-			}
-
-			SendClientMessage(playerid, COLOR_GREEN, "You fixed your vehicle's lights.");
-			playerInventory[playerid][scrapId] = playerInventory[playerid][scrapId] - 16;
-			GetVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-			serverVehicle[player[playerid][lastInVehId]][doors] = encode_lights(0, 0, 0, 0);
-			UpdateVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-		}
-		case 3: // fix panels
-		{
-			if(playerInventory[playerid][scrapId] < 16)
-			{
-				SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have enough scrap to perform this action.");
-				Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-				return 1;
-			}
-
-			SendClientMessage(playerid, COLOR_GREEN, "You fixed your vehicle's panels.");
-			playerInventory[playerid][scrapId] = playerInventory[playerid][scrapId] - 16;
-			GetVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-			serverVehicle[player[playerid][lastInVehId]][doors] = encode_panels(0, 0, 0, 0, 0, 0, 0);
-			UpdateVehicleDamageStatus(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][panels], serverVehicle[player[playerid][lastInVehId]][doors], serverVehicle[player[playerid][lastInVehId]][lights], serverVehicle[player[playerid][lastInVehId]][tires]);
-		}
-		case 4: // fix car HP
-		{
-			if(playerInventory[playerid][scrapId] < 10)
-			{
-				SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have enough scrap to perform this action.");
-				Dialog_ShowCallback(playerid, using public InventoryGeneralOpts<iiiis>, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-				return 1;
-			}
-
-			SendClientMessage(playerid, COLOR_GREEN, "You restored some of your vehicles HP.");
-			playerInventory[playerid][scrapId] = playerInventory[playerid][scrapId] - 10;
-
-			serverVehicle[player[playerid][lastInVehId]][vehHealth] = serverVehicle[player[playerid][lastInVehId]][vehHealth] + 100;
-
-			if(serverVehicle[player[playerid][lastInVehId]][vehHealth] >= 1000)
-			{
-				serverVehicle[player[playerid][lastInVehId]][vehHealth] = 1000;
-				SetVehicleHealth(player[playerid][lastInVehId], 1000);
-			}
-			else
-			{
-				SetVehicleHealth(player[playerid][lastInVehId], serverVehicle[player[playerid][lastInVehId]][vehHealth]);
-			}
-		}
-	}
+    
+    new scrapRequired = ScrapRequiredToRepairVeh(playerid);
+    playerInventory[playerid][scrapId] = playerInventory[playerid][scrapId] - scrapRequired;
+    RepairVehicle(player[playerid][lastInVehId]);
 	return 1;
 }
 
@@ -761,6 +706,13 @@ public InventoryGiveAmount(playerid, dialogid, response, listitem, string:inputt
 	}
 
 	new amount = strval(inputtext);
+    
+    if(amount < 1) // stops users entering values less than 1
+    {
+        SendClientMessage(playerid, COLOR_RED, "You cannot enter a value less than 1.");
+		Dialog_ShowCallback(playerid, using public InventoryGiveAmount<iiiis>, DIALOG_STYLE_INPUT, "Input an amount to give", "Input an amount of items you wish to give.", "Confirm", "Go Back");
+		return 1;
+    }
 
 	if(amount > playerInventory[playerid][player[playerid][chosenItemId]])
 	{
@@ -788,6 +740,13 @@ public InventoryDropAmount(playerid, dialogid, response, listitem, string:inputt
 		return Dialog_ShowCallback(playerid, using public InventoryMain<iiiis>, DIALOG_STYLE_LIST, "Select A Category", "General\nFood\nDrink\nMedical\nWeapons\nAmmo", "Select", "Close");
 
 	new amount = strval(inputtext);
+    
+    if(amount < 1) // stops users entering values less than 1
+    {
+        SendClientMessage(playerid, COLOR_RED, "You cannot enter a value less than 1.");
+		Dialog_ShowCallback(playerid, using public InventoryGiveAmount<iiiis>, DIALOG_STYLE_INPUT, "Input an amount to give", "Input an amount of items you wish to give.", "Confirm", "Go Back");
+		return 1;
+    }
 
 	if(amount > playerInventory[playerid][player[playerid][chosenItemId]])
 	{

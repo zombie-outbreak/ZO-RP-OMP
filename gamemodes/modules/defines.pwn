@@ -107,7 +107,7 @@
 /*
 * Maximum Interiors, lockers etc
 */
-#define MAX_SERVER_INTERIORS 2000
+#define MAX_SERVER_INTERIORS 2000 // increase if required
 #define INTERIOR_ENTER_EXIT_RANGE 2.0
 #define MAX_LOCKERS 1
 
@@ -122,6 +122,11 @@
 #define HUD_CLOCK 5
 #define HUD_VEHICLE 6
 #define HUD_ALL 7
+
+/*
+* Levels and EXP
+*/
+#define MAX_LEVELS 99
 
 /*
 * Inventory, Looting, Vendors
@@ -140,6 +145,7 @@
 #define MAX_VENDORS 20
 #define DEFAULT_HEALAMOUNT -1
 #define DEFAULT_AMMO -1
+#define SEARCH_NODE_RESET_TIME 300000 // 5 minutes (in ms)
 
 /*
 * Scavenging area types
