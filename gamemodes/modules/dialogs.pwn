@@ -7,7 +7,6 @@
 /*
 * Function Forwards
 */
-
 forward RegisterDialog(playerid, dialogid, response, listitem, string:inputtext[]);
 forward LoginDialog(playerid, dialogid, response, listitem, string:inputtext[]);
 forward ChangePasswordDialog(playerid, dialogid, response, listitem, string:inputtext[]);
@@ -41,6 +40,17 @@ forward EditFactionMember(playerid, dialogid, response, listitem, string:inputte
 forward SelectFactionRank(playerid, dialogid, response, listitem, string:inputtext[]);
 forward EditFactionRankSelect(playerid, dialogid, response, listitem, string:inputtext[]);
 forward EditRankName(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemSName(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemPName(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemDescription(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemCategory(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemHealAmount(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemWepId(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemAmmoId(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemWepSlot(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemIsUsable(playerid, dialogid, response, listitem, string:inputtext[]);
+forward CreateItemMaxResource(playerid, dialogid, response, listitem, string:inputtext[]);
+forward EditLootTableChanceNode(playerid, dialogid, response, listitem, string:inputtext[]);
 
 /*
 * Dialog Callbacks
@@ -256,6 +266,9 @@ public InventoryGeneralOpts(playerid, dialogid, response, listitem, string:input
 				playerInventory[playerid][player[playerid][chosenItemId]] = playerInventory[playerid][player[playerid][chosenItemId]] - 1;
 				playerInventory[playerid][dirtyWaterCanteenId] = playerInventory[playerid][dirtyWaterCanteenId] - 1;
 				playerInventory[playerid][waterCanteenId] = playerInventory[playerid][waterCanteenId] + 1;
+                UpdateCharacterInventoryEntry(playerid, playerInventory[playerid][player[playerid][chosenItemId]]);
+                UpdateCharacterInventoryEntry(playerid, playerInventory[playerid][dirtyWaterCanteenId]);
+                UpdateCharacterInventoryEntry(playerid, playerInventory[playerid][waterCanteenId]);
 
 				SendClientMessage(playerid, COLOR_GREEN, "You have used a purification tablet on some dirty water and have gained 1 clean canteen of water.");
 				SendProxMessage(playerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "puts a purification tablet into a water canteen.");
@@ -469,7 +482,6 @@ public InventoryFoodDrinkOpts(playerid, dialogid, response, listitem, string:inp
 				}
 
 				playerInventory[playerid][player[playerid][chosenItemId]] = playerInventory[playerid][player[playerid][chosenItemId]] - 1;
-				UpdatePlayerInventoryEntry(playerid, player[playerid][chosenItemId], player[playerid][chosenChar]);
 				UpdateHudElementForPlayer(playerid, HUD_THIRST);
 				ShowInventoryItemListByCategory(playerid, CATEGORY_DRINK);
 
@@ -489,12 +501,10 @@ public InventoryFoodDrinkOpts(playerid, dialogid, response, listitem, string:inp
 					}
     				UpdateHudElementForPlayer(playerid, HUD_DISEASE);
 					playerInventory[playerid][emptyCanteenItem] = playerInventory[playerid][emptyCanteenItem] + 1;
-					UpdatePlayerInventoryEntry(playerid, emptyCanteenItem, player[playerid][chosenChar]);
 				}
 				else if(player[playerid][chosenItemId] == waterCanteenItemId)
 				{
 					playerInventory[playerid][emptyCanteenItem] = playerInventory[playerid][emptyCanteenItem] + 1;
-					UpdatePlayerInventoryEntry(playerid, emptyCanteenItem, player[playerid][chosenChar]);
 				}
 			}
 		}
@@ -544,7 +554,6 @@ public InventoryMedicalOpts(playerid, dialogid, response, listitem, string:input
 				}
 
 				playerInventory[playerid][player[playerid][chosenItemId]] = playerInventory[playerid][player[playerid][chosenItemId]] - 1;
-				UpdatePlayerInventoryEntry(playerid, player[playerid][chosenItemId], player[playerid][chosenChar]);
 				UpdateHudElementForPlayer(playerid, HUD_DISEASE);
 				ShowInventoryItemListByCategory(playerid, CATEGORY_MEDICAL);
 			}
@@ -566,7 +575,6 @@ public InventoryMedicalOpts(playerid, dialogid, response, listitem, string:input
 				}
 
 				playerInventory[playerid][player[playerid][chosenItemId]] = playerInventory[playerid][player[playerid][chosenItemId]] - 1;
-				UpdatePlayerInventoryEntry(playerid, player[playerid][chosenItemId], player[playerid][chosenChar]);
 				SetPlayerHealth(playerid, player[playerid][health]);
 				UpdateHudElementForPlayer(playerid, HUD_HEALTH);
 				ShowInventoryItemListByCategory(playerid, CATEGORY_MEDICAL);
@@ -724,11 +732,9 @@ public InventoryGiveAmount(playerid, dialogid, response, listitem, string:inputt
 
 	playerInventory[player[playerid][invGivePlayerId]][player[playerid][chosenItemId]] = playerInventory[player[playerid][invGivePlayerId]][player[playerid][chosenItemId]] + amount;
 	SendClientMessage(player[playerid][invGivePlayerId], COLOR_RP_PURPLE, "You were given %d %s from %s.", amount, inventoryItems[player[playerid][chosenItemId]][itemNamePlural], player[playerid][chosenChar]);
-	UpdatePlayerInventoryEntry(playerid, player[playerid][chosenItemId], player[playerid][chosenChar]);
 
 	playerInventory[playerid][player[playerid][chosenItemId]] = playerInventory[playerid][player[playerid][chosenItemId]] - amount;
 	SendClientMessage(playerid, COLOR_RP_PURPLE, "You gave %s %d %s.", player[player[playerid][invGivePlayerId]][chosenChar], amount, inventoryItems[player[playerid][chosenItemId]][itemNamePlural]);
-	UpdatePlayerInventoryEntry(playerid, player[playerid][chosenItemId], player[player[playerid][invGivePlayerId]][chosenChar]);
 
 	Dialog_ShowCallback(playerid, using public InventoryMain<iiiis>, DIALOG_STYLE_LIST, "Select A Category", "General\nFood\nDrink\nMedical\nWeapons\nAmmo", "Select", "Close");
 	return 1;
@@ -757,7 +763,6 @@ public InventoryDropAmount(playerid, dialogid, response, listitem, string:inputt
 	}
 
 	playerInventory[playerid][player[playerid][chosenItemId]] = playerInventory[playerid][player[playerid][chosenItemId]] - amount;
-	UpdatePlayerInventoryEntry(playerid, player[playerid][chosenItemId], player[playerid][chosenChar]);
 	SendClientMessage(playerid, COLOR_RED, "You dropped %d %s.", amount, inventoryItems[player[playerid][chosenItemId]][itemNamePlural]);
 
 	Dialog_ShowCallback(playerid, using public InventoryMain<iiiis>, DIALOG_STYLE_LIST, "Select A Category", "General\nFood\nDrink\nMedical\nWeapons\nAmmo", "Select", "Close");
@@ -1084,6 +1089,23 @@ public EditRankName(playerid, dialogid, response, listitem, string:inputtext[])
 	return 1;
 }
 
+public EditLootTableChanceNode(playerid, dialogid, response, listitem, string:inputtext[])
+{   
+    if(!response)
+        return 1;
+        
+    if(strval(inputtext) < 0 || strval(inputtext) > MAX_ITEMS - 1)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Invalid item ID. Values between 0 & %d only.", MAX_ITEMS - 1);
+        Dialog_ShowCallback(playerid, using public EditLootTableChanceNode<iiiis>, DIALOG_STYLE_INPUT, "Loot Table Chance Node", "Input a valid item ID for this node. It will then be added to the loot table.", "Confirm", "Back");
+        return 1;
+    }
+    
+    UpdateLootTableEntry(player[playerid][admChosenTableName], player[playerid][admChosenTableId], player[playerid][admChosenChanceNode], strval(inputtext));
+    PopulateLootTableList(playerid);
+    return 1;
+}
+
 /*
 * Paged Dialogs
 */
@@ -1117,8 +1139,6 @@ DialogPages:ShowPlayerCharacterMenu(playerid, response, listitem, inputtext[])
 		* For now let's spawn the player as their chosen character.
 		*/
 		OnPlayerCharacterDataLoaded(playerid);
-		OnPlayerInventoryDataLoaded(playerid);
-		OnPlayerLockerDataLoaded(playerid);
 	}
 	return 1;
 }
@@ -1130,6 +1150,27 @@ DialogPages:ShowFactionMemberList(playerid, response, listitem, inputtext[])
 
 	format(player[playerid][facChosenChar], MAX_PLAYER_NAME, "%s", inputtext);
 	Dialog_ShowCallback(playerid, using public EditFactionMember<iiiis>, DIALOG_STYLE_LIST, "Faction Member Options", "Set Rank\nKick", "Confirm", "Back");
+	return 1;
+}
+
+DialogPages:ShowLootTableAdminList(playerid, response, listitem, inputtext[])
+{
+	if(!response)
+		return 1;
+
+    player[playerid][admChosenTableId] = listitem;
+	format(player[playerid][admChosenTableName], 32, "%s", inputtext);
+    PopulateLootTableChanceList(playerid, player[playerid][admChosenTableName]);
+	return 1;
+}
+
+DialogPages:ShowLootTableChanceList(playerid, response, listitem, inputtext[])
+{
+	if(!response)
+		return 1;
+
+	player[playerid][admChosenChanceNode] = listitem;
+    Dialog_ShowCallback(playerid, using public EditLootTableChanceNode<iiiis>, DIALOG_STYLE_INPUT, "Loot Table Chance Node", "Input a valid item ID for this node. It will then be added to the loot table.", "Confirm", "Back");
 	return 1;
 }
 
@@ -1325,6 +1366,8 @@ public OnModelSelectionResponse(playerid, extraid, index, modelid, response)
 					player[playerid][ID], player[playerid][chosenChar], player[playerid][age], player[playerid][description], player[playerid][skin], 
 					player[playerid][iszombie]
 				);
+                
+                CreateCharacterInventory(playerid);
 			}
 			else
 			{
@@ -1367,4 +1410,189 @@ public OnModelSelectionResponse(playerid, extraid, index, modelid, response)
 		}
     }
 	return 1;
+}
+
+/*
+* Creation of an item
+*/
+public CreateItemSName(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+        
+    if(strlen(inputtext) > 128)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Name cannot be more than 128 characters.");
+        Dialog_ShowCallback(playerid, using public CreateItemSName<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Name (Singular)", "Enter the item's singular name.", "Confirm", "Back");
+        return 1;
+    }
+    
+    inventoryItems[serverItemCount][itemId] = serverItemCount;
+    format(inventoryItems[serverItemCount][itemNameSingular], 128, "%s", inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemPName<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Name (Plural)", "Enter the item's plural name.", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemPName(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strlen(inputtext) > 128)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Name cannot be more than 128 characters.");
+        Dialog_ShowCallback(playerid, using public CreateItemPName<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Name (Plural)", "Enter the item's plural name.", "Confirm", "Back");
+        return 1;
+    }
+    
+    format(inventoryItems[serverItemCount][itemNamePlural], 128, "%s", inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemDescription<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Description", "Enter the item's description.", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemDescription(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+        
+    if(strlen(inputtext) > 128)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Description cannot be more than 128 characters.");
+        Dialog_ShowCallback(playerid, using public CreateItemPName<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Description", "Enter the item's description.", "Confirm", "Back");
+        return 1;
+    }
+    
+    format(inventoryItems[serverItemCount][itemDescription], 128, "%s", inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemCategory<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Category", "Enter the item's category ID.", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemCategory(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strval(inputtext) < 0)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Value cannot be below 0.");
+        Dialog_ShowCallback(playerid, using public CreateItemCategory<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Category", "Enter the item's category ID.", "Confirm", "Back");
+        return 1;
+    }
+    
+    inventoryItems[serverItemCount][itemCategory] = strval(inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemHealAmount<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Heal Amount", "Enter the amount this item heals (-1 for non use).", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemHealAmount(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strval(inputtext) < -1)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Value cannot be below -1.");
+        Dialog_ShowCallback(playerid, using public CreateItemHealAmount<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Heal Amount", "Enter the amount this item heals (-1 for non use).", "Confirm", "Back");
+        return 1;
+    }
+    
+    inventoryItems[serverItemCount][itemHealAmount] = strval(inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemWepId<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Weapon ID", "Enter this item's weapon ID (-1 if not a weapon).", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemWepId(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strval(inputtext) < -1)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Value cannot be below -1.");
+        Dialog_ShowCallback(playerid, using public CreateItemWepId<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Weapon ID", "Enter this item's weapon ID (-1 if not a weapon).", "Confirm", "Back");
+        return 1;
+    }
+    
+    inventoryItems[serverItemCount][itemWepId] = strval(inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemAmmoId<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Ammo ID", "Enter this item's ammo ID (-1 if not a weapon).", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemAmmoId(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strval(inputtext) < -1)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Value cannot be below -1.");
+        Dialog_ShowCallback(playerid, using public CreateItemAmmoId<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Ammo ID", "Enter this item's ammo ID (-1 if not a weapon).", "Confirm", "Back");
+        return 1;
+    }
+    
+    inventoryItems[serverItemCount][itemAmmoId] = strval(inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemWepSlot<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Weaponslot", "Enter this item's weaponslot ID (-1 if not a weapon).", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemWepSlot(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strval(inputtext) < -1)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Value cannot be below -1.");
+        Dialog_ShowCallback(playerid, using public CreateItemWepSlot<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Weaponslot", "Enter this item's weaponslot ID (-1 if not a weapon).", "Confirm", "Back");
+        return 1;
+    }
+    
+    inventoryItems[serverItemCount][itemWepSlot] = strval(inputtext);
+    Dialog_ShowCallback(playerid, using public CreateItemIsUsable<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Is Usable", "Enter whether this item can use the 'use' command (1 for true, 0 for false).", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemIsUsable(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strval(inputtext) < 0 || strval(inputtext) > 1)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Value can only be 0 or 1.");
+        Dialog_ShowCallback(playerid, using public CreateItemIsUsable<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Is Usable", "Enter whether this item can use the 'use' command (1 for true, 0 for false).", "Confirm", "Back");
+        return 1;
+    }
+    
+    if(strval(inputtext) == 0)
+    {
+        inventoryItems[serverItemCount][isUsable] = false;
+    }
+    else if(strval(inputtext) == 1)
+    {
+        inventoryItems[serverItemCount][isUsable] = true;
+    }
+    Dialog_ShowCallback(playerid, using public CreateItemMaxResource<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Max Resource", "Enter a value for this item's max resource (fuel can for example)(-1 for no resource).", "Confirm", "Back");
+    return 1;
+}
+
+public CreateItemMaxResource(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response)
+        return 1;
+    
+    if(strval(inputtext) < -1)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Value cannot be below -1.");
+        Dialog_ShowCallback(playerid, using public CreateItemMaxResource<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Max Resource", "Enter a value for this item's max resource (fuel can for example)(-1 for no resource).", "Confirm", "Back");
+        return 1;
+    }
+    
+    inventoryItems[serverItemCount][itemMaxResource] = strval(inputtext);
+    
+    // now add the new item to the database
+    CreateServerItem(inventoryItems[serverItemCount][itemId], inventoryItems[serverItemCount][itemNameSingular], inventoryItems[serverItemCount][itemNamePlural], inventoryItems[serverItemCount][itemDescription], 
+        inventoryItems[serverItemCount][itemCategory], inventoryItems[serverItemCount][itemHealAmount], inventoryItems[serverItemCount][itemWepId], inventoryItems[serverItemCount][itemAmmoId], 
+        inventoryItems[serverItemCount][itemWepSlot], inventoryItems[serverItemCount][isUsable], inventoryItems[serverItemCount][itemMaxResource]);
+    return 1;
 }

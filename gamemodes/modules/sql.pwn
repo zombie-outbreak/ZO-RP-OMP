@@ -210,6 +210,15 @@ OnPlayerCharacterDataLoaded(playerid)
 		player[playerid][spawned] = 1;
 		SetPlayerInterior(playerid, player[playerid][plrinterior]);
 		SetPlayerVirtualWorld(playerid, player[playerid][world]);
+        
+        /*
+        * Load/Create player's inventory data file
+        * As long as they are not a Zombie character
+        */
+        if(player[playerid][iszombie] == 0)
+        {
+            LoadCharacterInventory(playerid);
+        }
 
 		/*
 		* Small timer to freeze the player to stop them falling through maps
@@ -250,6 +259,15 @@ OnPlayerCharacterDataLoaded(playerid)
 		* Update the HUD_INFO so it shows the correct text depending on if the character is a zombie or not
 		*/
 		UpdateHudElementForPlayer(playerid, HUD_INFO);
+        
+        // now give the player their weapons (if they have any equipped)
+        GivePlayerWeapon(playerid, player[playerid][wepSlot][0], 1); // fist or brass knuckles
+        GivePlayerWeapon(playerid, player[playerid][wepSlot][1], 1); // melee weapons
+        GivePlayerWeapon(playerid, player[playerid][wepSlot][2], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][2])]); // pistols
+        GivePlayerWeapon(playerid, player[playerid][wepSlot][3], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][3])]); // shotguns
+        GivePlayerWeapon(playerid, player[playerid][wepSlot][4], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][4])]); // uzi/tec-9/mp5
+        GivePlayerWeapon(playerid, player[playerid][wepSlot][5], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][5])]); // ak/m4
+        GivePlayerWeapon(playerid, player[playerid][wepSlot][6], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][6])]); // rifles
 	}
 	else
 	{
@@ -285,20 +303,6 @@ SavePlayerCharacter(playerid, const currentCharacter[])
 	player[playerid][exp], player[playerid][perkPoints], player[playerid][plrFaction], player[playerid][factionrank], playerInventoryResource[playerid][28], currentCharacter);
 
 	/*
-	* Should do a full save on the player's inventory as well, just in case anything has been missed during normal play
-	*/
-	DB_ExecuteQuery(database, "UPDATE inventories SET item1 = '%d', item2 = '%d', item3 = '%d', item4 = '%d', item5 = '%d', item6 = '%d', \
-	item7 = '%d', item8 = '%d', item9 = '%d', item10 = '%d', item11 = '%d', item12 = '%d', item13 = '%d', item14 = '%d', item15 = '%d', item16 = '%d', \
-	item17 = '%d', item18 = '%d', item19 = '%d', item20 = '%d', item21 = '%d', item22 = '%d', item23 = '%d', item24 = '%d', item25 = '%d', item26 = '%d', \
-	item27 = '%d', item28 = '%d', item29 = '%d' WHERE name = '%q'", playerInventory[playerid][1], playerInventory[playerid][2], playerInventory[playerid][3],
-	playerInventory[playerid][4], playerInventory[playerid][5], playerInventory[playerid][6], playerInventory[playerid][7], playerInventory[playerid][8],
-	playerInventory[playerid][9], playerInventory[playerid][10], playerInventory[playerid][11], playerInventory[playerid][12], playerInventory[playerid][13],
-	playerInventory[playerid][14], playerInventory[playerid][15], playerInventory[playerid][16], playerInventory[playerid][17], playerInventory[playerid][18],
-	playerInventory[playerid][19], playerInventory[playerid][20], playerInventory[playerid][21], playerInventory[playerid][22], playerInventory[playerid][23],
-	playerInventory[playerid][24], playerInventory[playerid][25], playerInventory[playerid][26], playerInventory[playerid][27], playerInventory[playerid][28],
-	playerInventory[playerid][29], currentCharacter);
-
-	/*
 	* Kill the timers
 	*/
 	KillTimer(player[playerid][hungerTimer]);
@@ -309,126 +313,9 @@ SavePlayerCharacter(playerid, const currentCharacter[])
 	return 1;
 }
 
-OnPlayerInventoryDataLoaded(playerid)
-{
-	new DBResult:Result;
-    Result = DB_ExecuteQuery(database, "SELECT * FROM inventories WHERE name = '%q'", player[playerid][chosenChar]);
-
-	if(DB_GetFieldCount(Result) > 0)
-    {
-		playerInventory[playerid][1] = DB_GetFieldIntByName(Result, "item1");
-		playerInventory[playerid][2] = DB_GetFieldIntByName(Result, "item2");
-		playerInventory[playerid][3] = DB_GetFieldIntByName(Result, "item3");
-		playerInventory[playerid][4] = DB_GetFieldIntByName(Result, "item4");
-		playerInventory[playerid][5] = DB_GetFieldIntByName(Result, "item5");
-		playerInventory[playerid][6] = DB_GetFieldIntByName(Result, "item6");
-		playerInventory[playerid][7] = DB_GetFieldIntByName(Result, "item7");
-		playerInventory[playerid][8] = DB_GetFieldIntByName(Result, "item8");
-		playerInventory[playerid][9] = DB_GetFieldIntByName(Result, "item9");
-		playerInventory[playerid][10] = DB_GetFieldIntByName(Result, "item10");
-		playerInventory[playerid][11] = DB_GetFieldIntByName(Result, "item11");
-		playerInventory[playerid][12] = DB_GetFieldIntByName(Result, "item12");
-		playerInventory[playerid][13] = DB_GetFieldIntByName(Result, "item13");
-		playerInventory[playerid][14] = DB_GetFieldIntByName(Result, "item14");
-		playerInventory[playerid][15] = DB_GetFieldIntByName(Result, "item15");
-		playerInventory[playerid][16] = DB_GetFieldIntByName(Result, "item16");
-		playerInventory[playerid][17] = DB_GetFieldIntByName(Result, "item17");
-		playerInventory[playerid][18] = DB_GetFieldIntByName(Result, "item18");
-		playerInventory[playerid][19] = DB_GetFieldIntByName(Result, "item19");
-		playerInventory[playerid][20] = DB_GetFieldIntByName(Result, "item20");
-		playerInventory[playerid][21] = DB_GetFieldIntByName(Result, "item21");
-		playerInventory[playerid][22] = DB_GetFieldIntByName(Result, "item22");
-		playerInventory[playerid][23] = DB_GetFieldIntByName(Result, "item23");
-		playerInventory[playerid][24] = DB_GetFieldIntByName(Result, "item24");
-		playerInventory[playerid][25] = DB_GetFieldIntByName(Result, "item25");
-		playerInventory[playerid][26] = DB_GetFieldIntByName(Result, "item26");
-		playerInventory[playerid][27] = DB_GetFieldIntByName(Result, "item27");
-		playerInventory[playerid][28] = DB_GetFieldIntByName(Result, "item28");
-		playerInventory[playerid][29] = DB_GetFieldIntByName(Result, "item29");
-	}
-	else
-	{
-		/*
-		* Create inventory entry since it doesn't exist
-		*/
-		DB_ExecuteQuery(database, "INSERT INTO inventories (name) VALUES ('%q')", player[playerid][chosenChar]);
-	}
-	DB_FreeResultSet(Result);
-
-	// now give the player their weapons (if they have any equipped)
-	GivePlayerWeapon(playerid, player[playerid][wepSlot][0], 1); // fist or brass knuckles
-	GivePlayerWeapon(playerid, player[playerid][wepSlot][1], 1); // melee weapons
-	GivePlayerWeapon(playerid, player[playerid][wepSlot][2], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][2])]); // pistols
-	GivePlayerWeapon(playerid, player[playerid][wepSlot][3], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][3])]); // shotguns
-	GivePlayerWeapon(playerid, player[playerid][wepSlot][4], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][4])]); // uzi/tec-9/mp5
-	GivePlayerWeapon(playerid, player[playerid][wepSlot][5], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][5])]); // ak/m4
-	GivePlayerWeapon(playerid, player[playerid][wepSlot][6], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][6])]); // rifles
-	return 1;
-}
-
-UpdatePlayerInventoryEntry(playerid, itemid, const currentCharacter[])
-{
-	DB_ExecuteQuery(database, "UPDATE inventories SET item%d = '%d' WHERE name = '%q'", itemid, playerInventory[playerid][itemid], currentCharacter);
-	return 1;
-}
-
 UpdatePlayerWepslotEntry(wepslotid, weaponid, const currentCharacter[])
 {
 	DB_ExecuteQuery(database, "UPDATE characters SET wepslot%d = '%d' WHERE name = '%q'", wepslotid, weaponid, currentCharacter);
-	return 1;
-}
-
-OnPlayerLockerDataLoaded(playerid)
-{
-	new DBResult:Result;
-    Result = DB_ExecuteQuery(database, "SELECT * FROM lockers WHERE name = '%q'", player[playerid][chosenChar]);
-
-	if(DB_GetFieldCount(Result) > 0)
-    {
-		lockerInventory[playerid][1] = DB_GetFieldIntByName(Result, "item1");
-		lockerInventory[playerid][2] = DB_GetFieldIntByName(Result, "item2");
-		lockerInventory[playerid][3] = DB_GetFieldIntByName(Result, "item3");
-		lockerInventory[playerid][4] = DB_GetFieldIntByName(Result, "item4");
-		lockerInventory[playerid][5] = DB_GetFieldIntByName(Result, "item5");
-		lockerInventory[playerid][6] = DB_GetFieldIntByName(Result, "item6");
-		lockerInventory[playerid][7] = DB_GetFieldIntByName(Result, "item7");
-		lockerInventory[playerid][8] = DB_GetFieldIntByName(Result, "item8");
-		lockerInventory[playerid][9] = DB_GetFieldIntByName(Result, "item9");
-		lockerInventory[playerid][10] = DB_GetFieldIntByName(Result, "item10");
-		lockerInventory[playerid][11] = DB_GetFieldIntByName(Result, "item11");
-		lockerInventory[playerid][12] = DB_GetFieldIntByName(Result, "item12");
-		lockerInventory[playerid][13] = DB_GetFieldIntByName(Result, "item13");
-		lockerInventory[playerid][14] = DB_GetFieldIntByName(Result, "item14");
-		lockerInventory[playerid][15] = DB_GetFieldIntByName(Result, "item15");
-		lockerInventory[playerid][16] = DB_GetFieldIntByName(Result, "item16");
-		lockerInventory[playerid][17] = DB_GetFieldIntByName(Result, "item17");
-		lockerInventory[playerid][18] = DB_GetFieldIntByName(Result, "item18");
-		lockerInventory[playerid][19] = DB_GetFieldIntByName(Result, "item19");
-		lockerInventory[playerid][20] = DB_GetFieldIntByName(Result, "item20");
-		lockerInventory[playerid][21] = DB_GetFieldIntByName(Result, "item21");
-		lockerInventory[playerid][22] = DB_GetFieldIntByName(Result, "item22");
-		lockerInventory[playerid][23] = DB_GetFieldIntByName(Result, "item23");
-		lockerInventory[playerid][24] = DB_GetFieldIntByName(Result, "item24");
-		lockerInventory[playerid][25] = DB_GetFieldIntByName(Result, "item25");
-		lockerInventory[playerid][26] = DB_GetFieldIntByName(Result, "item26");
-		lockerInventory[playerid][27] = DB_GetFieldIntByName(Result, "item27");
-		lockerInventory[playerid][28] = DB_GetFieldIntByName(Result, "item28");
-		lockerInventory[playerid][29] = DB_GetFieldIntByName(Result, "item29");
-	}
-	else
-	{
-		/*
-		* Create locker entry since it doesn't exist
-		*/
-		DB_ExecuteQuery(database, "INSERT INTO lockers (name) VALUES ('%q')", player[playerid][chosenChar]);
-	}
-	DB_FreeResultSet(Result);
-	return 1;
-}
-
-stock UpdatePlayerLockerEntry(playerid, itemid, const currentCharacter[])
-{
-	DB_ExecuteQuery(database, "UPDATE lockers SET item%d = '%d' WHERE name = '%q'", itemid, lockerInventory[playerid][itemid], currentCharacter);
 	return 1;
 }
 
@@ -551,4 +438,319 @@ PopulateFactionMembersList(playerid, factionId)
 	DB_FreeResultSet(Result);
 	ShowPlayerDialogPages(playerid, "ShowFactionMemberList", DIALOG_STYLE_LIST, "Select a Member", "Select", "Close", 20);
 	return 1;
+}
+
+/*
+* Scavenging Locations
+*/
+LoadScavArea(scavAreaId)
+{
+    new DBResult:Result;
+    Result = DB_ExecuteQuery(database, "SELECT * FROM scavareas WHERE id = '%d'", scavAreaId);
+
+	if(DB_GetFieldCount(Result) > 0)
+    {
+        scavArea[scavAreaId][scavPos][0] = DB_GetFieldFloatByName(Result, "posx");
+        scavArea[scavAreaId][scavPos][1] = DB_GetFieldFloatByName(Result, "posy");
+        scavArea[scavAreaId][scavPos][2] = DB_GetFieldFloatByName(Result, "posz");
+        scavArea[scavAreaId][scavInterior] = DB_GetFieldIntByName(Result, "interior");
+        scavArea[scavAreaId][scavWorld] = DB_GetFieldIntByName(Result, "world");
+        scavArea[scavAreaId][scavType] = DB_GetFieldIntByName(Result, "type");
+        scavArea[scavAreaId][areaActive] = true;
+    }
+    DB_FreeResultSet(Result);
+    
+    // create the text label
+    scavTextLabel[scavAreaId] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavArea[scavAreaId][scavPos][0], scavArea[scavAreaId][scavPos][1], scavArea[scavAreaId][scavPos][2], 20.0, 
+        .testlos = 1, .worldid = scavArea[scavAreaId][scavWorld], .interiorid = scavArea[scavAreaId][scavInterior]);
+    return 1;
+}
+
+CreateScavArea(Float:scavPosX, Float:scavPosY, Float:scavPosZ, scavIntWorld, scavVirWorld, areaType)
+{
+    new tmpScavId, DBResult:Result;
+    DB_ExecuteQuery(database, "INSERT INTO scavareas (posx, posy, posz, interior, world, type) \
+        VALUES ('%f', '%f', '%f', '%d', '%d', '%d')", scavPosX, scavPosY, scavPosZ, scavIntWorld, scavVirWorld, areaType);
+
+    // get the ID of the scav area
+    Result = DB_ExecuteQuery(database, "SELECT last_insert_rowid() FROM scavareas");
+    tmpScavId = DB_GetFieldInt(Result);
+    DB_FreeResultSet(Result);
+
+    // update the array size
+    scavAreaCount = scavAreaCount + 1;
+    
+    // set the data for this new scav area
+    scavArea[tmpScavId][scavPos][0] = scavPosX;
+    scavArea[tmpScavId][scavPos][1] = scavPosY;
+    scavArea[tmpScavId][scavPos][2] = scavPosZ;
+    scavArea[tmpScavId][scavInterior] = scavIntWorld;
+    scavArea[tmpScavId][scavWorld] = scavVirWorld;
+    scavArea[tmpScavId][scavType] = areaType;
+    scavArea[tmpScavId][areaActive] = true;
+    
+    // create the text label
+    scavTextLabel[tmpScavId] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavPosX, scavPosY, scavPosZ, 20.0, 
+        .testlos = 1, .worldid = scavVirWorld, .interiorid = scavIntWorld);
+    return 1;
+}
+
+/*
+* Server items
+*/
+LoadServerItems(item)
+{
+    new DBResult:Result;
+    Result = DB_ExecuteQuery(database, "SELECT * FROM items WHERE id = '%d'", item);
+
+	if(DB_GetFieldCount(Result) > 0)
+    {
+        inventoryItems[item][itemId] = item;
+        DB_GetFieldStringByName(Result, "sname", inventoryItems[item][itemNameSingular], 128);
+        DB_GetFieldStringByName(Result, "pname", inventoryItems[item][itemNamePlural], 128);
+        DB_GetFieldStringByName(Result, "description", inventoryItems[item][itemDescription], 128);
+		inventoryItems[item][itemCategory] = DB_GetFieldIntByName(Result, "category");
+        inventoryItems[item][itemHealAmount] = DB_GetFieldIntByName(Result, "healamount");
+        inventoryItems[item][itemWepId] = DB_GetFieldIntByName(Result, "wepid");
+        inventoryItems[item][itemAmmoId] = DB_GetFieldIntByName(Result, "ammoid");
+        inventoryItems[item][itemWepSlot] = DB_GetFieldIntByName(Result, "wepslot");
+        if(DB_GetFieldIntByName(Result, "isusable") == 1)
+        {
+            inventoryItems[item][isUsable] = true;
+        }
+        else if(DB_GetFieldIntByName(Result, "isusable") == 0)
+        {
+            inventoryItems[item][isUsable] = false;
+        }
+        inventoryItems[item][itemMaxResource] = DB_GetFieldIntByName(Result, "maxresource");
+    }
+    DB_FreeResultSet(Result);
+    return 1;
+}
+
+CreateServerItem(itemid, const nameSingular[], const namePlural[], const itemDesc[], category, healamount, wepid, ammoid, wepslot, bool:isusable, maxresource)
+{
+    DB_ExecuteQuery(database, "INSERT INTO items (itemid, sname, pname, description, category, healamount, wepid, ammoid, wepslot, isusable, maxresource) \
+        VALUES ('%d', '%q', '%q', '%q', '%d', '%d', '%d', '%d', '%d', '%d', '%d')", itemid, nameSingular, namePlural, itemDesc, category, healamount, 
+        wepid, ammoid, wepslot, isusable, maxresource);
+
+    // update the array size
+    serverItemCount = serverItemCount + 1;
+    return 1;
+}
+
+/*
+* Loot Tables
+*/
+CreateServerLootTable(const tableName[])
+{
+    DB_ExecuteQuery(database, "INSERT INTO loottable (name) VALUES ('%q')", tableName);
+
+    // update the array size
+    lootTableCount = lootTableCount + 1;
+    return 1;
+}
+
+LoadServerLootTable(lootTableId)
+{
+    new DBResult:Result, fieldName[10];
+    Result = DB_ExecuteQuery(database, "SELECT * FROM loottable WHERE id = '%d'", lootTableId + 1);
+
+	if(DB_GetFieldCount(Result) > 0)
+    {
+        DB_GetFieldStringByName(Result, "name", lootTableName[lootTableId]);
+        for(new i = 0; i < CHANCE; i++)
+        {
+            format(fieldName, sizeof(fieldName), "chance%d", i);
+            lootTable[lootTableId][i] = DB_GetFieldIntByName(Result, fieldName);
+        }
+    }
+    DB_FreeResultSet(Result);
+    return 1;
+}
+
+UpdateLootTableEntry(const tableName[], tableid, chanceNode, itemid)
+{
+    DB_ExecuteQuery(database, "UPDATE loottable SET chance%d = '%d' WHERE name = '%q'", chanceNode, itemid, tableName);
+    lootTable[tableid][chanceNode] = itemid;
+    return 1;
+}
+
+PopulateLootTableList(playerid)
+{
+	new tmpTableName[32], DBResult:Result;
+	Result = DB_ExecuteQuery(database, "SELECT * FROM loottable LIMIT %d", lootTableCount);
+    
+    do
+	{
+		DB_GetFieldStringByName(Result, "name", tmpTableName, 32);
+        AddDialogListitem(playerid, tmpTableName);
+	}
+	while(DB_SelectNextRow(Result));
+    
+    DB_FreeResultSet(Result);
+    ShowPlayerDialogPages(playerid, "ShowLootTableAdminList", DIALOG_STYLE_LIST, "Select a Loot Table", "Select", "Quit", 10);
+	return 1;
+}
+
+PopulateLootTableChanceList(playerid, const chosenTable[])
+{
+    new DBResult:Result, tmpChance, fieldName[10], tmpChanceToString[5];
+	Result = DB_ExecuteQuery(database, "SELECT * FROM loottable WHERE name = '%q'", chosenTable);
+    
+    if(DB_GetFieldCount(Result) > 0)
+    {
+        for(new i = 0; i < CHANCE; i++)
+        {
+            format(fieldName, sizeof(fieldName), "chance%d", i);
+            tmpChance = DB_GetFieldIntByName(Result, fieldName);
+            format(tmpChanceToString, sizeof(tmpChanceToString), "%d", tmpChance); // AddDialogListitem only accepts strings in the 2nd param
+            AddDialogListitem(playerid, tmpChanceToString);
+        }
+    }
+    DB_FreeResultSet(Result);
+    ShowPlayerDialogPages(playerid, "ShowLootTableChanceList", DIALOG_STYLE_LIST, "Select an Item ID to edit", "Select", "Quit", 10);
+    return 1;
+}
+
+/*
+* Character Inventory
+*/
+CreateCharacterInventory(playerid)
+{
+    DB_ExecuteQuery(database, "INSERT INTO inventory (character) VALUES ('%q')", player[playerid][chosenChar]);
+    return 1;
+}
+
+LoadCharacterInventory(playerid)
+{
+    new DBResult:Result, fieldName[10], timeMs = GetTickCount();
+    Result = DB_ExecuteQuery(database, "SELECT * FROM inventory WHERE character = '%q'", player[playerid][chosenChar]);
+
+	if(DB_GetFieldCount(Result) > 0)
+    {
+        for(new i = 1; i < MAX_ITEMS; i++)
+        {
+            format(fieldName, sizeof(fieldName), "item%d", i);
+            playerInventory[playerid][i] = DB_GetFieldIntByName(Result, fieldName);
+        }
+    }
+    DB_FreeResultSet(Result);
+    printf("|-> %s Inventory Loaded in %d ms", player[playerid][chosenChar], GetTickCount() - timeMs);
+    return 1;
+}
+
+UpdateCharacterInventoryEntry(playerid, itemid)
+{
+    DB_ExecuteQuery(database, "UPDATE characters SET item%d = '%d' WHERE character = '%q'", itemid, playerInventory[playerid][itemid], player[playerid][chosenChar]);
+    return 1;
+}
+
+/*
+* Fuel Pumps
+*/
+CreateFuelPump(Float:fuelPosX, Float:fuelPosY, Float:fuelPosZ)
+{
+    new tmpPumpId, DBResult:Result;
+    DB_ExecuteQuery(database, "INSERT INTO fuelpump (posx, posy, posz) VALUES ('%f', '%f', '%f')", fuelPosX, fuelPosY, fuelPosZ);
+
+    // get the ID of the scav area
+    Result = DB_ExecuteQuery(database, "SELECT last_insert_rowid() FROM scavareas");
+    tmpPumpId = DB_GetFieldInt(Result) - 1;
+    DB_FreeResultSet(Result);
+
+    // update the array size
+    fuelPumpCount = fuelPumpCount + 1;
+    
+    // set the data for this new scav area
+    fuelPump[tmpPumpId][0] = fuelPosX;
+    fuelPump[tmpPumpId][1] = fuelPosY;
+    fuelPump[tmpPumpId][2] = fuelPosZ;
+    
+    // create the text label
+    fillTextLabel[tmpPumpId] = CreateDynamic3DTextLabel("/fill", COLOR_YELLOW, fuelPosX, fuelPosY, fuelPosZ, 20.0, .testlos = 1);
+    return 1;
+}
+
+LoadFuelPumps(pumpId)
+{
+    new DBResult:Result;
+    Result = DB_ExecuteQuery(database, "SELECT * FROM fuelpump WHERE id = '%d'", pumpId + 1);
+
+	if(DB_GetFieldCount(Result) > 0)
+    {
+        fuelPump[pumpId][0] = DB_GetFieldFloatByName(Result, "posx");
+        fuelPump[pumpId][1] = DB_GetFieldFloatByName(Result, "posy");
+        fuelPump[pumpId][2] = DB_GetFieldFloatByName(Result, "posz");
+    }
+    DB_FreeResultSet(Result);
+    
+    // create the text label
+    fillTextLabel[pumpId] = CreateDynamic3DTextLabel("/fill", COLOR_YELLOW, fuelPump[pumpId][0], fuelPump[pumpId][1], fuelPump[pumpId][2], 20.0, .testlos = 1);
+    return 1;
+}
+
+/*
+* Setup all of the server load stats
+*/
+GetServerLoadStats()
+{
+    new DBResult:Result, tmpCount;
+    
+    /*
+    * Count Accounts & Characters
+    */
+    print("-------------------------------------");
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM accounts");
+	tmpCount = DB_GetFieldInt(Result);
+	DB_FreeResultSet(Result);
+    printf("|-> Database has %d accounts", tmpCount);
+    
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM characters");
+	tmpCount = DB_GetFieldInt(Result);
+	DB_FreeResultSet(Result);
+    printf("|-> Database has %d characters", tmpCount);
+    print("-------------------------------------");
+    
+    /*
+	* Get Interior count
+	*/
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM interiors");
+	serverInteriorCount = DB_GetFieldInt(Result);
+	DB_FreeResultSet(Result);
+    
+    /*
+    * Get faction count
+    */
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM factions");
+	serverFactionCount = DB_GetFieldInt(Result);
+	DB_FreeResultSet(Result);
+    
+    /*
+    * Get scav area count
+    */
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM scavareas");
+    scavAreaCount = DB_GetFieldInt(Result);
+    DB_FreeResultSet(Result);
+    
+    /*
+    * Get items count
+    */
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM items");
+	serverItemCount = DB_GetFieldInt(Result);
+	DB_FreeResultSet(Result);
+    
+    /*
+    * Get Loot Table count
+    */
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM loottable");
+	lootTableCount = DB_GetFieldInt(Result);
+	DB_FreeResultSet(Result);
+    
+    /*
+    * Get Fuel Pump count
+    */
+    Result = DB_ExecuteQuery(database, "SELECT COUNT(*) FROM fuelpump");
+	fuelPumpCount = DB_GetFieldInt(Result);
+	DB_FreeResultSet(Result);
 }

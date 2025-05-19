@@ -6,6 +6,11 @@
 #define SAMP_CONST_CORRECT
 #define NO_TAGS
 #define CGEN_MEMORY 20000
+#define WC_CUSTOM_VENDING_MACHINES false // should disable vending machines
+
+/*
+* Max Zombie NPCs
+*/
 #define MAX_NPCS 7
 
 /*
@@ -45,9 +50,10 @@
 #define DEFAULT_POS_A 357.1140
 
 /*
-* Server maps directory
+* Server Directories
 */
 #define MAP_DIRECTORY "scriptfiles/maps/" // MTA .map files are loaded from this directory
+#define INVENTORY_FILEPATH "character_inventory/%s.ini"
 
 /*
 * Colours (0xRRGGBBAA)
@@ -107,7 +113,7 @@
 /*
 * Maximum Interiors, lockers etc
 */
-#define MAX_SERVER_INTERIORS 2000 // increase if required
+#define MAX_SERVER_INTERIORS 500 // increase if required
 #define INTERIOR_ENTER_EXIT_RANGE 2.0
 #define MAX_LOCKERS 1
 
@@ -131,7 +137,7 @@
 /*
 * Inventory, Looting, Vendors
 */
-#define MAX_ITEMS 30
+#define MAX_ITEMS 150 // increase as needed
 #define INVALID_ITEM 0
 #define MAX_SCAV_AREAS 5000 // increase if required.
 #define INV_CATEGORY_UNKNOWN -1
@@ -146,9 +152,11 @@
 #define DEFAULT_HEALAMOUNT -1
 #define DEFAULT_AMMO -1
 #define SEARCH_NODE_RESET_TIME 300000 // 5 minutes (in ms)
+#define MAX_LOOT_TABLES 50
 
 /*
 * Scavenging area types
+* Loot Table ID also use the same IDs
 */
 #define SCAV_AREA_SCRAP 0
 #define SCAV_AREA_WEAPONS 1 // includes ammo
@@ -222,7 +230,7 @@
 /*
 * Fuel
 */
-#define MAX_FUEL_PUMPS 20
-#define FUEL_PUMP_RANGE 25.0
+#define MAX_FUEL_PUMPS 100 // increase as needed
+#define FUEL_PUMP_RANGE 2.5
 #define FILL_TYPE_FUELPUMP 0
 #define FILL_TYPE_FUELCAN 1

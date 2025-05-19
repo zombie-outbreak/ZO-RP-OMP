@@ -370,10 +370,10 @@ bool:IsPlayerAtFuelPump(playerid)
 {
 	for (new i = 0; i < MAX_FUEL_PUMPS; i++)
 	{
-		if(!IsPlayerInRangeOfPoint(playerid, FUEL_PUMP_RANGE, fuelPump[i][0], fuelPump[i][1], fuelPump[i][2]))
-			return false;
+		if(IsPlayerInRangeOfPoint(playerid, FUEL_PUMP_RANGE, fuelPump[i][0], fuelPump[i][1], fuelPump[i][2]))
+			return true;
 	}
-	return true;
+    return false;
 }
 
 ScrapRequiredToRepairVeh(playerid)
@@ -481,61 +481,6 @@ CreateInteriorPickup(interiorid)
 }
 
 /*
-* Scavenging Locations
-*/
-LoadScavArea(scavAreaId)
-{
-    new DBResult:Result;
-    Result = DB_ExecuteQuery(database, "SELECT * FROM scavareas WHERE id = '%d'", scavAreaId);
-
-	if(DB_GetFieldCount(Result) > 0)
-    {
-        scavArea[scavAreaId][scavPos][0] = DB_GetFieldFloatByName(Result, "posx");
-        scavArea[scavAreaId][scavPos][1] = DB_GetFieldFloatByName(Result, "posy");
-        scavArea[scavAreaId][scavPos][2] = DB_GetFieldFloatByName(Result, "posz");
-        scavArea[scavAreaId][scavInterior] = DB_GetFieldIntByName(Result, "interior");
-        scavArea[scavAreaId][scavWorld] = DB_GetFieldIntByName(Result, "world");
-        scavArea[scavAreaId][scavType] = DB_GetFieldIntByName(Result, "type");
-        scavArea[scavAreaId][areaActive] = true;
-    }
-    DB_FreeResultSet(Result);
-    
-    // create the text label
-    scavTextLabel[scavAreaId] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavArea[scavAreaId][scavPos][0], scavArea[scavAreaId][scavPos][1], scavArea[scavAreaId][scavPos][2], 20.0, 
-        .testlos = 1, .worldid = scavArea[scavAreaId][scavWorld], .interiorid = scavArea[scavAreaId][scavInterior]);
-    return 1;
-}
-
-CreateScavArea(Float:scavPosX, Float:scavPosY, Float:scavPosZ, scavIntWorld, scavVirWorld, areaType)
-{
-    new tmpScavId, DBResult:Result;
-    DB_ExecuteQuery(database, "INSERT INTO scavareas (posx, posy, posz, interior, world, type) \
-        VALUES ('%f', '%f', '%f', '%d', '%d', '%d')", scavPosX, scavPosY, scavPosZ, scavIntWorld, scavVirWorld, areaType);
-
-    // get the ID of the 
-    Result = DB_ExecuteQuery(database, "SELECT last_insert_rowid() FROM scavareas");
-    tmpScavId = DB_GetFieldInt(Result);
-    DB_FreeResultSet(Result);
-
-    // update the array size
-    scavAreaCount = scavAreaCount + 1;
-    
-    // set the data for this new scav area
-    scavArea[tmpScavId][scavPos][0] = scavPosX;
-    scavArea[tmpScavId][scavPos][1] = scavPosY;
-    scavArea[tmpScavId][scavPos][2] = scavPosZ;
-    scavArea[tmpScavId][scavInterior] = scavIntWorld;
-    scavArea[tmpScavId][scavWorld] = scavVirWorld;
-    scavArea[tmpScavId][scavType] = areaType;
-    scavArea[tmpScavId][areaActive] = true;
-    
-    // create the text label
-    scavTextLabel[tmpScavId] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavPosX, scavPosY, scavPosZ, 20.0, 
-        .testlos = 1, .worldid = scavVirWorld, .interiorid = scavIntWorld);
-    return 1;
-}
-
-/*
 * Punishment for dying
 */
 ReducePlayerInventoryAndExp(playerid)
@@ -593,7 +538,7 @@ OnPlayerSearchNode(playerid)
 {
     new string[128], itemIdFound, amountFound;
     
-    for(new i = 1; i <= scavAreaCount; i++)
+    for(new i = 0; i < MAX_SCAV_AREAS; i++)
     {
         if(IsPlayerInRangeOfPoint(playerid, 1.0, scavArea[i][scavPos][0], scavArea[i][scavPos][1], scavArea[i][scavPos][2]))
         {
@@ -607,7 +552,7 @@ OnPlayerSearchNode(playerid)
                     ClearAnimations(playerid);
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
-                    itemIdFound = lootTableScrap[random(CHANCE)];
+                    itemIdFound = lootTable[SCAV_AREA_SCRAP][random(CHANCE)];
                     if(itemIdFound != INVALID_ITEM) // item found
                     {
                         amountFound = random(30) + 1;
@@ -623,7 +568,7 @@ OnPlayerSearchNode(playerid)
                         }
                         SendClientMessage(playerid, COLOR_RP_PURPLE, string);
 
-                        UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
+                        //UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
                     }
                     else
                     {
@@ -635,7 +580,7 @@ OnPlayerSearchNode(playerid)
                     ClearAnimations(playerid);
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
-                    itemIdFound = lootTableBody[random(CHANCE)];
+                    itemIdFound = lootTable[SCAV_AREA_BODY][random(CHANCE)];
                     new scrapItemId = ReturnItemIdByName("Scrap");
                     new moneyItemId = ReturnItemIdByName("Money");
                     if(itemIdFound != INVALID_ITEM) // item found
@@ -660,7 +605,7 @@ OnPlayerSearchNode(playerid)
                         }
                         SendClientMessage(playerid, COLOR_RP_PURPLE, string);
 
-                        UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
+                        //UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
                     }
                     else
                     {
@@ -672,7 +617,7 @@ OnPlayerSearchNode(playerid)
                     ClearAnimations(playerid);
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
-                    itemIdFound = lootTableWeapons[random(CHANCE)];
+                    itemIdFound = lootTable[SCAV_AREA_WEAPONS][random(CHANCE)];
                     if(itemIdFound != INVALID_ITEM) // item found
                     {
                         if(inventoryItems[itemIdFound][itemCategory] == CATEGORY_WEAPONS)
@@ -696,7 +641,7 @@ OnPlayerSearchNode(playerid)
                         }
                         SendClientMessage(playerid, COLOR_RP_PURPLE, string);
 
-                        UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
+                        //UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
                     }
                     else
                     {
@@ -708,7 +653,7 @@ OnPlayerSearchNode(playerid)
                     ClearAnimations(playerid);
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
-                    itemIdFound = lootTableFoodDrink[random(CHANCE)];
+                    itemIdFound = lootTable[SCAV_AREA_FOODDRINK][random(CHANCE)];
                     if(itemIdFound != INVALID_ITEM) // item found
                     {
                         amountFound = random(3) + 1;
@@ -724,7 +669,7 @@ OnPlayerSearchNode(playerid)
                         }
                         SendClientMessage(playerid, COLOR_RP_PURPLE, string);
 
-                        UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
+                        //UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
                     }
                     else
                     {
@@ -736,7 +681,7 @@ OnPlayerSearchNode(playerid)
                     ClearAnimations(playerid);
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
-                    itemIdFound = lootTableMedical[random(CHANCE)];
+                    itemIdFound = lootTable[SCAV_AREA_MEDICAL][random(CHANCE)];
                     if(itemIdFound != INVALID_ITEM) // item found
                     {
                         amountFound = random(3) + 1;
@@ -752,7 +697,7 @@ OnPlayerSearchNode(playerid)
                         }
                         SendClientMessage(playerid, COLOR_RP_PURPLE, string);
 
-                        UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
+                        //UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
                     }
                     else
                     {
@@ -764,7 +709,7 @@ OnPlayerSearchNode(playerid)
                     ClearAnimations(playerid);
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
-                    itemIdFound = lootTableMoney[random(CHANCE)];
+                    itemIdFound = lootTable[SCAV_AREA_MONEY][random(CHANCE)];
                     if(itemIdFound != INVALID_ITEM) // item found
                     {
                         amountFound = random(150) + 1;
@@ -780,7 +725,7 @@ OnPlayerSearchNode(playerid)
                         }
                         SendClientMessage(playerid, COLOR_RP_PURPLE, string);
 
-                        UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
+                        //UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
                     }
                     else
                     {
@@ -792,7 +737,7 @@ OnPlayerSearchNode(playerid)
                     ClearAnimations(playerid);
 	                OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 3.0, 0, 0, 0, 0, 0);
 
-                    itemIdFound = lootTableGasStation[random(CHANCE)];
+                    itemIdFound = lootTable[SCAV_AREA_GASSTATION][random(CHANCE)];
                     if(itemIdFound != INVALID_ITEM) // item found
                     {
                         new fuelcanItemId = ReturnItemIdByName("Fuel Can");
@@ -827,7 +772,7 @@ OnPlayerSearchNode(playerid)
                         }
                         SendClientMessage(playerid, COLOR_RP_PURPLE, string);
 
-                        UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
+                        //UpdatePlayerInventoryEntry(playerid, itemIdFound, player[playerid][chosenChar]);
                     }
                     else
                     {

@@ -57,11 +57,10 @@ ParseMapFiles()
     /*new iNpcIDStart = 0;
     new iNpcIDEnd = MAX_NPCS - 1;
     new tempNpcIdNum = 999;*/
+    new timeMs = GetTickCount();
 
     // although this data is not loaded from the map, it looks tidier in the logs on startup to show all the stats here
     printf("|-> Vehicle Respawn Delay: %d", VEHICLE_RESPAWN_TIME);
-    printf("|-> Interiors Loaded: %d/%d", serverInteriorCount, MAX_SERVER_INTERIORS);
-    printf("|-> Scav Areas Loaded: %d/%d", scavAreaCount, MAX_SCAV_AREAS);
 
     format(mapDirectory, sizeof(mapDirectory), "%s", MAP_DIRECTORY);
     new dir:dDir = dir_open(mapDirectory);
@@ -170,16 +169,18 @@ ParseMapFiles()
             printf("    |-> Objects Parsed: %d/%d", iObjects, MAX_CA_OBJECTS);
             printf("    |-> Vehicles Parsed: %d/%d", iVehicles, MAX_VEHICLES);
             printf("    |-> Objects Removed: %d/%d", removedObjects, MAX_REMOVED_OBJECTS); //doesn't include LOD Models as the MTA map file contains both IDs for one line of removeWorldObject
-            //printf("    |-> NPCs Parsed: %d", iNpcs);
+            printf("|-> Map files Parsed in %d ms", GetTickCount() - timeMs);
         }
-        else print("    |-> Parsing Failed!");
+        else print("|-> Parsing Maps Failed!");
     }
     dir_close(dDir);
 
     print("-------------------------------------\n");
 
     // Initialize ColAndreas
+    timeMs = GetTickCount();
     CA_Init();
+    printf("|-> Col Andreas Initialized in %d ms", GetTickCount() - timeMs);
     return 1;
 }
 

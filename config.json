@@ -95,7 +95,7 @@
     "password": "",
     "pawn": {
         "legacy_plugins": [
-            "PawnPlus", "streamer", "samp_bcrypt", "FileManager", "ColAndreas"
+            "PawnPlus", "streamer", "samp_bcrypt", "FileManager", "ColAndreas", "textdraw-streamer"
         ],
         "main_scripts": [
             "zorp 1"

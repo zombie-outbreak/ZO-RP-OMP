@@ -100,6 +100,9 @@ enum E_PLAYERS
     currentInterior,
     atProperty,
     tmpIntName[64],
+    admChosenTableName[32],
+    admChosenTableId,
+    admChosenChanceNode,
     
 };
 new player[MAX_PLAYERS][E_PLAYERS];
@@ -219,6 +222,7 @@ new serverNpc[MAX_NPCS][E_NPCS];
 /*
 * Interior Data
 */
+new serverInteriorCount = 0;
 enum E_INTERIORS
 {
     intId,
@@ -236,31 +240,13 @@ enum E_INTERIORS
     mapIcon,
 };
 new srvInterior[MAX_SERVER_INTERIORS][E_INTERIORS];
-new serverInteriorCount = 0;
 new interiorEnterPickup[MAX_SERVER_INTERIORS];
 new interiorExitPickup[MAX_SERVER_INTERIORS];
 
 /*
-* NPC Data
-*/
-/*enum npcData
-{
-    npcId,
-    npcName[MAX_PLAYER_NAME],
-    npcSkin,
-    Float:npcX,
-    Float:npcY,
-    Float:npcZ,
-    Float:npcA,
-    npcInterior,
-    npcWorld,
-}
-new npcVariable[MAX_PLAYERS][npcData];
-new Text3D:npcNameTag[MAX_PLAYERS];*/
-
-/*
 * Faction Data
 */
+new serverFactionCount = 0;
 enum E_FACTIONS
 {
     facId,
@@ -291,6 +277,44 @@ enum E_VEHICLES
     bool:isBeingFilled,
 }
 new serverVehicle[MAX_VEHICLES][E_VEHICLES];
+
+/*
+* Inventory
+*/
+new serverItemCount = 0;
+enum inventoryItemData
+{
+    itemId,
+    itemNameSingular[128],
+    itemNamePlural[128],
+    itemDescription[128],
+    itemCategory,
+    itemHealAmount,
+    itemWepId,
+    itemAmmoId,
+    itemWepSlot,
+    bool:isUsable, // mostly only used for general category items which may not all have a usecase
+    itemMaxResource,
+}
+new inventoryItems[MAX_ITEMS][inventoryItemData];
+new playerInventory[MAX_PLAYERS][MAX_ITEMS];
+new playerInventoryResource[MAX_PLAYERS][MAX_ITEMS];
+
+/*
+* Scavenging Locations
+*/
+new scavAreaCount = 0;
+enum E_SCAV_AREAS
+{
+    scavId,
+    Float:scavPos[3],
+    scavInterior,
+    scavWorld,
+    scavType,
+    bool:areaActive,
+}
+new scavArea[MAX_SCAV_AREAS][E_SCAV_AREAS];
+new Text3D:scavTextLabel[MAX_SCAV_AREAS];
 
 /*
 * Map Conversion Variables
@@ -355,239 +379,20 @@ new Text:animhelper;
 new	Text:Clock;
 
 /*
-* Locker locations
-*/
-new Float:lockerLocation[MAX_LOCKERS][3] =
-{
-    {-2583.5339,2359.8047,3.6328}
-};
-
-new lockerInterior[MAX_LOCKERS] =
-{
-    0
-};
-
-new lockerVirWorld[MAX_LOCKERS] =
-{
-    1002
-};
-
-/*
-* Sleep Locations
-*/
-/*
-new Float:sleepLocations[MAX_SLEEP_LOCATIONS][3] =
-{
-    {-2585.1775,2368.4158,3.6328}
-};
-
-new sleepInterior[MAX_SLEEP_LOCATIONS] =
-{
-    0
-};
-
-new sleepVirWorld[MAX_SLEEP_LOCATIONS] =
-{
-    1002
-};
-*/
-
-/*
 * Fuel Pump Locations
 */
-new Float:fuelPump[MAX_FUEL_PUMPS][3] =
-{
-    // Redlands West fuel station
-    {1602.9343,2193.6711,11.0610}, {1597.0671,2193.6724,11.0610}, {1591.2882,2193.7856,11.0610},
-    {1591.2859,2204.5198,11.0610}, {1597.0685,2204.6177,11.0610}, {1602.9369,2204.5825,11.0610},
-    
-    // Bone County fuel station
-    {602.9949,1708.2792,6.9922}, {625.0079,1677.0963,6.9922},
-    
-    // Emerald Isle fuel station
-    {2208.6399,2469.7236,10.8203}, {2208.7542,2474.8875,10.8203}, {2208.9165,2480.4324,10.8203},
-    {2195.8984,2470.0959,10.8203}, {2195.8499,2474.6213,10.8203}, {2195.7922,2480.0513,10.8203},
-    
-    // Strip (bottom) fuel station
-    {2121.1812,914.1354,10.9609}, {2115.1523,914.0585,10.9577}, {2109.4880,914.0550,10.9565},
-    {2108.7522,926.0942,10.9609}, {2114.7932,926.0942,10.9609}, {2120.6821,926.0942,10.9609}
-};
-
-/*
-* Inventory
-*/
-enum inventoryItemData
-{
-    itemId,
-    itemNameSingular[128],
-    itemNamePlural[128],
-    itemDescription[128],
-    itemCategory,
-    itemHealAmount,
-    itemWepId,
-    itemAmmoId,
-    itemWepSlot,
-    bool:isUsable, // mostly only used for general category items which may not all have a usecase
-    itemMaxResource,
-}
-
-new inventoryItems[MAX_ITEMS][inventoryItemData] =
-{
-    //{id, name(singular), name(plural), description, category, healamount, wepid, ammoid, wepslot, isusable, maxresource}
-    //{id, "", "", "", INV_CATEGORY_UNKNOWN, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, false, -1}
-    {0, "Invalid Item", "Invalid Items", "This is used for no items found when looting. If you're seeing this item... you shouldn't.", INV_CATEGORY_UNKNOWN, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, false, -1},
-    {1, "Scrap", "Scrap", "Some scrap metal. Might be useful for something.", CATEGORY_GENERAL, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {2, "Candy Bar", "Candy Bars", "It might be a bit out of date by now... but it'll have to do.", CATEGORY_FOOD, 5, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {3, "Carton of Juice", "Cartons of Juice", "Freshly squeezed orange juice in a carton... or maybe it once was.", CATEGORY_DRINK, 5, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {4, "Money", "Monies", "You pay for things with it.", CATEGORY_GENERAL, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, false, -1},
-    {5, "Baseball Bat", "Baseball Bats", "Normally used for baseball games... good at smashing heads in too.", CATEGORY_WEAPONS, DEFAULT_HEALAMOUNT, WEAPON_BAT, DEFAULT_AMMO, WEAPON_SLOT_MELEE, true, -1},
-    {6, "9mm Pistol", "9mm Pistols", "A pistol which fires 9mm rounds.", CATEGORY_WEAPONS, DEFAULT_HEALAMOUNT, WEAPON_COLT45, 7, WEAPON_SLOT_PISTOL, true, -1},
-    {7, "9mm Round", "9mm Rounds", "Rounds of ammo used in the 9mm pistols, Uzi and Tec-9 weapons.", CATEGORY_AMMO, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, false, -1},
-    {8, "Shotgun", "Shotguns", "Good at close range. Fires 12 gauge shells.", CATEGORY_WEAPONS, DEFAULT_HEALAMOUNT, WEAPON_SHOTGUN, 9, WEAPON_SLOT_SHOTGUN, true, -1},
-    {9, "12 Gauge Shell", "12 Gauge Shells", "Shells used as shotgun ammo.", CATEGORY_AMMO, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, false, -1},
-    {10, "Bandage", "Bandages", "Used to stop bleeding from minor wounds.", CATEGORY_MEDICAL, 5, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {11, "Large Medical Kit", "Large Medical Kits", "A large kit full of medical supplies which can deal with major wounds.", CATEGORY_MEDICAL, 100, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {12, "Small Medical Kit", "Small Medical Kits", "A small medical kit which can deal with small injuries.", CATEGORY_MEDICAL, 50, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {13, "Medical Syringe", "Medical Syringes", "A syringe with some form of  liquid.", CATEGORY_MEDICAL, 25, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {14, "Paracetamol", "Paracetamol", "A small tablet that helps ease pain.", CATEGORY_MEDICAL, 10, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {15, "Uzi", "Uzis", "A submachine gun with a faster fire rate than a standard pistol while still using 9mm ammo.", CATEGORY_WEAPONS, DEFAULT_HEALAMOUNT, WEAPON_UZI, 7, WEAPON_SLOT_MACHINE_GUN, true, -1},
-    {16, "Shovel", "Shovels", "Good at digging things up or burying things.", CATEGORY_WEAPONS, DEFAULT_HEALAMOUNT, WEAPON_SHOVEL, DEFAULT_AMMO, WEAPON_SLOT_MELEE, true, -1},
-    {17, "Desert Eagle", "Desert Eagles", "Uses .44 ammo, a heavier and more powerful handgun.", CATEGORY_WEAPONS, DEFAULT_HEALAMOUNT, WEAPON_DEAGLE, 18, WEAPON_SLOT_PISTOL, true, -1},
-    {18, ".44 Round", ".44 Rounds", "Ammo used in the Desert Eagle.", CATEGORY_AMMO, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, false, -1},
-    {19, "Ration", "Rations", "A ration pack which greatly restores hunger.", CATEGORY_FOOD, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {20, "Bottle of Water", "Bottles of Water", "Probably the most important liquid for human life.", CATEGORY_DRINK, 25, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {21, "Chocolate Bar", "Chocolate Bars", "It might not be the healthiest, but it is still tasty.", CATEGORY_FOOD, 15, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {22, "Biscuit", "Biscuits", "Very dry but it staves off hunger a little bit.", CATEGORY_FOOD, 10, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {23, "Canteen of Water", "Canteens of Water", "Bigger and heavier than a basic bottle of water, but reusable!", CATEGORY_DRINK, 45, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {24, "Empty Canteen", "Empty Canteens", "Refillable canteen for water.", CATEGORY_GENERAL, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {25, "Canteen of Dirty Water", "Canteens of Dirty Water", "A water canteen that has been filled with dirty water.", CATEGORY_DRINK, 15, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {26, "Purification Tablet", "Purification Tablets", "A purification tablet used to purify dirty water.", CATEGORY_GENERAL, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {27, "Antibiotic", "Antibiotics", "An Antibiotic tablet used to cure disease.", CATEGORY_MEDICAL, 10, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, -1},
-    {28, "Fuel Can", "Fuel Cans", "Holds fuel for vehicles or generators.", CATEGORY_GENERAL, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, true, 30},
-    {29, "", "", "", INV_CATEGORY_UNKNOWN, DEFAULT_HEALAMOUNT, WEAPON_UNKNOWN, DEFAULT_AMMO, WEAPON_SLOT_UNKNOWN, false, -1}
-};
-new playerInventory[MAX_PLAYERS][MAX_ITEMS];
-new playerInventoryResource[MAX_PLAYERS][MAX_ITEMS];
-new lockerInventory[MAX_PLAYERS][MAX_ITEMS];
-
-/*
-* Scavenging Locations
-*/
-new scavAreaCount = 0;
-enum E_SCAV_AREAS
-{
-    scavId,
-    Float:scavPos[3],
-    scavInterior,
-    scavWorld,
-    scavType,
-    bool:areaActive,
-}
-new scavArea[MAX_SCAV_AREAS][E_SCAV_AREAS];
-new Text3D:scavTextLabel[MAX_SCAV_AREAS];
+new fuelPumpCount = 0;
+new Float:fuelPump[MAX_FUEL_PUMPS][3];
+new Text3D:fillTextLabel[MAX_FUEL_PUMPS];
 
 /*
 * Loot tables - corresponds to item IDs found in inventoryItems.
 * 0 for no item
 * 1+ for an item
 */
-new lootTableScrap[CHANCE] =
-{
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0, 0
-};
-
-new lootTableBody[CHANCE] =
-{
-    1, 1, 1, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0,
-    1, 2, 3, 4, 24, 0, 0, 0, 0, 0
-};
-
-new lootTableFoodDrink[CHANCE] =
-{
-    2, 2, 2, 3, 3, 3, 23, 23, 0, 0,
-    2, 2, 2, 3, 3, 3, 23, 23, 0, 0,
-    2, 2, 2, 3, 3, 3, 23, 23, 0, 0,
-    2, 2, 2, 3, 3, 3, 23, 23, 0, 0,
-    2, 2, 2, 3, 3, 3, 23, 23, 0, 0,
-    2, 2, 2, 3, 3, 3, 25, 25, 0, 0,
-    2, 2, 2, 3, 3, 3, 25, 25, 0, 0,
-    2, 2, 2, 3, 3, 3, 25, 25, 0, 0,
-    2, 2, 2, 3, 3, 3, 25, 25, 0, 0,
-    2, 2, 2, 3, 3, 3, 25, 25, 0, 0
-};
-
-new lootTableWeapons[CHANCE] =
-{
-    0, 0, 6, 7, 7, 8, 0, 0, 9, 7,
-    15, 17, 18, 0, 5, 16, 0, 0, 0,
-    0, 0, 6, 7, 7, 8, 0, 0, 9, 7,
-    15, 17, 18, 0, 5, 16, 0, 0, 0,
-    15, 17, 18, 0, 5, 16, 0, 0, 0,
-    0, 0, 6, 7, 7, 8, 0, 0, 9, 7,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-new lootTableMedical[CHANCE] =
-{
-    11, 10, 12, 13, 14, 0, 0, 0, 0,
-    0, 10, 12, 13, 14, 0, 0, 0, 0,
-    10, 10, 12, 13, 14, 0, 0, 0, 0,
-    12, 10, 12, 13, 14, 0, 0, 0, 0,
-    13, 10, 12, 13, 14, 0, 0, 0, 0,
-    14, 10, 12, 13, 14, 0, 0, 0, 0,
-    27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-new lootTableMoney[CHANCE] =
-{
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    0, 0, 0, 0, 0, 4, 4, 4, 4, 4
-};
-
-new lootTableGasStation[CHANCE] =
-{
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0,
-    1, 4, 28, 21, 20, 0, 0, 0, 0, 0
-};
+new lootTableCount = 0;
+new lootTableName[MAX_LOOT_TABLES][32];
+new lootTable[MAX_LOOT_TABLES][CHANCE];
 
 /*
 * Random Spawns
