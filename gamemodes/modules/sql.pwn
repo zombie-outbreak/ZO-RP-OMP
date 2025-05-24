@@ -548,10 +548,10 @@ LoadServerItems(item)
     return 1;
 }
 
-CreateServerItem(itemid, const nameSingular[], const namePlural[], const itemDesc[], category, healamount, wepid, ammoid, wepslot, bool:isusable, maxresource)
+CreateServerItem(const nameSingular[], const namePlural[], const itemDesc[], category, healamount, wepid, ammoid, wepslot, bool:isusable, maxresource)
 {
-    DB_ExecuteQuery(database, "INSERT INTO items (itemid, sname, pname, description, category, healamount, wepid, ammoid, wepslot, isusable, maxresource) \
-        VALUES ('%d', '%q', '%q', '%q', '%d', '%d', '%d', '%d', '%d', '%d', '%d')", itemid, nameSingular, namePlural, itemDesc, category, healamount, 
+    DB_ExecuteQuery(database, "INSERT INTO items (sname, pname, description, category, healamount, wepid, ammoid, wepslot, isusable, maxresource) \
+        VALUES ('%d', '%q', '%q', '%q', '%d', '%d', '%d', '%d', '%d', '%d', '%d')", nameSingular, namePlural, itemDesc, category, healamount, 
         wepid, ammoid, wepslot, isusable, maxresource);
 
     // update the array size

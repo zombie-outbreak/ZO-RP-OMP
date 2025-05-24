@@ -1540,7 +1540,7 @@ public CreateItemSName(playerid, dialogid, response, listitem, string:inputtext[
         return 1;
     }
     
-    inventoryItems[serverItemCount][itemId] = serverItemCount;
+    inventoryItems[serverItemCount + 1][itemId] = serverItemCount + 1;
     format(inventoryItems[serverItemCount][itemNameSingular], 128, "%s", inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemPName<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Name (Plural)", "Enter the item's plural name.", "Confirm", "Back");
     return 1;
@@ -1558,7 +1558,7 @@ public CreateItemPName(playerid, dialogid, response, listitem, string:inputtext[
         return 1;
     }
     
-    format(inventoryItems[serverItemCount][itemNamePlural], 128, "%s", inputtext);
+    format(inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemNamePlural], 128, "%s", inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemDescription<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Description", "Enter the item's description.", "Confirm", "Back");
     return 1;
 }
@@ -1575,7 +1575,7 @@ public CreateItemDescription(playerid, dialogid, response, listitem, string:inpu
         return 1;
     }
     
-    format(inventoryItems[serverItemCount][itemDescription], 128, "%s", inputtext);
+    format(inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemDescription], 128, "%s", inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemCategory<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Category", "Enter the item's category ID.", "Confirm", "Back");
     return 1;
 }
@@ -1592,7 +1592,7 @@ public CreateItemCategory(playerid, dialogid, response, listitem, string:inputte
         return 1;
     }
     
-    inventoryItems[serverItemCount][itemCategory] = strval(inputtext);
+    inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemCategory] = strval(inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemHealAmount<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Heal Amount", "Enter the amount this item heals (-1 for non use).", "Confirm", "Back");
     return 1;
 }
@@ -1609,7 +1609,7 @@ public CreateItemHealAmount(playerid, dialogid, response, listitem, string:input
         return 1;
     }
     
-    inventoryItems[serverItemCount][itemHealAmount] = strval(inputtext);
+    inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemHealAmount] = strval(inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemWepId<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Weapon ID", "Enter this item's weapon ID (-1 if not a weapon).", "Confirm", "Back");
     return 1;
 }
@@ -1626,7 +1626,7 @@ public CreateItemWepId(playerid, dialogid, response, listitem, string:inputtext[
         return 1;
     }
     
-    inventoryItems[serverItemCount][itemWepId] = strval(inputtext);
+    inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemWepId] = strval(inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemAmmoId<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Ammo ID", "Enter this item's ammo ID (-1 if not a weapon).", "Confirm", "Back");
     return 1;
 }
@@ -1643,7 +1643,7 @@ public CreateItemAmmoId(playerid, dialogid, response, listitem, string:inputtext
         return 1;
     }
     
-    inventoryItems[serverItemCount][itemAmmoId] = strval(inputtext);
+    inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemAmmoId] = strval(inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemWepSlot<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Weaponslot", "Enter this item's weaponslot ID (-1 if not a weapon).", "Confirm", "Back");
     return 1;
 }
@@ -1660,7 +1660,7 @@ public CreateItemWepSlot(playerid, dialogid, response, listitem, string:inputtex
         return 1;
     }
     
-    inventoryItems[serverItemCount][itemWepSlot] = strval(inputtext);
+    inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemWepSlot] = strval(inputtext);
     Dialog_ShowCallback(playerid, using public CreateItemIsUsable<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Is Usable", "Enter whether this item can use the 'use' command (1 for true, 0 for false).", "Confirm", "Back");
     return 1;
 }
@@ -1679,11 +1679,11 @@ public CreateItemIsUsable(playerid, dialogid, response, listitem, string:inputte
     
     if(strval(inputtext) == 0)
     {
-        inventoryItems[serverItemCount][isUsable] = false;
+        inventoryItems[inventoryItems[serverItemCount + 1][itemId]][isUsable] = false;
     }
     else if(strval(inputtext) == 1)
     {
-        inventoryItems[serverItemCount][isUsable] = true;
+        inventoryItems[inventoryItems[serverItemCount + 1][itemId]][isUsable] = true;
     }
     Dialog_ShowCallback(playerid, using public CreateItemMaxResource<iiiis>, DIALOG_STYLE_INPUT, "Create Item: Max Resource", "Enter a value for this item's max resource (fuel can for example)(-1 for no resource).", "Confirm", "Back");
     return 1;
@@ -1701,11 +1701,12 @@ public CreateItemMaxResource(playerid, dialogid, response, listitem, string:inpu
         return 1;
     }
     
-    inventoryItems[serverItemCount][itemMaxResource] = strval(inputtext);
+    inventoryItems[inventoryItems[serverItemCount + 1][itemId]][itemMaxResource] = strval(inputtext);
+    new tmpItemId = inventoryItems[serverItemCount + 1][itemId];
     
     // now add the new item to the database
-    CreateServerItem(inventoryItems[serverItemCount][itemId], inventoryItems[serverItemCount][itemNameSingular], inventoryItems[serverItemCount][itemNamePlural], inventoryItems[serverItemCount][itemDescription], 
-        inventoryItems[serverItemCount][itemCategory], inventoryItems[serverItemCount][itemHealAmount], inventoryItems[serverItemCount][itemWepId], inventoryItems[serverItemCount][itemAmmoId], 
-        inventoryItems[serverItemCount][itemWepSlot], inventoryItems[serverItemCount][isUsable], inventoryItems[serverItemCount][itemMaxResource]);
+    CreateServerItem(inventoryItems[tmpItemId][itemNameSingular], inventoryItems[tmpItemId][itemNamePlural], inventoryItems[tmpItemId][itemDescription], 
+        inventoryItems[tmpItemId][itemCategory], inventoryItems[tmpItemId][itemHealAmount], inventoryItems[tmpItemId][itemWepId], inventoryItems[tmpItemId][itemAmmoId], 
+        inventoryItems[tmpItemId][itemWepSlot], inventoryItems[tmpItemId][isUsable], inventoryItems[tmpItemId][itemMaxResource]);
     return 1;
 }
