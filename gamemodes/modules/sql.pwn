@@ -299,6 +299,25 @@ OnPlayerCharacterDataLoaded(playerid)
 	return 1;
 }
 
+SavePlayerCharacterLocation(playerid, const currentCharacter[])
+{
+    /*
+	* Get player's location data
+	*/
+	GetPlayerPos(playerid, player[playerid][pPos][0], player[playerid][pPos][1], player[playerid][pPos][2]);
+	GetPlayerFacingAngle(playerid, player[playerid][pPos][3]);
+	player[playerid][plrinterior] = GetPlayerInterior(playerid);
+	player[playerid][world] = GetPlayerVirtualWorld(playerid);
+
+	/*
+	* Run the query to update the player character entry in the database
+	*/
+	DB_ExecuteQuery(database, "UPDATE characters SET px = '%f', py = '%f', pz = '%f', pa = '%f', interior = '%d', virtualworld = '%d' WHERE name = '%q'", 
+	player[playerid][pPos][0], player[playerid][pPos][1], player[playerid][pPos][2], player[playerid][pPos][3], player[playerid][plrinterior], player[playerid][world], 
+    currentCharacter);
+    return 1;
+}
+
 SavePlayerCharacter(playerid, const currentCharacter[])
 {
 	/*

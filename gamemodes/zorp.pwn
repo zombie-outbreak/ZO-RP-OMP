@@ -401,6 +401,8 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 					SetPlayerInterior(playerid, srvInterior[i][intWorld]);
 					SetPlayerVirtualWorld(playerid, srvInterior[i][intVirWorld]);
 					GameTextForPlayer(playerid, "You entered %s", 5000, 3, srvInterior[i][intName]);
+                    
+                    SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 				}
 				
 				if(player[playerid][antiMessageSpam] != 1)
@@ -434,6 +436,8 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 						SetPlayerInterior(playerid, srvInterior[i][intWorld]);
 						SetPlayerVirtualWorld(playerid, srvInterior[i][intVirWorld]);
 						GameTextForPlayer(playerid, "You entered %s", 5000, 3, srvInterior[i][intName]);
+                        
+                        SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 					}
 				}
 				else
@@ -446,6 +450,8 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 					SetPlayerInterior(playerid, srvInterior[i][intWorld]);
 					SetPlayerVirtualWorld(playerid, srvInterior[i][intVirWorld]);
 					GameTextForPlayer(playerid, "You entered %s", 5000, 3, srvInterior[i][intName]);
+                    
+                    SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 				}
 			}
 		}
@@ -459,6 +465,8 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 			SetPlayerInterior(playerid, srvInterior[i][intExitWorld]);
 			SetPlayerVirtualWorld(playerid, srvInterior[i][intExitVirWorld]);
 			GameTextForPlayer(playerid, "You exited %s", 5000, 3, srvInterior[i][intName]);
+            
+            SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 		}
 	}
 	return 1;
