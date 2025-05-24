@@ -1214,28 +1214,6 @@ DialogPages:ShowInteriorsDialog(playerid, response, listitem, inputtext[])
 	return 1;
 }
 
-DialogPages:ShowPlayerCharacterMenu(playerid, response, listitem, inputtext[])
-{
-	if(!response)
-		return Kick(playerid);
-
-	format(player[playerid][chosenChar], MAX_PLAYER_NAME, "%s", inputtext);
-
-	if(strcmp("Create New", player[playerid][chosenChar]) == 0) // show the create character dialogs
-	{
-		Dialog_ShowCallback(playerid, using public ChooseZombie<iiiis>, DIALOG_STYLE_LIST, "Is Your Character A Zombie?", "Human\nZombie", "Confirm", "Back");
-	}
-	else // show character options
-	{
-		/*
-		* Eventally this should show another dialog menu with character options. 
-		* For now let's spawn the player as their chosen character.
-		*/
-		OnPlayerCharacterDataLoaded(playerid);
-	}
-	return 1;
-}
-
 DialogPages:ShowFactionMemberList(playerid, response, listitem, inputtext[])
 {
 	if(!response)
@@ -1430,6 +1408,8 @@ ShowSkinModelMenu(playerid)
 	return 1;
 }
 
+
+
 public OnModelSelectionResponse(playerid, extraid, index, modelid, response)
 {
     // make sure the extraid matches the skin menu ID
@@ -1501,6 +1481,46 @@ public OnModelSelectionResponse(playerid, extraid, index, modelid, response)
 				Dialog_ShowCallback(playerid, using public CreateCharDescription<iiiis>, DIALOG_STYLE_INPUT, "Character Description", "A brief description of your character.", "Confirm", "Back");
 			}
 		}
+    }
+    else if(extraid == CHARACTER_SELECTION_SKIN_MENU)
+    {
+        if(response == MODEL_RESPONSE_SELECT)
+        {
+            if(index == 0) // create character index
+            {
+                if(player[playerid][characterCount] >= MAX_CHARACTERS + 1) // +1 for the empty create character slot
+                {
+                    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You have reached the maximum character count, please delete one to be able to create another.");
+                    PopulateCharacterMenu(playerid);
+                    return 1;
+                }
+                else
+                {
+                    Dialog_ShowCallback(playerid, using public ChooseZombie<iiiis>, DIALOG_STYLE_LIST, "Human or Zombie?", "Human\nZombie", "Confirm", "Back");
+                }
+            }
+            else // a character has been selected
+            {
+                new DBResult:Result;
+                Result = DB_ExecuteQuery(database, "SELECT name FROM characters WHERE owner = '%d' AND skin = '%d'", player[playerid][ID], modelid);
+                
+                if(DB_GetFieldCount(Result) > 0)
+                {
+                    DB_GetFieldStringByName(Result, "name", player[playerid][chosenChar]);
+                }
+                DB_FreeResultSet(Result);
+                
+                /*
+                * Now load the player's character data and spawn them
+                * This will be replaced with a new menu which allows for character editing and deletion eventually
+                */
+                OnPlayerCharacterDataLoaded(playerid);
+            }
+        }
+        else
+        {
+            return Kick(playerid);
+        }
     }
 	return 1;
 }

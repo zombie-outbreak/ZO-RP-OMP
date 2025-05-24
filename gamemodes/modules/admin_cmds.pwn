@@ -154,10 +154,13 @@
 
 @cmd() goto(playerid, params[], help)
 {
-    new targetId = strval(params);
+    new targetId;
 
     if(player[playerid][admin] < 1)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
+        
+    if(sscanf(params, "d", targetId))
+		return SendClientMessage(playerid, COLOR_YELLOW, "USAGE: /goto [playerid]");
 
     if(!IsPlayerConnected(targetId))
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Invalid player ID given.");
@@ -178,10 +181,13 @@
 
 @cmd() gethere(playerid, params[], help)
 {
-    new targetId = strval(params);
+    new targetId;
 
     if(player[playerid][admin] < 1)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
+        
+    if(sscanf(params, "d", targetId))
+		return SendClientMessage(playerid, COLOR_YELLOW, "USAGE: /gethere [playerid]");
 
     if(!IsPlayerConnected(targetId))
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Invalid player ID given.");

@@ -131,6 +131,19 @@ BanWithMessage(playerid, color, const message[], {Float, _}:...)
     return 1;
 }
 
+RemoveUnderscoreFromName(const tmpName[])
+{
+    new passedName[MAX_PLAYER_NAME];
+    format(passedName, sizeof(passedName), "%s", tmpName);
+    
+    for(new i; i < MAX_PLAYER_NAME; i++)
+    {
+        if(passedName[i] == '_')
+            passedName[i] = ' ';
+    }
+    return passedName;
+}
+
 /*
 * Player Coordinate Functions
 */
@@ -588,8 +601,8 @@ stock TryUpgradeJumpSkill(playerid)
 	
     player[playerid][unlockedJumpSkill] = true;
 
-	// Lower gravity for higher jumps (default: 0.008, less = more jump)
-	SetPlayerGravity(playerid, 0.005); // Adjust value to fit game balance
+	// Lower gravity for higher jumps
+	SetPlayerGravity(playerid, JUMP_SKILL_GRAVITY);
 
 	// Save skill unlock to DB
 	DB_ExecuteQuery(database,

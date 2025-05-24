@@ -190,6 +190,9 @@
 {
     new tmpVehicleId = GetPlayerVehicleID(playerid);
     new chanceToStart = RandomRange(1, 100);
+    
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
 
     if(GetPlayerState(playerid) != PLAYER_STATE_DRIVER)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You have to be in the driver's seat of a vehicle to use this command.");
@@ -320,6 +323,9 @@
 
 @cmd() fill(playerid, params[], help)
 {
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+        
     // check if player is close enough to a valid fuel pump
     if(!IsPlayerAtFuelPump(playerid))
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You are not close enough to a fuel pump.");
@@ -737,30 +743,6 @@
     }
 
     return 1;
-}
-@cmd() grab(playerid, params[], help)
-{
-    if(player[playerid][iszombie] && player[playerid][unlockedGrabSkill])
-    {
-        if((GetTickCount() - player[playerid][grabAntiSpam]) < 30000)
-        {
-            return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 30 seconds between uses of this command.");
-        }
-        new Float:px, Float:py, Float:pz;
-        new Float:vx, Float:vy, Float:vz;
-        new victim = strval(params);
-        GetPlayerPos(victim, vx, vy, vz);
-        GetPlayerPos(playerid, px, py, pz);
-
-        if (IsPlayerInRangeOfPoint(playerid, 10, vx, vy, vz))
-        {
-            SetPlayerPos(victim, px, py+1, pz);
-            player[playerid][grabAntiSpam] = GetTickCount();
-        }
-        return 1;
-    }
-    SendClientMessage(playerid, COLOR_RED, "You can't do that!");
-    return 0;
 }
 
 @cmd() bstr(playerid, params[], help)

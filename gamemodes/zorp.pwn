@@ -297,9 +297,10 @@ public OnPlayerDeath(playerid, killerid, reason)
 	}
 	//combustperkcheck
     if (player[playerid][iszombie] && player[playerid][unlockedCombustSkill])
-{
-    Combust(playerid);
-}
+    {
+        Combust(playerid);
+    }
+    
 	/*
 	* Kill timers and reset spawned variable as well as hide the HUD
 	*/
@@ -497,38 +498,54 @@ public OnPlayerWeaponShot(playerid, WEAPON:weaponid, BULLET_HIT_TYPE:hittype, hi
 public OnPlayerStateChange(playerid, newstate, oldstate)
 {
 	new allowedWeapons[] = {WEAPON_COLT45, WEAPON_UZI, WEAPON_MP5, WEAPON_TEC9};
-	if(newstate == PLAYER_STATE_DRIVER) 
-	{
-		SetPlayerArmedWeapon(playerid, WEAPON_FIST);
-		player[playerid][lastInVehId] = GetPlayerVehicleID(playerid);
-		if(serverVehicle[player[playerid][lastInVehId]][engine]) // vehicle engine is turned on so show HUD
-		{
-			// show the fuel hud and start the vehicle timer
-			ShowHudForPlayer(playerid, HUD_VEHICLE);
-			player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, player[playerid][lastInVehId]);
-		}
-	}
-	else if(newstate == PLAYER_STATE_PASSENGER)
-	{
-		for(new i = 0; i < sizeof(allowedWeapons); i++) 
-		{
-			if(GetPlayerWeapon(playerid) != allowedWeapons[i])
-			{
-				SetPlayerArmedWeapon(playerid, WEAPON_FIST);
-			}
-		}
-		player[playerid][lastInVehId] = GetPlayerVehicleID(playerid);
-	}
+    if(player[playerid][iszombie] == 0)
+    {
+        if(newstate == PLAYER_STATE_DRIVER) 
+        {
+            SetPlayerArmedWeapon(playerid, WEAPON_FIST);
+            player[playerid][lastInVehId] = GetPlayerVehicleID(playerid);
+            if(serverVehicle[player[playerid][lastInVehId]][engine]) // vehicle engine is turned on so show HUD
+            {
+                // show the fuel hud and start the vehicle timer
+                ShowHudForPlayer(playerid, HUD_VEHICLE);
+                player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, player[playerid][lastInVehId]);
+            }
+        }
+        else if(newstate == PLAYER_STATE_PASSENGER)
+        {
+            for(new i = 0; i < sizeof(allowedWeapons); i++) 
+            {
+                if(GetPlayerWeapon(playerid) != allowedWeapons[i])
+                {
+                    SetPlayerArmedWeapon(playerid, WEAPON_FIST);
+                }
+            }
+            player[playerid][lastInVehId] = GetPlayerVehicleID(playerid);
+        }
 
-	/*
-	* Hide the fuel HUD when the driver exits the vehicle
-	*/
-	if(oldstate == PLAYER_STATE_DRIVER) 
-	{
-		SetPlayerArmedWeapon(playerid, WEAPON_FIST);
-		HideHudElementForPlayer(playerid, HUD_VEHICLE);
-		KillTimer(player[playerid][fuelTimer]);
-	}
+        /*
+        * Hide the fuel HUD when the driver exits the vehicle
+        */
+        if(oldstate == PLAYER_STATE_DRIVER) 
+        {
+            SetPlayerArmedWeapon(playerid, WEAPON_FIST);
+            HideHudElementForPlayer(playerid, HUD_VEHICLE);
+            KillTimer(player[playerid][fuelTimer]);
+        }
+    }
+    else if(player[playerid][iszombie] == 1) // zombies don't need fuel etc.
+    {
+        if(newstate == PLAYER_STATE_DRIVER)
+        {
+            player[playerid][lastInVehId] = GetPlayerVehicleID(playerid);
+            SetVehicleEngineOn(player[playerid][lastInVehId]);
+        }
+        
+        if(oldstate == PLAYER_STATE_DRIVER) 
+        {
+            SetVehicleEngineOff(player[playerid][lastInVehId]);
+        }
+    }
 	return 1;
 }
 
@@ -539,28 +556,28 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	{
 		if(player[playerid][iszombie] && player[playerid][unlockedSuperJumpSkill])
 		{
-		SuperJump(playerid);
+            SuperJump(playerid);
 		}
 	}
 	if (HOLDING( KEY_WALK | KEY_AIM))
 	{
 		if(player[playerid][iszombie] && player[playerid][unlockedBiteSkill])
 		{
-		Bite(playerid);
+            Bite(playerid);
 		}
 	}
 	if (HOLDING( KEY_WALK | KEY_FIRE))
 	{
 		if(player[playerid][iszombie] && player[playerid][unlockedStunSkill])
 		{
-		Stun(playerid);
+            Stun(playerid);
 		}
 	}
 	if (HOLDING( KEY_WALK | KEY_CROUCH))
 	{
 		if(player[playerid][iszombie] && player[playerid][unlockedGrabSkill])
 		{
-		Grab(playerid);
+            Grab(playerid);
 		}
 	}
 	//zedperk hotkeys

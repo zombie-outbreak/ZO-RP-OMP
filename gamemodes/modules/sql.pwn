@@ -184,7 +184,8 @@ OnPlayerCharacterDataLoaded(playerid)
 		player[playerid][unlockedSuperJumpSkill] = bool:DB_GetFieldIntByName(Result, "unlockedsjump");
 		player[playerid][unlockedCorneredSkill] = bool:DB_GetFieldIntByName(Result, "unlockedcorn");
 		player[playerid][unlockedHpIncreaseSkill] = DB_GetFieldIntByName(Result, "unlockedhpinc");
-		/*
+		
+        /*
 		* Set the character's spawn up
 		*/
 		new randSpawn = random(4);
@@ -203,11 +204,11 @@ OnPlayerCharacterDataLoaded(playerid)
 		{
 			if(player[playerid][spawned] == 0)
 			{
-				SetSpawnInfo(playerid, TEAM_ZOMBIE, player[playerid][skin], zombieSpawns[randSpawn][0], zombieSpawns[randSpawn][1], zombieSpawns[randSpawn][2], zombieSpawns[randSpawn][3], 9, 1, 0, 0, 0, 0);
+				SetSpawnInfo(playerid, TEAM_ZOMBIE, player[playerid][skin], zombieSpawns[randSpawn][0], zombieSpawns[randSpawn][1], zombieSpawns[randSpawn][2], zombieSpawns[randSpawn][3], 0, 0, 0, 0, 0, 0);
 			}
 			else
 			{
-				SetSpawnInfo(playerid, TEAM_ZOMBIE, player[playerid][skin], player[playerid][pPos][0], player[playerid][pPos][1], player[playerid][pPos][2], player[playerid][pPos][3], 9, 1, 0, 0, 0, 0);
+				SetSpawnInfo(playerid, TEAM_ZOMBIE, player[playerid][skin], player[playerid][pPos][0], player[playerid][pPos][1], player[playerid][pPos][2], player[playerid][pPos][3], 0, 0, 0, 0, 0, 0);
 			}
 		}
 		SetPlayerName(playerid, player[playerid][chosenChar]);
@@ -258,27 +259,33 @@ OnPlayerCharacterDataLoaded(playerid)
 			player[playerid][thirstTimer] = SetTimerEx("ThirstTimer", THIRST_TIMER_DURATION, true, "d", playerid);
 			player[playerid][diseaseTimer] = SetTimerEx("DiseaseTimer", DISEASE_TIMER_DURATION, true, "d", playerid);
 			SetPlayerColor(playerid, COLOR_WHITE);
+            
+            // now give the player their weapons (if they have any equipped)
+            GivePlayerWeapon(playerid, player[playerid][wepSlot][0], 1); // fist or brass knuckles
+            GivePlayerWeapon(playerid, player[playerid][wepSlot][1], 1); // melee weapons
+            GivePlayerWeapon(playerid, player[playerid][wepSlot][2], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][2])]); // pistols
+            GivePlayerWeapon(playerid, player[playerid][wepSlot][3], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][3])]); // shotguns
+            GivePlayerWeapon(playerid, player[playerid][wepSlot][4], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][4])]); // uzi/tec-9/mp5
+            GivePlayerWeapon(playerid, player[playerid][wepSlot][5], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][5])]); // ak/m4
+            GivePlayerWeapon(playerid, player[playerid][wepSlot][6], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][6])]); // rifles
 		}
 		else // is a zombie so only show health
 		{
 			ShowHudForPlayer(playerid, HUD_HEALTH);
 			ShowHudForPlayer(playerid, HUD_CLOCK);
 			SetPlayerColor(playerid, COLOR_YELLOW);
+            
+            // set the player's gravity if they have the jump skill
+            if(player[playerid][unlockedJumpSkill])
+            {
+                SetPlayerGravity(playerid, JUMP_SKILL_GRAVITY);
+            }
 		}
 
 		/*
 		* Update the HUD_INFO so it shows the correct text depending on if the character is a zombie or not
 		*/
 		UpdateHudElementForPlayer(playerid, HUD_INFO);
-        
-        // now give the player their weapons (if they have any equipped)
-        GivePlayerWeapon(playerid, player[playerid][wepSlot][0], 1); // fist or brass knuckles
-        GivePlayerWeapon(playerid, player[playerid][wepSlot][1], 1); // melee weapons
-        GivePlayerWeapon(playerid, player[playerid][wepSlot][2], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][2])]); // pistols
-        GivePlayerWeapon(playerid, player[playerid][wepSlot][3], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][3])]); // shotguns
-        GivePlayerWeapon(playerid, player[playerid][wepSlot][4], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][4])]); // uzi/tec-9/mp5
-        GivePlayerWeapon(playerid, player[playerid][wepSlot][5], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][5])]); // ak/m4
-        GivePlayerWeapon(playerid, player[playerid][wepSlot][6], playerInventory[playerid][ReturnWeaponAmmoId(player[playerid][wepSlot][6])]); // rifles
 	}
 	else
 	{
@@ -412,19 +419,21 @@ PopulateCharacterMenu(playerid)
 	/*
 	* Show character menu
 	*/
-	new charName[MAX_PLAYER_NAME], DBResult:Result;
-	Result = DB_ExecuteQuery(database, "SELECT name FROM characters WHERE owner = '%d' LIMIT 50", player[playerid][ID]);
+	new charName[MAX_PLAYER_NAME], tmpSkin, DBResult:Result, List:skins = list_new();
+	Result = DB_ExecuteQuery(database, "SELECT name, skin FROM characters WHERE owner = '%d' LIMIT %d", player[playerid][ID], MAX_CHARACTERS);
 
-	AddDialogListitem(playerid, "Create New");
+    AddModelMenuItem(skins, 18631, "Create New");
 	do
 	{
 		DB_GetFieldStringByName(Result, "name", charName, MAX_PLAYER_NAME);
-		AddDialogListitem(playerid, charName);
+        tmpSkin = DB_GetFieldIntByName(Result, "skin");
+        AddModelMenuItem(skins, tmpSkin, RemoveUnderscoreFromName(charName));
 	}
 	while(DB_SelectNextRow(Result));
-
+    
+    player[playerid][characterCount] = list_size(skins);
 	DB_FreeResultSet(Result);
-	ShowPlayerDialogPages(playerid, "ShowPlayerCharacterMenu", DIALOG_STYLE_LIST, "Select a Character", "Select", "Quit", 15);
+    ShowModelSelectionMenu(playerid, "Select Your Character / Create A New One", CHARACTER_SELECTION_SKIN_MENU, skins);
 	return 1;
 }
 
