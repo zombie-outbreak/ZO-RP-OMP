@@ -63,7 +63,8 @@ enum E_PLAYERS
     Float:unlockedBorrowedStrengthSkillDamage,
     bool:unlockedSuperJumpSkill,
     bool:unlockedCorneredSkill,
-	/*
+	
+    /*
 	* Not Saved
 	*/
 	bool:IsLoggedIn,
@@ -106,7 +107,7 @@ enum E_PLAYERS
     generalAntiSpam,
     stunnedRecently,
     grabbedRecently,
-
+    characterCount,
 
     /*
     * Admin fly
