@@ -103,6 +103,9 @@ enum E_PLAYERS
     grabAntiSpam,
     borrowedStrengthAntiSpam,
     borrowedSuperJumpAntiSpam,
+    generalAntiSpam,
+    stunnedRecently,
+    grabbedRecently,
 
 
     /*

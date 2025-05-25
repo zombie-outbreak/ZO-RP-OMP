@@ -733,7 +733,9 @@
     else
     {
         // Show empty or placeholder skill menu for humans
-        Dialog_ShowCallback(playerid, using public PerkMenu<iiiis>, DIALOG_STYLE_MSGBOX, "Human Perks", "No Perks available for humans.", "Close", "");
+        static const skillListHuman[] = 
+            "HP Increase\nJump\nStun\nScavenger\nScrapyard Mechanic\nGroup Cohesion\nPilots Manual\nMedic\nMarksman\nInconspicuous\nSuper Immune";
+        Dialog_ShowCallback(playerid, using public PerkMenu<iiiis>, DIALOG_STYLE_LIST, "Human Perks", skillListHuman, "Select", "Close");
     }
 
     return 1;

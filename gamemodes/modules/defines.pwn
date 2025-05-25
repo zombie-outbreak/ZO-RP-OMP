@@ -167,7 +167,7 @@
 */
 #define HUNGER_TIMER_DURATION 30000 * 5 // 2.5 minutes
 #define THIRST_TIMER_DURATION 10000 * 5 // 50 seconds
-#define DISEASE_TIMER_DURATION 60000 * 5 // 5 minutes
+#define DISEASE_TIMER_DURATION 60000 * 3 // 3 minutes
 
 /*
 * Max Character
