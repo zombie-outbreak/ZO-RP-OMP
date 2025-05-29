@@ -1414,8 +1414,6 @@ ShowSkinModelMenu(playerid)
 	return 1;
 }
 
-
-
 public OnModelSelectionResponse(playerid, extraid, index, modelid, response)
 {
     // make sure the extraid matches the skin menu ID
@@ -1446,6 +1444,9 @@ public OnModelSelectionResponse(playerid, extraid, index, modelid, response)
 					player[playerid][iszombie]
 				);
                 
+                /*
+                * Create character's inventory entry
+                */
                 CreateCharacterInventory(playerid);
 			}
 			else
@@ -1457,23 +1458,10 @@ public OnModelSelectionResponse(playerid, extraid, index, modelid, response)
 				);
 			}
 
-			if(player[playerid][iszombie] == 0)
-			{
-				/*
-				* Create inventory entry
-				*/
-				DB_ExecuteQuery(database, "INSERT INTO inventories (name) VALUES ('%q')", player[playerid][chosenChar]);
-
-				/*
-				* Create lockers entry
-				*/
-				DB_ExecuteQuery(database, "INSERT INTO lockers (name) VALUES ('%q')", player[playerid][chosenChar]);
-			}
-
 			/*
 			* To be removed when tutorial implemented.
 			*/
-			PopulateCharacterMenu(playerid);
+			SetTimerEx("DelayedShowCharacterMenu", 500, false, "d", playerid);
             return 1;
         }
 		else

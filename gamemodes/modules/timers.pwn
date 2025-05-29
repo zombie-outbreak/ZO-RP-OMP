@@ -33,6 +33,8 @@ forward stunCooldownTimer(playerid);
 forward biteCooldownTimer(playerid);
 forward grabCooldownTimer(playerid);
 forward superJumpCooldownTimer(playerid);
+forward DelayedShowCharacterMenu(playerid);
+
 /*
 * Timer Functions
 */
@@ -496,5 +498,11 @@ public RespawnAfterDeath(playerid)
     /*Reduce the xp and inv items by 20% with the exception for weapons and key items. Send on-death message*/
 	//ReducePlayerInventoryAndExp(playerid);
     UpdateHudElementForPlayer(playerid, HUD_INFO);
+    return 1;
+}
+
+public DelayedShowCharacterMenu(playerid)
+{
+    PopulateCharacterMenu(playerid);
     return 1;
 }

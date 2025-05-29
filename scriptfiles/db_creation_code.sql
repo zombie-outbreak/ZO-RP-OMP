@@ -37,10 +37,8 @@ CREATE TABLE "characters" (
 	"interior"	INTEGER NOT NULL DEFAULT '0',
 	"virtualworld"	INTEGER NOT NULL DEFAULT '0',
 	"level"	INTEGER NOT NULL DEFAULT '1',
+	"exp"	INTEGER NOT NULL DEFAULT 0,
 	"perkpoints"	INTEGER NOT NULL DEFAULT '0',
-	"strength"	INTEGER NOT NULL DEFAULT '0',
-	"constitution"	INTEGER NOT NULL DEFAULT '0',
-	"endurance"	INTEGER NOT NULL DEFAULT '0',
 	"faction"	INTEGER NOT NULL DEFAULT '0',
 	"factionrank"	INTEGER NOT NULL DEFAULT '0',
 	"fuelcanamount"	INTEGER NOT NULL DEFAULT 0,
@@ -57,6 +55,17 @@ CREATE TABLE "characters" (
 	"wepslot10"	INTEGER NOT NULL DEFAULT 0,
 	"wepslot11"	INTEGER NOT NULL DEFAULT 0,
 	"wepslot12"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedjump"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedunarmed"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedbite"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedcombust"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedstun"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedgrab"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedbstr"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedsjump"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedcorn"	INTEGER NOT NULL DEFAULT 0,
+	"unlockedhpinc"	INTEGER NOT NULL DEFAULT 0,
+    "unlockedhunt"	INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
@@ -74,7 +83,7 @@ CREATE TABLE "factions" (
 	"rank7"	TEXT NOT NULL DEFAULT 'Rank8',
 	"rank8"	TEXT NOT NULL DEFAULT 'Co-Leader',
 	"rank9"	TEXT NOT NULL DEFAULT 'Leader',
-	"money"	INTEGER NOT NULL DEFAULT 1000,
+	"money"	INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
