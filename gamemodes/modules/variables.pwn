@@ -63,6 +63,9 @@ enum E_PLAYERS
     Float:unlockedBorrowedStrengthSkillDamage,
     bool:unlockedSuperJumpSkill,
     bool:unlockedCorneredSkill,
+    bool:unlockedHuntSkill,
+    bool:huntActive,
+    huntTarget,
 	
     /*
 	* Not Saved
@@ -104,6 +107,9 @@ enum E_PLAYERS
     grabAntiSpam,
     borrowedStrengthAntiSpam,
     borrowedSuperJumpAntiSpam,
+    generalAntiSpam,
+    stunnedRecently,
+    grabbedRecently,
     characterCount,
 
     /*

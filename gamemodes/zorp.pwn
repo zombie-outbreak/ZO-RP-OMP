@@ -94,7 +94,7 @@ public OnGameModeInit()
     * Gamemode Settings
     */
 	ManualVehicleEngineAndLights();
-    ShowPlayerMarkers(PLAYER_MARKERS_MODE_OFF);
+    ShowPlayerMarkers(PLAYER_MARKERS_MODE_GLOBAL);
 	SetVehiclePassengerDamage(true);
     SetVehicleUnoccupiedDamage(true);
     SetDisableSyncBugs(true);
@@ -296,11 +296,43 @@ public OnPlayerDeath(playerid, killerid, reason)
 		return 1;
 	}
 	//combustperkcheck
-    if (player[playerid][iszombie] && player[playerid][unlockedCombustSkill])
-    {
-        Combust(playerid);
+
+	if (player[playerid][iszombie]){
+		if (player[playerid][unlockedCombustSkill])
+		{
+			Combust(playerid);
+    	}
+		if (player[playerid][huntActive])
+		{
+			SetPlayerMarkerForPlayer(playerid, player[playerid][huntTarget], (GetPlayerColor(player[playerid][huntTarget]) & 0xFFFFFF00));
+			player[playerid][huntActive]=false;
+			SendClientMessage(playerid, COLOR_RP_PURPLE, "You lost the scent.");
+		}
+		
+	}
+	if (player[killerid][huntTarget] == playerid && player[killerid][huntActive]){
+			SendClientMessage(killerid, COLOR_RP_PURPLE, "A successful hunt. You fill your voids with the life of your prey.");
+			SetPlayerHealth(killerid, player[killerid][maxHealth]);
+			UpdateHudElementForPlayer(killerid, HUD_HEALTH);
+			SetPlayerMarkerForPlayer(killerid, player[killerid][huntTarget], (GetPlayerColor(player[killerid][huntTarget]) & 0xFFFFFF00));
+			player[playerid][huntActive]=false;
+		}
+	new players[MAX_PLAYERS], length;
+    length = GetPlayers(players, sizeof(players));
+
+    for (new i = 0; i < length; i++) {
+        new pid = players[i];
+        if (pid == killerid) continue;
+
+        if (player[pid][huntTarget] == playerid && player[pid][huntActive]) {
+            player[pid][huntActive] = false;
+            SendClientMessage(pid, COLOR_RP_PURPLE, "Your prey has died. The trail fades cold.");
+            SetPlayerMarkerForPlayer(pid, player[pid][huntTarget], (GetPlayerColor(pid) & 0xFFFFFF00)); // optional
+        }
     }
     
+	
+	
 	/*
 	* Kill timers and reset spawned variable as well as hide the HUD
 	*/
@@ -341,6 +373,19 @@ public OnPlayerDamage(&playerid, &Float:amount, &issuerid, &WEAPON:weapon, &body
 	if(weapon == 0 && player[issuerid][unlockedCorneredSkill] && player[issuerid][health] < player[issuerid][maxHealth] * 0.3){
 		SendProxMessage(issuerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "A near-death desperation feeds savage blows.");
 		amount+= 20;
+	}
+	//huntchecks
+	if(player[issuerid][huntActive] && player[issuerid][huntTarget] == playerid){
+		amount+=5;
+	}
+	if(player[issuerid][huntActive] && player[issuerid][huntTarget] != playerid){
+		amount-=5;
+	}
+	if(player[playerid][huntActive] && player[issuerid][huntTarget] == issuerid){
+		amount-=5;
+	}
+	if(player[playerid][huntActive] && player[issuerid][huntTarget] != issuerid){
+		amount+=5;
 	}
     //perks test
     return 1;

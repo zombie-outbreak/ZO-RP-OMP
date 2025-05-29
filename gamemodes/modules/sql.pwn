@@ -184,6 +184,7 @@ OnPlayerCharacterDataLoaded(playerid)
 		player[playerid][unlockedSuperJumpSkill] = bool:DB_GetFieldIntByName(Result, "unlockedsjump");
 		player[playerid][unlockedCorneredSkill] = bool:DB_GetFieldIntByName(Result, "unlockedcorn");
 		player[playerid][unlockedHpIncreaseSkill] = DB_GetFieldIntByName(Result, "unlockedhpinc");
+		player[playerid][unlockedHuntSkill] = bool:DB_GetFieldIntByName(Result, "unlockedhunt");
 		
         /*
 		* Set the character's spawn up

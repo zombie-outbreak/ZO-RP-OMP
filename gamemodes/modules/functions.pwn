@@ -631,6 +631,24 @@ stock TryUnlockCombustSkill(playerid)
     SendClientMessage(playerid, COLOR_GREEN, "On Death: Deal damage to players around you");
     return 1;
 }
+
+TryUnlockHuntSkill(playerid)
+{
+    if(player[playerid][unlockedHuntSkill])
+	{
+		SendClientMessage(playerid, COLOR_YELLOW, "You have already unlocked the hunt skill.");
+        return 0;
+	}
+    player[playerid][unlockedHuntSkill] = true;
+	DB_ExecuteQuery(database,
+		"UPDATE characters SET unlockedhunt = '1' WHERE owner = '%d' AND name = '%q'",
+		player[playerid][ID], player[playerid][chosenChar]);
+
+	SendClientMessage(playerid, COLOR_RP_PURPLE, "A primal predatory instinct awakens within.");
+    SendClientMessage(playerid, COLOR_GREEN, "/hunt (id). Deal more and take less damage to specified player. Take more and deal less damage to everyone else.");
+    return 1;
+}
+
 TryUnlockStunSkill(playerid)
 {
     if(player[playerid][unlockedStunSkill])
@@ -713,6 +731,12 @@ stock Grab(playerid)
     {
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 30 seconds between uses of this command.");
     }
+    if ((GetTickCount() - player[playerid][generalAntiSpam]) < 2000){
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 2 seconds between active ability uses");
+    }
+    if ((GetTickCount() - player[playerid][grabbedRecently]) < 8000){
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "This player has already been grabbed in the past 8 seconds.");
+    }
 
     new players[MAX_PLAYERS], length;
     new Float:grabberX, Float:grabberY, Float:grabberZ;
@@ -769,14 +793,23 @@ stock Grab(playerid)
     // Anti-spam timer
     SetTimerEx("grabCooldownTimer", 30000, false, "d", playerid);
     player[playerid][grabAntiSpam] = GetTickCount();
+    player[playerid][generalAntiSpam] = GetTickCount();
+    player[playerid][grabbedRecently] = GetTickCount();
     return 1;
 }    
 
 stock Stun(playerid)
 {
+    if((GetTickCount() - player[playerid][stunnedRecently]) < 8000)
+    {
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "This player has already been stunned in the past 8 seconds.");
+    }
     if ((GetTickCount() - player[playerid][stunAntiSpam]) < 30000)
     {
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 30 seconds between uses of this command.");
+    }
+    if ((GetTickCount() - player[playerid][generalAntiSpam]) < 2000){
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 2 seconds between active ability uses");
     }
 
     new players[MAX_PLAYERS], length;
@@ -827,13 +860,15 @@ stock Stun(playerid)
     player[target][health] -= 10;
     SetPlayerHealth(target, player[target][health]);
     UpdateHudElementForPlayer(target, HUD_HEALTH);
-    SetTimerEx("SpawnTimer", 2000, false, "d", target);
+    SetTimerEx("SpawnTimer", 1000, false, "d", target);
     TogglePlayerControllable(target, false);
     SendProxMessage(playerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "The infected crashes into their victim with overwhelming force, leaving them dazed.");
     SendPlayerServerMessage(target, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "You have been stunned!");
     SetTimerEx("stunCooldownTimer", 30000, false, "d", playerid);
     // Update anti-spam timer
     player[playerid][stunAntiSpam] = GetTickCount();
+    player[playerid][generalAntiSpam] = GetTickCount();
+    player[playerid][stunnedRecently] = GetTickCount();
     return 1;
 }
 
@@ -878,7 +913,9 @@ Bite(playerid)
     {
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 15 seconds between uses of this command.");
     }
-
+    if ((GetTickCount() - player[playerid][generalAntiSpam]) < 2000){
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 2 seconds between active ability uses");
+    }
     new players[MAX_PLAYERS], length;
     new Float:zombieX, Float:zombieY, Float:zombieZ;
     GetPlayerPos(playerid, zombieX, zombieY, zombieZ);
@@ -926,6 +963,9 @@ Bite(playerid)
 
     // Bite logic
     player[target][disease] -= (10 * player[playerid][unlockedBiteSkill]);
+    if(player[target][disease]<0){
+        player[target][disease]=0;
+    }
     player[target][health] -= 10;
 
     SetPlayerHealth(target, player[target][health]);
@@ -939,6 +979,8 @@ Bite(playerid)
     // Update anti-spam timer
     SetTimerEx("biteCooldownTimer", 15000, false, "d", playerid);
     player[playerid][biteAntiSpam] = GetTickCount();
+    player[playerid][generalAntiSpam] = GetTickCount();
+    
     return 1;
 }
 
@@ -949,6 +991,7 @@ SuperJump(playerid)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED,
         "Please wait 5 seconds between uses of this command.");
     }
+    
     new Float:damage = 50;
     player[playerid][health] -= damage;
     SetPlayerHealth(playerid, player[playerid][health]);
