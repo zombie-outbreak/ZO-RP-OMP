@@ -732,7 +732,7 @@
     {
         // Show zombie skill menu
         static const skillList[] = 
-            "HP Increase\nJump\nUnarmed Damage\nBite\nCombust\nStun\nGrab\nBorrowed Strength\nSuper Jump\nCornered";
+            "HP Increase\nJump\nUnarmed Damage\nBite\nCombust\nStun\nGrab\nBorrowed Strength\nSuper Jump\nCornered\nHunt";
 
         Dialog_ShowCallback(playerid, using public PerkMenu<iiiis>, DIALOG_STYLE_LIST, "Zombie Perks", skillList, "Select", "Close");
     }
@@ -786,5 +786,37 @@
     SendClientMessage(playerid, COLOR_RED, "You can't do that!");
     return 0;
 }
+@cmd() hunt(playerid, params[], help)
+{
+    if (player[playerid][iszombie] && player[playerid][unlockedHuntSkill])
+    {
 
+        if (!strlen(params)) {
+            return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED,
+                "Usage: /hunt [id]");
+        }
+        new target = strval(params);
+        new Float:targetX, Float:targetY, Float:targetZ;
+        GetPlayerPos(target, targetX, targetY, targetZ);
+
+        if (IsPlayerInRangeOfPoint(playerid, 60.0, targetX, targetY, targetZ))
+        {
+            SendClientMessage(playerid, COLOR_RP_PURPLE, "Your senses flare up. Every distraction fades away into a red haze, only your prey remains.");
+            SendClientMessage(target, COLOR_RP_PURPLE, "Something makes the hairs stand up on your back neck");
+            SetPlayerMarkerForPlayer(playerid, target, 0xFF0000FF);
+            player[playerid][huntActive]=true;
+            player[playerid][huntTarget]=target;
+        }
+        else
+        {
+            return SendClientMessage(playerid, COLOR_RP_PURPLE, "The target is too far.");
+        }
+        
+
+        return 1;
+    }
+
+    SendClientMessage(playerid, COLOR_RED, "You can't do that!");
+    return 0;
+}
 //skilltests

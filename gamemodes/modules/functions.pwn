@@ -631,6 +631,24 @@ stock TryUnlockCombustSkill(playerid)
     SendClientMessage(playerid, COLOR_GREEN, "On Death: Deal damage to players around you");
     return 1;
 }
+
+TryUnlockHuntSkill(playerid)
+{
+    if(player[playerid][unlockedHuntSkill])
+	{
+		SendClientMessage(playerid, COLOR_YELLOW, "You have already unlocked the hunt skill.");
+        return 0;
+	}
+    player[playerid][unlockedHuntSkill] = true;
+	DB_ExecuteQuery(database,
+		"UPDATE characters SET unlockedhunt = '1' WHERE owner = '%d' AND name = '%q'",
+		player[playerid][ID], player[playerid][chosenChar]);
+
+	SendClientMessage(playerid, COLOR_RP_PURPLE, "A primal predatory instinct awakens within.");
+    SendClientMessage(playerid, COLOR_GREEN, "/hunt (id). Deal more and take less damage to specified player. Take more and deal less damage to everyone else.");
+    return 1;
+}
+
 TryUnlockStunSkill(playerid)
 {
     if(player[playerid][unlockedStunSkill])

@@ -70,7 +70,8 @@ public PerkMenu(playerid, dialogid, response, listitem, string:inputtext[])
         "Grab",
         "Borrowed Strength",
         "Super Jump",
-        "Cornered"
+        "Cornered",
+		"Hunt"
     };
 
     if(listitem >= 0 && listitem < sizeof(skillNames))
@@ -128,6 +129,11 @@ public PerkMenu(playerid, dialogid, response, listitem, string:inputtext[])
 		else if(listitem == 9) //Cornered
 		{
 			TryUnlockCorneredSkill(playerid);
+			return 1;
+		}
+		else if(listitem == 10) //Hunt
+		{
+			TryUnlockHuntSkill(playerid);
 			return 1;
 		}
         else
