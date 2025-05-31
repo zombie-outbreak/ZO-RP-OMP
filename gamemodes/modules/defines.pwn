@@ -237,5 +237,6 @@
 #define INITIAL_MAX_HEALTH_ZED 200.0
 #define INITIAL_MAX_HEALTH_HUM 100.0
 #define VK_KEYB1 0x31
-#define JUMP_SKILL_GRAVITY 0.005 // Adjust value to fit game balance (default: 0.008, less = more jump)
+#define JUMP_SKILL_GRAVITY 0.005 // Adjust value to fit game balance
+#define DEFAULT_SERVER_GRAVITY 0.008
 //perktests

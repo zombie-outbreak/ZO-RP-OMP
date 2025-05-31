@@ -6,7 +6,7 @@
 
 @cmd() commands(playerid, params[], help)
 {
-    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/changepass /menu /inv /search /purchaseproperty /myproperties /faction /finvite /facceptinvite /fdenyinvite /perks");
+    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/changepass /menu /inv /search /faction /finvite /facceptinvite /fdenyinvite /perks");
     SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/s /me /do /b /g");
     return 1;
 }
@@ -188,9 +188,6 @@
 */
 @cmd() engine(playerid, params[], help)
 {
-    new tmpVehicleId = GetPlayerVehicleID(playerid);
-    new chanceToStart = RandomRange(1, 100);
-    
     if(player[playerid][iszombie] == 1)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
 
@@ -199,125 +196,11 @@
 
     if((GetTickCount() - player[playerid][engineAntiSpam]) < 5000)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "Please wait 5 seconds between uses of this command.");
-
-    if(serverVehicle[tmpVehicleId][engine])
-    {
-        SendClientMessage(playerid, COLOR_RED, "Vehicle stopped.");
-        SetVehicleEngineOff(tmpVehicleId);
-        HideHudElementForPlayer(playerid, HUD_VEHICLE);
-        KillTimer(player[playerid][fuelTimer]);
-        serverVehicle[tmpVehicleId][engine] = false;
-
-        /*
-        * Stop the command being used too often
-        */
-        player[playerid][engineAntiSpam] = GetTickCount();
-        return 1;
-    }
-
-    switch(floatround(serverVehicle[tmpVehicleId][vehHealth]))
-    {
-        case 250 .. 350:
-        {
-            switch(chanceToStart)
-            {
-                case 1 .. 85: // 85% chance to fail
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Failed to start the vehicle.");
-                }
-                case 86 .. 100:
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Vehicle started.");
-                    SetVehicleEngineOn(tmpVehicleId);
-                    ShowHudForPlayer(playerid, HUD_VEHICLE);
-                    UpdateHudElementForPlayer(playerid, HUD_VEHICLE);
-                    player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, tmpVehicleId);
-                    serverVehicle[tmpVehicleId][engine] = true;
-                }
-            }
-        }
-        case 351 .. 500:
-        {
-            switch(chanceToStart)
-            {
-                case 1 .. 65: // 65% chance to fail
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Failed to start the vehicle.");
-                }
-                case 66 .. 100:
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Vehicle started.");
-                    SetVehicleEngineOn(tmpVehicleId);
-                    ShowHudForPlayer(playerid, HUD_VEHICLE);
-                    UpdateHudElementForPlayer(playerid, HUD_VEHICLE);
-                    player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, tmpVehicleId);
-                    serverVehicle[tmpVehicleId][engine] = true;
-                }
-            }
-        }
-        case 501 .. 700:
-        {
-            switch(chanceToStart)
-            {
-                case 1 .. 45: // 45% chance to fail
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Failed to start the vehicle.");
-                }
-                case 46 .. 100:
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Vehicle started.");
-                    SetVehicleEngineOn(tmpVehicleId);
-                    ShowHudForPlayer(playerid, HUD_VEHICLE);
-                    UpdateHudElementForPlayer(playerid, HUD_VEHICLE);
-                    player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, tmpVehicleId);
-                    serverVehicle[tmpVehicleId][engine] = true;
-                }
-            }
-        }
-        case 701 .. 850:
-        {
-            switch(chanceToStart)
-            {
-                case 1 .. 25: // 25% chance to fail
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Failed to start the vehicle.");
-                }
-                case 26 .. 100:
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Vehicle started.");
-                    SetVehicleEngineOn(tmpVehicleId);
-                    ShowHudForPlayer(playerid, HUD_VEHICLE);
-                    UpdateHudElementForPlayer(playerid, HUD_VEHICLE);
-                    player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, tmpVehicleId);
-                    serverVehicle[tmpVehicleId][engine] = true;
-                }
-            }
-        }
-        case 851 .. 1000:
-        {
-            switch(chanceToStart)
-            {
-                case 1 .. 5: // 5% chance to fail
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Failed to start the vehicle.");
-                }
-                case 6 .. 100:
-                {
-                    SendClientMessage(playerid, COLOR_RED, "Vehicle started.");
-                    SetVehicleEngineOn(tmpVehicleId);
-                    ShowHudForPlayer(playerid, HUD_VEHICLE);
-                    UpdateHudElementForPlayer(playerid, HUD_VEHICLE);
-                    player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, tmpVehicleId);
-                    serverVehicle[tmpVehicleId][engine] = true;
-                }
-            }
-        }
-    }
-
+    
     /*
-    * Stop the command being used too often
+    * Attempt to start the vehicle
     */
-    player[playerid][engineAntiSpam] = GetTickCount();
+    StartVehicleAttempt(playerid);
     return 1;
 }
 

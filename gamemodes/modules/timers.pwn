@@ -7,7 +7,6 @@
 /*
 * Function Forwards
 */
-
 forward ServerTime();
 forward ServerWeather();
 forward SpawnTimer(playerid);
@@ -76,6 +75,20 @@ public ServerWeather()
 
 public SpawnTimer(playerid)
 {
+    // Check and correct gravity
+	SetPlayerSkin(playerid, player[playerid][skin]);
+    
+    // Set the player's gravity if they have the jump skill
+    if(player[playerid][unlockedJumpSkill])
+    {
+        SetPlayerGravity(playerid, JUMP_SKILL_GRAVITY);
+    }
+    else
+    {
+        SetPlayerGravity(playerid, DEFAULT_SERVER_GRAVITY);
+    }
+    
+    // Now allow the player to move
     TogglePlayerControllable(playerid, true);
 }
 
@@ -83,6 +96,7 @@ public stunCooldownTimer(playerid)
 {
     SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Stun cooldown expired.");
 }
+
 public biteCooldownTimer(playerid)
 {
     SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Bite cooldown expired.");

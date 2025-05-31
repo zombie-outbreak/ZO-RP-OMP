@@ -275,12 +275,6 @@ OnPlayerCharacterDataLoaded(playerid)
 			ShowHudForPlayer(playerid, HUD_HEALTH);
 			ShowHudForPlayer(playerid, HUD_CLOCK);
 			SetPlayerColor(playerid, COLOR_YELLOW);
-            
-            // set the player's gravity if they have the jump skill
-            if(player[playerid][unlockedJumpSkill])
-            {
-                SetPlayerGravity(playerid, JUMP_SKILL_GRAVITY);
-            }
 		}
 
 		/*

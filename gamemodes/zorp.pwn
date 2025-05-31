@@ -264,16 +264,6 @@ public OnPlayerDisconnect(playerid, reason)
 public OnPlayerSpawn(playerid)
 {
 	player[playerid][hasDied] = false;
-	//Check and correct gravity
-	SetPlayerSkin(playerid, player[playerid][skin]);
-	if (player[playerid][unlockedBiteSkill])
-	{
-		SetPlayerGravity(playerid, 0.005);
-	}
-	else
-	{
-		SetPlayerGravity(playerid, 0.008);
-	}
 	
     // Set basic weapon skills to 1
     SetPlayerSkillLevel(playerid, WEAPONSKILL_PISTOL, 1);
@@ -287,7 +277,6 @@ public OnPlayerSpawn(playerid)
     SetPlayerSkillLevel(playerid, WEAPONSKILL_AK47, 1);
     SetPlayerSkillLevel(playerid, WEAPONSKILL_M4, 1);
     SetPlayerSkillLevel(playerid, WEAPONSKILL_SNIPERRIFLE, 1);
-
     return 1;
 }
 public OnPlayerDeath(playerid, killerid, reason)
