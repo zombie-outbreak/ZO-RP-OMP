@@ -48,7 +48,6 @@
 * Server Directories
 */
 #define MAP_DIRECTORY "scriptfiles/maps/" // MTA .map files are loaded from this directory
-#define INVENTORY_FILEPATH "character_inventory/%s.ini"
 
 /*
 * Colours (0xRRGGBBAA)
