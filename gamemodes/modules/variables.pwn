@@ -164,8 +164,8 @@ new expForNextLevel[MAX_LEVELS] = // EXP to next level = n^3
     19683,
     21952,
     24389,
-    27000,
-    29791,
+    27000
+    /*29791,
     32768,
     35937,
     39304,
@@ -233,7 +233,7 @@ new expForNextLevel[MAX_LEVELS] = // EXP to next level = n^3
     884736,
     912673,
     941192,
-    970299
+    970299*/
 };
 
 /*

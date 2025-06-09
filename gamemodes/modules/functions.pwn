@@ -1309,7 +1309,7 @@ OnPlayerSearchNode(playerid)
             /*
             * Give the player some EXP
             */
-            if(amountFound > 0)
+            if(amountFound > 0 && player[playerid][level] != MAX_LEVELS)
             {
                 new expEarned = random(3) + 1; // 1 - 3
                 player[playerid][exp] = player[playerid][exp] + expEarned;

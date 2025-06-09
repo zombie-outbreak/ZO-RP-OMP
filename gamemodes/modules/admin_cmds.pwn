@@ -28,14 +28,14 @@
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/a /asay /slap /akill /kick /mark /gotomark /goto /gethere");
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/aban");
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/ipban");
-            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/rconbanip /unbanip /dsetpw");
+            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/rconbanip /unbanip /dsetpw /giveplayeritem /setplayeritem");
         }
         case 5: 
         {
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/a /asay /slap /akill /kick /mark /gotomark /goto /gethere");
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/aban");
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/ipban");
-            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/rconbanip /unbanip /dsetpw");
+            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/rconbanip /unbanip /dsetpw /giveplayeritem /setplayeritem");
             SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "/fly /createinterior /icis /setintvirworld /showinteriors /cancelinterior /scavcreate /createloottable");
         }
     }
@@ -300,6 +300,44 @@
 
     bcrypt_hash(playerid, "OnUserPasswordChange", pw, BCRYPT_COST);
     SendClientMessage(playerid, COLOR_ADMINMSG, "You've set %s's password.", params);
+    return 1;
+}
+
+@cmd() giveplayeritem(playerid, params[], help)
+{
+    new id, tmpItemId, amount;
+    
+    if(player[playerid][admin] < 4)
+		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
+
+	if(sscanf(params,"ddd", id, tmpItemId, amount))
+		return SendClientMessage(playerid, COLOR_YELLOW, "USAGE: /giveplayeritem [playerid] [item id] [amount].");
+    
+    if(tmpItemId < 1 || tmpItemId > serverItemCount)
+        return SendClientMessage(playerid, COLOR_YELLOW, "Invalid item id.");
+    
+    playerInventory[playerid][tmpItemId] = playerInventory[playerid][tmpItemId] + amount;
+    UpdateCharacterInventoryEntry(id, playerInventory[id][tmpItemId]);
+    SendClientMessage(playerid, COLOR_ADMINMSG, "You've given %s %d %s.", player[id][chosenChar], amount, inventoryItems[tmpItemId][itemNamePlural]);
+    return 1;
+}
+
+@cmd() setplayeritem(playerid, params[], help)
+{
+    new id, tmpItemId, amount;
+    
+    if(player[playerid][admin] < 4)
+		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
+
+	if(sscanf(params,"ddd", id, tmpItemId, amount))
+		return SendClientMessage(playerid, COLOR_YELLOW, "USAGE: /setplayeritem [playerid] [item id] [amount].");
+    
+    if(tmpItemId < 1 || tmpItemId > serverItemCount)
+        return SendClientMessage(playerid, COLOR_YELLOW, "Invalid item id.");
+    
+    playerInventory[playerid][tmpItemId] = amount;
+    UpdateCharacterInventoryEntry(id, playerInventory[id][tmpItemId]);
+    SendClientMessage(playerid, COLOR_ADMINMSG, "You've set %s's %s to %d.", player[id][chosenChar], inventoryItems[tmpItemId][itemNamePlural], amount);
     return 1;
 }
 
@@ -633,21 +671,6 @@
 	return 1;
 }
 
-@cmd() dam(playerid, params[], help)
-{
-    if(player[playerid][admin] < 5)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-        
-	SetPlayerHealth(playerid, player[playerid][maxHealth]);
-	player[playerid][hunger] = 0;
-	player[playerid][thirst] = 0;
-	
-	UpdateHudElementForPlayer(playerid, HUD_HUNGER);
-	UpdateHudElementForPlayer(playerid, HUD_THIRST);
-	UpdateHudElementForPlayer(playerid, HUD_HEALTH);
-	return 1;
-}
-
 @cmd() tut(playerid, params[], help)
 {
     if(player[playerid][admin] < 5)
@@ -658,15 +681,5 @@
     as well as showing how it displays to the user. I can check if I need to create something new for the tutorial and information boxes.");
     ShowDialogueTextDraw(playerid, string);
     SetTimerEx("HideInfoBox", 10000, false, "d", playerid);
-    return 1;
-}
-
-@cmd() dis(playerid, params[], help)
-{
-    if(player[playerid][admin] < 5)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-        
-    player[playerid][disease] = 0;
-    UpdateHudElementForPlayer(playerid, HUD_DISEASE);
     return 1;
 }

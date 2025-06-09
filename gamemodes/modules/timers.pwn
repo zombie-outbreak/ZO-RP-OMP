@@ -240,14 +240,18 @@ public PlayerChecks()
 {
     foreach(new i : Player)
     {
+        if(player[i][spawned] == 0)
+            return 1;
+            
+        /*
+        * Zombie map markers
+        */
         foreach(new p : Player)
         {
             if(player[p][huntTarget]!=i || player[p][huntActive]==false){
                 SetPlayerMarkerForPlayer(p, i, (GetPlayerColor(i) & 0xFFFFFF00));
             }
         }
-        if(player[i][spawned] == 0)
-            return 1;
 
         /*
         * Sync the player HUD

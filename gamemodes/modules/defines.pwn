@@ -126,7 +126,7 @@
 /*
 * Levels and EXP
 */
-#define MAX_LEVELS 99
+#define MAX_LEVELS 30
 
 /*
 * Inventory, Looting, Vendors
