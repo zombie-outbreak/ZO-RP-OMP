@@ -39,8 +39,8 @@ CreateDialogueTextdraw(playerid)
 	PlayerTextDrawSetShadow(playerid, dialogueText[playerid], 0);
 	PlayerTextDrawAlignment(playerid, dialogueText[playerid], 1);
 	PlayerTextDrawColour(playerid, dialogueText[playerid], -1);
-	PlayerTextDrawBackgroundColor(playerid, dialogueText[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, dialogueText[playerid], 255);
+	PlayerTextDrawBackgroundColour(playerid, dialogueText[playerid], 255);
+	PlayerTextDrawBoxColour(playerid, dialogueText[playerid], 255);
 	PlayerTextDrawUseBox(playerid, dialogueText[playerid], true);
 	PlayerTextDrawSetProportional(playerid, dialogueText[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, dialogueText[playerid], false);
@@ -80,7 +80,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, infoBar[playerid], 2);
 	PlayerTextDrawColour(playerid, infoBar[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, infoBar[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, infoBar[playerid], 101);
+	PlayerTextDrawBoxColour(playerid, infoBar[playerid], 101);
 	PlayerTextDrawUseBox(playerid, infoBar[playerid], true);
 	PlayerTextDrawSetProportional(playerid, infoBar[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, infoBar[playerid], false);
@@ -94,7 +94,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, hungerIcon[playerid], 1);
 	PlayerTextDrawColour(playerid, hungerIcon[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, hungerIcon[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, hungerIcon[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, hungerIcon[playerid], 50);
 	PlayerTextDrawUseBox(playerid, hungerIcon[playerid], true);
 	PlayerTextDrawSetProportional(playerid, hungerIcon[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, hungerIcon[playerid], false);
@@ -108,7 +108,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, hungerText[playerid], 1);
 	PlayerTextDrawColour(playerid, hungerText[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, hungerText[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, hungerText[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, hungerText[playerid], 50);
 	PlayerTextDrawUseBox(playerid, hungerText[playerid], false);
 	PlayerTextDrawSetProportional(playerid, hungerText[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, hungerText[playerid], false);
@@ -122,7 +122,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, thirstIcon[playerid], 1);
 	PlayerTextDrawColour(playerid, thirstIcon[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, thirstIcon[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, thirstIcon[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, thirstIcon[playerid], 50);
 	PlayerTextDrawUseBox(playerid, thirstIcon[playerid], true);
 	PlayerTextDrawSetProportional(playerid, thirstIcon[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, thirstIcon[playerid], false);
@@ -136,7 +136,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, thirstText[playerid], 1);
 	PlayerTextDrawColour(playerid, thirstText[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, thirstText[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, thirstText[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, thirstText[playerid], 50);
 	PlayerTextDrawUseBox(playerid, thirstText[playerid], false);
 	PlayerTextDrawSetProportional(playerid, thirstText[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, thirstText[playerid], false);
@@ -150,7 +150,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, diseaseIcon[playerid], 1);
 	PlayerTextDrawColour(playerid, diseaseIcon[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, diseaseIcon[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, diseaseIcon[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, diseaseIcon[playerid], 50);
 	PlayerTextDrawUseBox(playerid, diseaseIcon[playerid], true);
 	PlayerTextDrawSetProportional(playerid, diseaseIcon[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, diseaseIcon[playerid], false);
@@ -164,7 +164,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, diseaseText[playerid], 1);
 	PlayerTextDrawColour(playerid, diseaseText[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, diseaseText[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, diseaseText[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, diseaseText[playerid], 50);
 	PlayerTextDrawUseBox(playerid, diseaseText[playerid], false);
 	PlayerTextDrawSetProportional(playerid, diseaseText[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, diseaseText[playerid], false);
@@ -178,7 +178,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, fuelIcon[playerid], 1);
 	PlayerTextDrawColour(playerid, fuelIcon[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, fuelIcon[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, fuelIcon[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, fuelIcon[playerid], 50);
 	PlayerTextDrawUseBox(playerid, fuelIcon[playerid], true);
 	PlayerTextDrawSetProportional(playerid, fuelIcon[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, fuelIcon[playerid], false);
@@ -192,7 +192,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, fuelText[playerid], 1);
 	PlayerTextDrawColour(playerid, fuelText[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, fuelText[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, fuelText[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, fuelText[playerid], 50);
 	PlayerTextDrawUseBox(playerid, fuelText[playerid], false);
 	PlayerTextDrawSetProportional(playerid, fuelText[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, fuelText[playerid], false);
@@ -206,7 +206,7 @@ CreatePlayerHud(playerid)
 	PlayerTextDrawAlignment(playerid, healthText[playerid], 1);
 	PlayerTextDrawColour(playerid, healthText[playerid], -1);
 	PlayerTextDrawBackgroundColour(playerid, healthText[playerid], 255);
-	PlayerTextDrawBoxColor(playerid, healthText[playerid], 50);
+	PlayerTextDrawBoxColour(playerid, healthText[playerid], 50);
 	PlayerTextDrawUseBox(playerid, healthText[playerid], false);
 	PlayerTextDrawSetProportional(playerid, healthText[playerid], true);
 	PlayerTextDrawSetSelectable(playerid, healthText[playerid], false);
