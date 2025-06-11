@@ -51,6 +51,7 @@ ParseMapFiles()
     new dType;
     new iObjects = 0;
     new iVehicles = 0;
+    new tmpVehiclePlate[32];
     //new iNpcs = 0;
     new cMapBuffer[1024];
     new cVehicleColor[48];
@@ -97,6 +98,7 @@ ParseMapFiles()
                     new Float:fVehiclePosY = floatstr(ParseMapString(cMapBuffer, "posY=\""));
                     new Float:fVehiclePosZ = floatstr(ParseMapString(cMapBuffer, "posZ=\""));
                     new Float:fVehicleRotation = floatstr(ParseMapString(cMapBuffer, "rotZ=\""));
+                    format(tmpVehiclePlate, sizeof(tmpVehiclePlate), "%s", ParseMapString(cMapBuffer, "plate=\""));
                     format(cVehicleColor, sizeof(cVehicleColor), "%s", ParseMapString(cMapBuffer, "color=\""));
                     new cVehicleRGBColor[2][3];
                     for(new c1 = 0; 2 > c1; c1++)
@@ -111,7 +113,8 @@ ParseMapFiles()
                         }
                     }
                     new iVehicleID = CreateVehicle(iVehicleModel, fVehiclePosX, fVehiclePosY, fVehiclePosZ, fVehicleRotation, FindClosetVehicleColor(cVehicleRGBColor[0][0], cVehicleRGBColor[0][1], cVehicleRGBColor[0][2]), FindClosetVehicleColor(cVehicleRGBColor[1][0], cVehicleRGBColor[1][1], cVehicleRGBColor[1][2]), VEHICLE_RESPAWN_TIME);
-                
+                    SetVehicleNumberPlate(iVehicleID, tmpVehiclePlate);
+                    
                     /*
                     * Set some vehicle stats etc. when spawned
                     */
