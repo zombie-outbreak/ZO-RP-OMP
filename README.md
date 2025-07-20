@@ -30,6 +30,7 @@ The following libraries are used. This repository includes the windows DLLs for 
 - [PawnPlus v1.5.1](https://github.com/IS4Code/PawnPlus/releases/tag/v1.5.1)
 - [sscanf v2.13.8](https://github.com/Y-Less/sscanf/releases/tag/v2.13.8)
   - I advise using the component version, putting the .dll/.so in the OMP components folder.
+- [SA-MP Textdraw Streamer v2.0.3-hotfix](https://github.com/nexquery/samp-textdraw-streamer/releases/tag/v2.0.3-hotfix)
 
 I use [VSCodium](https://vscodium.com/) for my IDE of choice when coding PAWN, with the [PAWN Tools](https://open-vsx.org/extension/southclaws/vscode-pawn) extension. This repository includes the .vscode folder, which has the tasks.json file for setting up the ability to compile the game mode from within VSCodium using CTRL + LEFT SHIFT + B. You can use VsCode as well if you wish as it's basically the same IDE but with added Microsoft telemetry.
 

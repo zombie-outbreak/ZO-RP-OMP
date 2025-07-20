@@ -49,13 +49,44 @@ public ServerTime()
 
     foreach(new i : Player)
 	{
-        if(player[i][spawned] == 0)
-            return 1;
+        if(IsPlayerConnected(i))
+        {
+            if(player[i][spawned] == 0)
+                return 1;
 
-	    if(IsPlayerConnected(i) && GetPlayerState(i) != PLAYER_STATE_NONE)
-		{
-  			SetPlayerTime(i, hour, minute);
-	 	}
+            if(GetPlayerState(i) != PLAYER_STATE_NONE)
+            {
+                SetPlayerTime(i, hour, minute);
+            }
+            
+            // daily restart warnings at 30, 15, 10, 5, and 1 minutes
+            if(hour == 5 && minute == 30)
+            {
+                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 30 minutes.");
+            }
+            else if(hour == 5 && minute == 45)
+            {
+                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 15 minutes.");
+            }
+            else if(hour == 5 && minute == 50)
+            {
+                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 10 minutes.");
+            }
+            else if(hour == 5 && minute == 55)
+            {
+                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 5 minutes.");
+            }
+            else if(hour == 5 && minute == 59)
+            {
+                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 1 minute.");
+            }
+            
+            // final message
+            if(hour == 5 && minute == 59 && second == 50)
+            {
+                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server restarting imminently.");
+            }
+        }
 	}
     return 1;
 }

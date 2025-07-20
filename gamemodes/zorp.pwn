@@ -188,7 +188,15 @@ public OnPlayerConnect(playerid)
 	// no NPCs here... for now
     if(IsPlayerNPC(playerid))
 		return Kick(playerid);
-
+        
+    // check the user's client is an official SA-MP/OpenMP client
+    // kick the player if not
+    if(!IsPlayerUsingOfficialClient(playerid) || !IsPlayerUsingOmp(playerid))
+    {
+        KickWithMessage(playerid, COLOR_ADMINMSG, "Please connect using an official copy of the SA-MP or OpenMP client.");
+        return 0;
+    }
+    
 	/*
 	* Reset player variables
 	*/
@@ -279,6 +287,7 @@ public OnPlayerSpawn(playerid)
     SetPlayerSkillLevel(playerid, WEAPONSKILL_SNIPERRIFLE, 1);
     return 1;
 }
+
 public OnPlayerDeath(playerid, killerid, reason)
 {
 	if(player[playerid][hasDied]){
@@ -299,13 +308,15 @@ public OnPlayerDeath(playerid, killerid, reason)
 		}
 		
 	}
+    
 	if (player[killerid][huntTarget] == playerid && player[killerid][huntActive]){
-			SendClientMessage(killerid, COLOR_RP_PURPLE, "A successful hunt. You fill your voids with the life of your prey.");
-			SetPlayerHealth(killerid, player[killerid][maxHealth]);
-			UpdateHudElementForPlayer(killerid, HUD_HEALTH);
-			SetPlayerMarkerForPlayer(killerid, player[killerid][huntTarget], (GetPlayerColor(player[killerid][huntTarget]) & 0xFFFFFF00));
-			player[playerid][huntActive]=false;
-		}
+        SendClientMessage(killerid, COLOR_RP_PURPLE, "A successful hunt. You fill your voids with the life of your prey.");
+        SetPlayerHealth(killerid, player[killerid][maxHealth]);
+        UpdateHudElementForPlayer(killerid, HUD_HEALTH);
+        SetPlayerMarkerForPlayer(killerid, player[killerid][huntTarget], (GetPlayerColor(player[killerid][huntTarget]) & 0xFFFFFF00));
+        player[playerid][huntActive]=false;
+    }
+    
 	new players[MAX_PLAYERS], length;
     length = GetPlayers(players, sizeof(players));
 
@@ -320,8 +331,6 @@ public OnPlayerDeath(playerid, killerid, reason)
         }
     }
     
-	
-	
 	/*
 	* Kill timers and reset spawned variable as well as hide the HUD
 	*/
