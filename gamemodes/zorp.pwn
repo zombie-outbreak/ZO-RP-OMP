@@ -99,6 +99,7 @@ public OnGameModeInit()
     SetVehicleUnoccupiedDamage(true);
     SetDisableSyncBugs(true);
     SetDamageFeed(true);
+    SetCustomVendingMachines(true);
 
 	/*
     * Get certain stats from the database
@@ -644,6 +645,42 @@ public OnVehicleSpawn(vehicleid)
 {
 	SetupVehicleForSpawn(vehicleid);
 	return 1;
+}
+
+public OnPlayerUseVendingMachine(playerid, &Float:health_given)
+{
+    health_given = 0; // don't give health
+    
+    if((GetTickCount() - player[playerid][vendingAntiSpam]) < 30000) // guarentee no item found
+        return SendClientMessage(playerid, COLOR_RP_PURPLE, "You shake the vending machine but can't get anything of use from it. ((Please wait 30 seconds between use.))");
+    
+    /*
+    * Chance of getting an item from the vending machine
+    */
+    new candyBarId = ReturnItemIdByName("Candy Bar");
+    new bottledWaterId = ReturnItemIdByName("Bottle of Water"); 
+    new chance = random(CHANCE);
+    
+    switch(chance)
+    {
+        case 0 .. 24: // candy bar
+        {
+           playerInventory[playerid][candyBarId] = playerInventory[playerid][candyBarId] + 1;
+           SendClientMessage(playerid, COLOR_RP_PURPLE, "You shake the vending machine and a candy bar drops out.");
+        }
+        case 25 .. 49: // bottled water
+        {
+            playerInventory[playerid][bottledWaterId] = playerInventory[playerid][bottledWaterId] + 1;
+            SendClientMessage(playerid, COLOR_RP_PURPLE, "You shake the vending machine and a bottle of water drops out.");
+        }
+        default: SendClientMessage(playerid, COLOR_RP_PURPLE, "You shake the vending machine but can't get anything of use from it.");
+    }
+    
+    /*
+    * Stop being able to spam vending machines
+    */
+    player[playerid][vendingAntiSpam] = GetTickCount();
+    return 1;
 }
 
 public OnPlayerFinishedDownloading(playerid, virtualworld)

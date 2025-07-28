@@ -6,7 +6,6 @@
 #define SAMP_CONST_CORRECT
 #define NO_TAGS
 #define CGEN_MEMORY 20000
-#define WC_CUSTOM_VENDING_MACHINES false // should disable vending machines
 
 /*
 * Max ColAndreas Objects

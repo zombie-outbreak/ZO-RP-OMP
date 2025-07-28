@@ -111,6 +111,7 @@ enum E_PLAYERS
     stunnedRecently,
     grabbedRecently,
     characterCount,
+    vendingAntiSpam,
 
     /*
     * Admin fly
