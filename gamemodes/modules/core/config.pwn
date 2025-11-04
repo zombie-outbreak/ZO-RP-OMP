@@ -30,8 +30,8 @@
 // SERVER INFORMATION
 // ============================================================================
 
-#define SERVER_NAME	"Zombie Outbreak Roleplay"
-#define SERVER_RCON	"94t7hfroewpmh0tri2fr4e" // the live server has one I set when I compile for release
+#define SERVER_NAME	"Zombie Outbreak Roleplay [Account required on zo-rp.com]"
+#define SERVER_RCON	"changethisifgoingpublic" // the live server has one I set when I compile for release
 #define SERVER_PASSWORD	"Nuts7bolts" // set to 0 for no server password, current live server is password protected
 #define SERVER_VERSION "Zombie Outbreak v0.1.0"
 #define SERVER_VERSION_SHORT "v0.1.0"
