@@ -427,35 +427,44 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 public OnPlayerDamage(&playerid, &Float:amount, &issuerid, &WEAPON:weapon, &bodypart)
 {
+    // Check if issuerid is valid (not INVALID_PLAYER_ID for falling damage, etc.)
+    new bool:validIssuer = (issuerid != INVALID_PLAYER_ID);
+    
     if(weapon == 0){
         amount = 10;
     }
-    //perks test 
-    if(weapon == 0 && player[issuerid][unlockedUnarmedSkill]){
-		//multiply 5 with unarmed skill level (max: 25dmg bonus)
-        amount = amount + player[issuerid][unlockedUnarmedSkill] * 3;
+    
+    // Only apply issuer-based modifiers if there's a valid issuer
+    if(validIssuer)
+    {
+        //perks test 
+        if(weapon == 0 && player[issuerid][unlockedUnarmedSkill]){
+            //multiply 5 with unarmed skill level (max: 25dmg bonus)
+            amount = amount + player[issuerid][unlockedUnarmedSkill] * 3;
+        }
+        if(weapon == 0 && player[issuerid][unlockedBorrowedStrengthSkillActive]){
+            amount = amount + player[issuerid][unlockedBorrowedStrengthSkillDamage];
+        }
+        if(weapon == 0 && player[issuerid][unlockedCorneredSkill] && player[issuerid][health] < player[issuerid][maxHealth] * 0.3){
+            SendProxMessage(issuerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "A near-death desperation feeds savage blows.");
+            amount += 20;
+        }
+        //huntchecks
+        if(player[issuerid][huntActive] && player[issuerid][huntTarget] == playerid){
+            amount += 5;
+        }
+        if(player[issuerid][huntActive] && player[issuerid][huntTarget] != playerid){
+            amount -= 5;
+        }
+        if(player[playerid][huntActive] && player[issuerid][huntTarget] == issuerid){
+            amount -= 5;
+        }
+        if(player[playerid][huntActive] && player[issuerid][huntTarget] != issuerid){
+            amount += 5;
+        }
+        //perks test
     }
-    if(weapon == 0 && player[issuerid][unlockedBorrowedStrengthSkillActive]){
-        amount = amount + player[issuerid][unlockedBorrowedStrengthSkillDamage];
-    }
-	if(weapon == 0 && player[issuerid][unlockedCorneredSkill] && player[issuerid][health] < player[issuerid][maxHealth] * 0.3){
-		SendProxMessage(issuerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "A near-death desperation feeds savage blows.");
-		amount += 20;
-	}
-	//huntchecks
-	if(player[issuerid][huntActive] && player[issuerid][huntTarget] == playerid){
-		amount += 5;
-	}
-	if(player[issuerid][huntActive] && player[issuerid][huntTarget] != playerid){
-		amount -= 5;
-	}
-	if(player[playerid][huntActive] && player[issuerid][huntTarget] == issuerid){
-		amount -= 5;
-	}
-	if(player[playerid][huntActive] && player[issuerid][huntTarget] != issuerid){
-		amount += 5;
-	}
-    //perks test
+    
     return 1;
 }
 

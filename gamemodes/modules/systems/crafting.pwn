@@ -586,6 +586,9 @@ CMD:craft(playerid, params[])
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
     
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+    
     ShowCraftingMenu(playerid);
     return 1;
 }
@@ -594,6 +597,9 @@ CMD:recipes(playerid, params[])
 {
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
+    
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
     
     ShowCraftingMenu(playerid);
     return 1;

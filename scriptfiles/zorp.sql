@@ -122,6 +122,8 @@ CREATE TABLE `characters` (
   `wepslot12` smallint(6) NOT NULL DEFAULT 0,
   `tinkererskilllevel` tinyint(4) NOT NULL DEFAULT 0,
   `mechanicskilllevel` tinyint(4) NOT NULL DEFAULT 0,
+  `medicskilllevel` tinyint(4) NOT NULL DEFAULT 0,
+  `gourmetskilllevel` tinyint(4) NOT NULL DEFAULT 0,
   `unlockedjump` tinyint(4) NOT NULL DEFAULT 0,
   `unlockedunarmed` tinyint(4) NOT NULL DEFAULT 0,
   `unlockedbite` tinyint(4) NOT NULL DEFAULT 0,

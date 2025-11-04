@@ -839,6 +839,9 @@ CMD:createfaction(playerid, params[])
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
     
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+    
     // Check if player is already in a faction
     if(PlayerFaction[playerid][playerFactionId] != -1)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You are already in a faction.");
@@ -968,6 +971,9 @@ CMD:factioninvite(playerid, params[])
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
     
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+    
     // Check if player is in a faction
     new factionid = PlayerFaction[playerid][playerFactionId];
     if(factionid == -1)
@@ -1017,6 +1023,9 @@ CMD:factionaccept(playerid, params[])
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
     
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+    
     // Check if player has a pending invite
     if(PlayerFaction[playerid][playerFactionInviteId] == -1)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You don't have any pending faction invites.");
@@ -1055,6 +1064,9 @@ CMD:factiondeny(playerid, params[])
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
     
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+    
     // Check if player has a pending invite
     if(PlayerFaction[playerid][playerFactionInviteId] == -1)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You don't have any pending faction invites.");
@@ -1077,6 +1089,9 @@ CMD:factionkick(playerid, params[])
 {
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
+    
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
     
     // Check if player is in a faction
     new factionid = PlayerFaction[playerid][playerFactionId];
@@ -1122,6 +1137,9 @@ CMD:factionleave(playerid, params[])
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
     
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+    
     // Check if player is in a faction
     new factionid = PlayerFaction[playerid][playerFactionId];
     if(factionid == -1)
@@ -1149,6 +1167,9 @@ CMD:factionchat(playerid, params[])
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
     
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
+    
     // Check if player is in a faction
     new factionid = PlayerFaction[playerid][playerFactionId];
     if(factionid == -1)
@@ -1171,6 +1192,9 @@ CMD:factioninfo(playerid, params[])
 {
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
+    
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
     
     // Check if player is in a faction
     new factionid = PlayerFaction[playerid][playerFactionId];
@@ -1214,6 +1238,9 @@ CMD:factionmotd(playerid, params[])
 {
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
+    
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
     
     // Check if player is in a faction
     new factionid = PlayerFaction[playerid][playerFactionId];
@@ -1337,6 +1364,9 @@ CMD:factionranks(playerid, params[])
 {
     if(!player[playerid][isSpawned])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You must be spawned to use this command.");
+    
+    if(player[playerid][iszombie] == 1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You cannot use this as a Zombie.");
     
     // Check if player is in a faction
     new factionid = PlayerFaction[playerid][playerFactionId];

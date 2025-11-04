@@ -153,6 +153,7 @@ enum E_PLAYERS
     bool:isflying,
     flyTimer,
     Float:flyPos[4],
+    flySpeed,
     
     /*
     * Property Variables (used to be slower pVars)

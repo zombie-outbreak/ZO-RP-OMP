@@ -403,6 +403,15 @@ public OnCharacterDataReceived(playerid, raceCheck)
 		SetPlayerVirtualWorld(playerid, player[playerid][world]);
         
         /*
+        * Reset inventory variables to prevent data from previous character carrying over
+        */
+        for(new i = 0; i < MAX_ITEMS; i++)
+        {
+            playerInventory[playerid][i] = 0;
+            playerInventoryResource[playerid][i] = 0;
+        }
+        
+        /*
         * Load/Create player's inventory data file
         * As long as they are not a Zombie character
         */
@@ -443,6 +452,17 @@ public OnCharacterDataReceived(playerid, raceCheck)
 			player[playerid][thirstTimer] = SetTimerEx("ThirstTimer", THIRST_TIMER_DURATION, true, "d", playerid);
 			player[playerid][diseaseTimer] = SetTimerEx("DiseaseTimer", DISEASE_TIMER_DURATION, true, "d", playerid);
 			SetPlayerColor(playerid, COLOR_WHITE);
+			
+			/*
+			* Make sure all /search text labels are visible for humans
+			*/
+			for(new i = 0; i < scavAreaCount; i++)
+			{
+				if(scavArea[i][areaActive])
+				{
+					Streamer_ToggleItem(playerid, STREAMER_TYPE_3D_TEXT_LABEL, scavTextLabel[i], true);
+				}
+			}
             
             // now give the player their weapons (if they have any equipped)
             GivePlayerWeapon(playerid, player[playerid][wepSlot][0], 1); // fist or brass knuckles
@@ -458,6 +478,17 @@ public OnCharacterDataReceived(playerid, raceCheck)
 			ShowHudForPlayer(playerid, HUD_HEALTH);
 			ShowHudForPlayer(playerid, HUD_CLOCK);
 			SetPlayerColor(playerid, COLOR_YELLOW);
+			
+			/*
+			* Hide all /search text labels for zombies since they can't search
+			*/
+			for(new i = 0; i < scavAreaCount; i++)
+			{
+				if(scavArea[i][areaActive])
+				{
+					Streamer_ToggleItem(playerid, STREAMER_TYPE_3D_TEXT_LABEL, scavTextLabel[i], false);
+				}
+			}
 		}
 
 		/*

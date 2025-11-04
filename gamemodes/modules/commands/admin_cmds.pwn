@@ -58,7 +58,7 @@
 * - CMD:deletechar - Delete player character
 * - CMD:createitem - Create new server item
 * - CMD:deleteitem - Delete server item
-* - CMD:fly - Toggle flight mode
+* - CMD:fly - Toggle flight mode (optional speed 1-15, default 8)
 * 
 * DESCRIPTION:
 * Contains all administrative commands for server moderation and management.
@@ -551,20 +551,60 @@ CMD:fly(playerid, params[])
     if(player[playerid][admin] < 5)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
 
-    if(player[playerid][isflying])
-	{
-		player[playerid][isflying] = false;
-		SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "* Fly mode offline.");
-		TogglePlayerControllable(playerid, true);
-        KillTimer(player[playerid][flyTimer]);
-	}
-	else
-	{
-		player[playerid][isflying] = true;
-		SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "* Fly mode online.");
-		TogglePlayerControllable(playerid, false);
-        player[playerid][flyTimer] = SetTimerEx("FlyTimer", 100, true, "d", playerid);
-	}
+    new speed;
+    
+    // Check if a speed parameter was provided
+    if(sscanf(params, "d", speed))
+    {
+        // No parameter given - toggle fly mode off if flying
+        if(player[playerid][isflying])
+        {
+            player[playerid][isflying] = false;
+            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "* Fly mode offline.");
+            TogglePlayerControllable(playerid, true);
+            KillTimer(player[playerid][flyTimer]);
+        }
+        else
+        {
+            // Not flying and no speed given - use default speed of 8
+            speed = 8;
+            
+            // Clamp speed between 1 and 15
+            if(speed < 1) speed = 1;
+            if(speed > 15) speed = 15;
+            
+            player[playerid][flySpeed] = speed;
+            player[playerid][isflying] = true;
+            
+            new string[128];
+            format(string, sizeof(string), "* Fly mode online (Speed: %d).", speed);
+            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, string);
+            
+            TogglePlayerControllable(playerid, false);
+            player[playerid][flyTimer] = SetTimerEx("FlyTimer", 50, true, "d", playerid);
+        }
+    }
+    else
+    {
+        // Speed parameter given - set fly speed (enable or update)
+        // Clamp speed between 1 and 15
+        if(speed < 1) speed = 1;
+        if(speed > 15) speed = 15;
+        
+        player[playerid][flySpeed] = speed;
+        
+        if(!player[playerid][isflying])
+        {
+            player[playerid][isflying] = true;
+            TogglePlayerControllable(playerid, false);
+            player[playerid][flyTimer] = SetTimerEx("FlyTimer", 50, true, "d", playerid);
+        }
+        
+        new string[128];
+        format(string, sizeof(string), "* Fly mode speed set to %d.", speed);
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, string);
+    }
+    
 	return 1;
 }
 

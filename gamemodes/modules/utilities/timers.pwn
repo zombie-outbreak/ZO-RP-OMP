@@ -216,109 +216,118 @@ public TimedBan(playerid)
 
 public FlyTimer(playerid)
 {
+    if(!IsPlayerConnected(playerid) || !player[playerid][isflying])
+        return 1;
+    
     new keys, updown, leftright;
-
-    if(IsPlayerConnected(playerid))
-	{
-        if(player[playerid][isflying])
-		{
-            GetPlayerKeys(playerid, keys, updown, leftright);
-            if(updown == KEY_UP)
-			{
-                if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
-				{
-                    GetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    GetXYInFrontOfPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], 5.0);
-                    SetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    SetCameraBehindPlayer(playerid);
-                }
-                else if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-				{
-                    new playerVehicle = GetPlayerVehicleID(playerid);
-                    GetVehiclePos(playerVehicle,player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    GetXYInFrontOfPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], 5.0);
-                    SetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                }
-            }
-            else if(updown == KEY_DOWN)
-			{
-                if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
-				{
-                    GetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    GetXYBehindPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], 5.0);
-                    SetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    SetCameraBehindPlayer(playerid);
-                }
-                else if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-				{
-                    new playerVehicle = GetPlayerVehicleID(playerid);
-                    GetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    GetXYBehindPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], 5.0);
-                    SetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                }
-            }
-            if(leftright == KEY_LEFT)
-			{
-                if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
-				{
-                    GetPlayerFacingAngle(playerid, player[playerid][flyPos][3]);
-                    SetPlayerFacingAngle(playerid, player[playerid][flyPos][3]+10);
-                    SetCameraBehindPlayer(playerid);
-                }
-                else if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-				{
-                    new playerVehicle = GetPlayerVehicleID(playerid);
-                    GetVehicleZAngle(playerVehicle, player[playerid][flyPos][3]);
-                    SetVehicleZAngle(playerVehicle, player[playerid][flyPos][3]+10);
-                }
-            }
-            else if(leftright == KEY_RIGHT)
-			{
-                if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
-				{
-                    GetPlayerFacingAngle(playerid, player[playerid][flyPos][3]);
-                    SetPlayerFacingAngle(playerid, player[playerid][flyPos][3]-10);
-                    SetCameraBehindPlayer(playerid);
-                }
-                else if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-				{
-                    new playerVehicle = GetPlayerVehicleID(playerid);
-                    GetVehicleZAngle(playerVehicle, player[playerid][flyPos][3]);
-                    SetVehicleZAngle(playerVehicle, player[playerid][flyPos][3]-10);
-                }
-            }
-            if(keys == KEY_JUMP)
-			{
-                if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
-				{
-                    GetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    SetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]+5);
-                    SetCameraBehindPlayer(playerid);
-                }
-                else if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-				{
-                    new playerVehicle = GetPlayerVehicleID(playerid);
-                    GetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    SetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]+5);
-                }
-            }
-            else if(keys == KEY_SPRINT)
-			{
-                if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
-				{
-                    GetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    SetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]-5);
-                    SetCameraBehindPlayer(playerid);
-                }
-                else if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-				{
-                    new playerVehicle = GetPlayerVehicleID(playerid);
-                    GetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
-                    SetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]-5);
-                }
-            }
+    new Float:moveSpeed = float(player[playerid][flySpeed]); // Use player's chosen speed
+    new Float:verticalSpeed = float(player[playerid][flySpeed]); // Use player's chosen speed
+    new Float:turnSpeed = 15.0; // Turn speed remains constant
+    new bool:needsCameraUpdate = false;
+    new playerState = GetPlayerState(playerid);
+    
+    GetPlayerKeys(playerid, keys, updown, leftright);
+    
+    // Early exit if no keys pressed
+    if(updown == 0 && leftright == 0 && keys != KEY_JUMP && keys != KEY_SPRINT)
+        return 1;
+    
+    if(playerState == PLAYER_STATE_ONFOOT)
+    {
+        GetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
+        
+        // Forward/Backward movement
+        if(updown == KEY_UP)
+        {
+            GetXYInFrontOfPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], moveSpeed);
+            needsCameraUpdate = true;
+        }
+        else if(updown == KEY_DOWN)
+        {
+            GetXYBehindPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], moveSpeed);
+            needsCameraUpdate = true;
+        }
+        
+        // Turning
+        if(leftright == KEY_LEFT)
+        {
+            GetPlayerFacingAngle(playerid, player[playerid][flyPos][3]);
+            SetPlayerFacingAngle(playerid, player[playerid][flyPos][3] + turnSpeed);
+            needsCameraUpdate = true;
+        }
+        else if(leftright == KEY_RIGHT)
+        {
+            GetPlayerFacingAngle(playerid, player[playerid][flyPos][3]);
+            SetPlayerFacingAngle(playerid, player[playerid][flyPos][3] - turnSpeed);
+            needsCameraUpdate = true;
+        }
+        
+        // Vertical movement
+        if(keys == KEY_JUMP)
+        {
+            player[playerid][flyPos][2] += verticalSpeed;
+            needsCameraUpdate = true;
+        }
+        else if(keys == KEY_SPRINT)
+        {
+            player[playerid][flyPos][2] -= verticalSpeed;
+            needsCameraUpdate = true;
+        }
+        
+        // Apply position changes
+        if(updown != 0 || keys == KEY_JUMP || keys == KEY_SPRINT)
+        {
+            SetPlayerPos(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
+        }
+        
+        // Only update camera when needed
+        if(needsCameraUpdate)
+            SetCameraBehindPlayer(playerid);
+    }
+    else if(playerState == PLAYER_STATE_DRIVER)
+    {
+        new playerVehicle = GetPlayerVehicleID(playerid);
+        GetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
+        
+        // Forward/Backward movement
+        if(updown == KEY_UP)
+        {
+            GetXYInFrontOfPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], moveSpeed);
+        }
+        else if(updown == KEY_DOWN)
+        {
+            GetXYBehindPlayer(playerid, player[playerid][flyPos][0], player[playerid][flyPos][1], moveSpeed);
+        }
+        
+        // Turning
+        if(leftright == KEY_LEFT)
+        {
+            GetVehicleZAngle(playerVehicle, player[playerid][flyPos][3]);
+            SetVehicleZAngle(playerVehicle, player[playerid][flyPos][3] + turnSpeed);
+        }
+        else if(leftright == KEY_RIGHT)
+        {
+            GetVehicleZAngle(playerVehicle, player[playerid][flyPos][3]);
+            SetVehicleZAngle(playerVehicle, player[playerid][flyPos][3] - turnSpeed);
+        }
+        
+        // Vertical movement
+        if(keys == KEY_JUMP)
+        {
+            player[playerid][flyPos][2] += verticalSpeed;
+        }
+        else if(keys == KEY_SPRINT)
+        {
+            player[playerid][flyPos][2] -= verticalSpeed;
+        }
+        
+        // Apply position changes
+        if(updown != 0 || keys == KEY_JUMP || keys == KEY_SPRINT)
+        {
+            SetVehiclePos(playerVehicle, player[playerid][flyPos][0], player[playerid][flyPos][1], player[playerid][flyPos][2]);
         }
     }
+    
     return 1;
 }
 
