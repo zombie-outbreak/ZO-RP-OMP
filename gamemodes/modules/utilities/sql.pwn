@@ -338,6 +338,8 @@ public OnCharacterDataReceived(playerid, raceCheck)
 		// Load human skills
 		cache_get_value_name_int(0, "tinkererskilllevel", player[playerid][tinkererSkillLevel]);
         cache_get_value_name_int(0, "mechanicskilllevel", player[playerid][mechanicSkillLevel]);
+        cache_get_value_name_int(0, "medicskilllevel", player[playerid][medicSkillLevel]);
+        cache_get_value_name_int(0, "gourmetskilllevel", player[playerid][gourmetSkillLevel]);
 
 		// Load perks
         new tempInt;
@@ -516,11 +518,13 @@ SavePlayerCharacter(playerid, const currentCharacter[])
 	mysql_format(database, query, sizeof(query), 
         "UPDATE `characters` SET `health` = %f, `maxhealth` = %f, `hunger` = %d, `maxhunger` = %d, `thirst` = %d, `maxthirst` = %d, \
         `disease` = %d, `maxdisease` = %d, `spawned` = %d, `px` = %f, `py` = %f, `pz` = %f, `pa` = %f, `interior` = %d, `virtualworld` = %d, \
-        `level` = %d, `exp` = %d, `perkpoints` = %d, `fuelcanamount` = %d, `tinkererskilllevel` = %d WHERE `name` = '%e'", 
+        `level` = %d, `exp` = %d, `perkpoints` = %d, `fuelcanamount` = %d, `tinkererskilllevel` = %d, `mechanicskilllevel` = %d, \
+        `medicskilllevel` = %d, `gourmetskilllevel` = %d WHERE `name` = '%e'", 
         player[playerid][health], player[playerid][maxHealth], player[playerid][hunger], player[playerid][maxHunger], player[playerid][thirst], 
         player[playerid][maxThirst], player[playerid][disease], player[playerid][maxDisease], player[playerid][spawned], player[playerid][pPos][0], 
         player[playerid][pPos][1], player[playerid][pPos][2], player[playerid][pPos][3], player[playerid][plrinterior], player[playerid][world], 
-        player[playerid][level], player[playerid][exp], player[playerid][perkPoints], playerInventoryResource[playerid][28], player[playerid][tinkererSkillLevel], currentCharacter);
+        player[playerid][level], player[playerid][exp], player[playerid][perkPoints], playerInventoryResource[playerid][28], player[playerid][tinkererSkillLevel], 
+        player[playerid][mechanicSkillLevel], player[playerid][medicSkillLevel], player[playerid][gourmetSkillLevel], currentCharacter);
     mysql_tquery(database, query);
 
 	/*

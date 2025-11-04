@@ -16,6 +16,8 @@
 * Human Perks:
 * - TryUnlockTinkererPerk() - Unlock/upgrade tinkerer perk (5 levels)
 * - TryUnlockMechanicPerk() - Unlock/upgrade mechanic perk (5 levels, 5% repair discount)
+* - TryUnlockMedicPerk() - Unlock/upgrade medic perk (5 levels, 2% healing boost per level)
+* - TryUnlockGourmetPerk() - Unlock/upgrade gourmet perk (5 levels, 2% food/drink boost per level)
 * 
 * Zombie Perks:
 * - TryUpgradeHpSkill() - Increase max HP by 10% (5 levels)
@@ -160,6 +162,114 @@ TryUnlockMechanicPerk(playerid)
                 SendClientMessage(playerid, COLOR_GREEN, "Mechanic skill 4/5 - 20% scrap discount on vehicle repairs");
         case 5: SendClientMessage(playerid, COLOR_RP_PURPLE, "You are a master mechanic, capable of reviving even the most broken vehicles."),
                 SendClientMessage(playerid, COLOR_GREEN, "Mechanic skill 5/5 - 25% scrap discount on vehicle repairs");
+    }
+    return 1;
+}
+
+TryUnlockMedicPerk(playerid)
+{
+    if (player[playerid][medicSkillLevel] >= 5)
+    {
+        SendClientMessage(playerid, COLOR_YELLOW, "You have already unlocked the maximum level of this skill.");
+        return 0;
+    }
+
+    // Calculate required points for next level (level 1 = 1 point, level 2 = 2 points, etc.)
+    new nextLevel = player[playerid][medicSkillLevel] + 1;
+    new requiredPoints = nextLevel;
+
+    // Check if player has enough perk points
+    if (player[playerid][perkPoints] < requiredPoints)
+    {
+        new string[128];
+        format(string, sizeof(string), "You need %d perk point%s to unlock level %d of this skill.", 
+            requiredPoints, (requiredPoints == 1) ? "" : "s", nextLevel);
+        SendClientMessage(playerid, COLOR_YELLOW, string);
+        return 0;
+    }
+
+    // Reduce perk points
+    player[playerid][perkPoints] -= requiredPoints;
+
+    // Increase the medic skill level by 1
+    player[playerid][medicSkillLevel]++;
+
+    // Update database
+    new query[256];
+    mysql_format(database, query, sizeof(query),
+        "UPDATE `characters` SET `medicskilllevel` = `medicskilllevel` + 1, `perkpoints` = `perkpoints` - %d WHERE `owner` = %d AND `name` = '%e'",
+        requiredPoints, player[playerid][ID], player[playerid][chosenChar]);
+    mysql_tquery(database, query);
+
+    // Update HUD to show new perk points
+    UpdateHudElementForPlayer(playerid, HUD_INFO);
+
+    switch (player[playerid][medicSkillLevel])
+    {
+        case 1: SendClientMessage(playerid, COLOR_RP_PURPLE, "You learn the basics of first aid and medicine."),
+                SendClientMessage(playerid, COLOR_GREEN, "Medic skill 1/5 - 2% increased healing from medical items");
+        case 2: SendClientMessage(playerid, COLOR_RP_PURPLE, "Your knowledge of treating wounds deepens."),
+                SendClientMessage(playerid, COLOR_GREEN, "Medic skill 2/5 - 4% increased healing from medical items");
+        case 3: SendClientMessage(playerid, COLOR_RP_PURPLE, "You become skilled at diagnosing and treating illness."),
+                SendClientMessage(playerid, COLOR_GREEN, "Medic skill 3/5 - 6% increased healing from medical items");
+        case 4: SendClientMessage(playerid, COLOR_RP_PURPLE, "Your medical expertise allows you to maximize treatment effectiveness."),
+                SendClientMessage(playerid, COLOR_GREEN, "Medic skill 4/5 - 8% increased healing from medical items");
+        case 5: SendClientMessage(playerid, COLOR_RP_PURPLE, "You are a master healer, able to restore health with remarkable efficiency."),
+                SendClientMessage(playerid, COLOR_GREEN, "Medic skill 5/5 - 10% increased healing from medical items");
+    }
+    return 1;
+}
+
+TryUnlockGourmetPerk(playerid)
+{
+    if (player[playerid][gourmetSkillLevel] >= 5)
+    {
+        SendClientMessage(playerid, COLOR_YELLOW, "You have already unlocked the maximum level of this skill.");
+        return 0;
+    }
+
+    // Calculate required points for next level (level 1 = 1 point, level 2 = 2 points, etc.)
+    new nextLevel = player[playerid][gourmetSkillLevel] + 1;
+    new requiredPoints = nextLevel;
+
+    // Check if player has enough perk points
+    if (player[playerid][perkPoints] < requiredPoints)
+    {
+        new string[128];
+        format(string, sizeof(string), "You need %d perk point%s to unlock level %d of this skill.", 
+            requiredPoints, (requiredPoints == 1) ? "" : "s", nextLevel);
+        SendClientMessage(playerid, COLOR_YELLOW, string);
+        return 0;
+    }
+
+    // Reduce perk points
+    player[playerid][perkPoints] -= requiredPoints;
+
+    // Increase the gourmet skill level by 1
+    player[playerid][gourmetSkillLevel]++;
+
+    // Update database
+    new query[256];
+    mysql_format(database, query, sizeof(query),
+        "UPDATE `characters` SET `gourmetskilllevel` = `gourmetskilllevel` + 1, `perkpoints` = `perkpoints` - %d WHERE `owner` = %d AND `name` = '%e'",
+        requiredPoints, player[playerid][ID], player[playerid][chosenChar]);
+    mysql_tquery(database, query);
+
+    // Update HUD to show new perk points
+    UpdateHudElementForPlayer(playerid, HUD_INFO);
+
+    switch (player[playerid][gourmetSkillLevel])
+    {
+        case 1: SendClientMessage(playerid, COLOR_RP_PURPLE, "You learn to savor every morsel, extracting more nourishment."),
+                SendClientMessage(playerid, COLOR_GREEN, "Gourmet skill 1/5 - 2% increased benefits from food and drink");
+        case 2: SendClientMessage(playerid, COLOR_RP_PURPLE, "Your refined palate allows you to gain more from each meal."),
+                SendClientMessage(playerid, COLOR_GREEN, "Gourmet skill 2/5 - 4% increased benefits from food and drink");
+        case 3: SendClientMessage(playerid, COLOR_RP_PURPLE, "You've become adept at maximizing nutritional value."),
+                SendClientMessage(playerid, COLOR_GREEN, "Gourmet skill 3/5 - 6% increased benefits from food and drink");
+        case 4: SendClientMessage(playerid, COLOR_RP_PURPLE, "Your body efficiently processes every nutrient."),
+                SendClientMessage(playerid, COLOR_GREEN, "Gourmet skill 4/5 - 8% increased benefits from food and drink");
+        case 5: SendClientMessage(playerid, COLOR_RP_PURPLE, "You are a survival gourmet, able to thrive on minimal rations."),
+                SendClientMessage(playerid, COLOR_GREEN, "Gourmet skill 5/5 - 10% increased benefits from food and drink");
     }
     return 1;
 }

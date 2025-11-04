@@ -518,7 +518,16 @@ Dialog:InventoryFoodDrinkOpts(playerid, response, listitem, string:inputtext[])
 				}
 
 				SendClientMessage(playerid, COLOR_RP_PURPLE, "You eat a %s.", inventoryItems[player[playerid][chosenItemId]][itemNameSingular]);
-				player[playerid][hunger] = player[playerid][hunger] + inventoryItems[player[playerid][chosenItemId]][itemHealAmount];
+				
+				// Apply gourmet skill bonus (2% per level, up to 10%)
+				new hungerAmount = inventoryItems[player[playerid][chosenItemId]][itemHealAmount];
+				if(player[playerid][gourmetSkillLevel] > 0)
+				{
+					new Float:bonus = 1.0 + (float(player[playerid][gourmetSkillLevel]) * 0.02);
+					hungerAmount = floatround(float(hungerAmount) * bonus);
+				}
+				
+				player[playerid][hunger] = player[playerid][hunger] + hungerAmount;
 
 				if(player[playerid][hunger] > player[playerid][maxHunger])
 				{
@@ -539,7 +548,16 @@ Dialog:InventoryFoodDrinkOpts(playerid, response, listitem, string:inputtext[])
 				}
 
 				SendClientMessage(playerid, COLOR_RP_PURPLE, "You drink a %s.", inventoryItems[player[playerid][chosenItemId]][itemNameSingular]);
-				player[playerid][thirst] = player[playerid][thirst] + inventoryItems[player[playerid][chosenItemId]][itemHealAmount];
+				
+				// Apply gourmet skill bonus (2% per level, up to 10%)
+				new thirstAmount = inventoryItems[player[playerid][chosenItemId]][itemHealAmount];
+				if(player[playerid][gourmetSkillLevel] > 0)
+				{
+					new Float:bonus = 1.0 + (float(player[playerid][gourmetSkillLevel]) * 0.02);
+					thirstAmount = floatround(float(thirstAmount) * bonus);
+				}
+				
+				player[playerid][thirst] = player[playerid][thirst] + thirstAmount;
 
 				if(player[playerid][thirst] > player[playerid][maxThirst])
 				{
@@ -611,7 +629,16 @@ Dialog:InventoryMedicalOpts(playerid, response, listitem, string:inputtext[])
 				}
 
 				SendClientMessage(playerid, COLOR_RP_PURPLE, "You use a %s to heal some of your injuries.", inventoryItems[player[playerid][chosenItemId]][itemNameSingular]);
-				player[playerid][disease] = player[playerid][disease] + inventoryItems[player[playerid][chosenItemId]][itemHealAmount];
+				
+				// Apply medic skill bonus (2% per level, up to 10%)
+				new diseaseHealAmount = inventoryItems[player[playerid][chosenItemId]][itemHealAmount];
+				if(player[playerid][medicSkillLevel] > 0)
+				{
+					new Float:bonus = 1.0 + (float(player[playerid][medicSkillLevel]) * 0.02);
+					diseaseHealAmount = floatround(float(diseaseHealAmount) * bonus);
+				}
+				
+				player[playerid][disease] = player[playerid][disease] + diseaseHealAmount;
 
 				if(player[playerid][disease] >= player[playerid][maxDisease])
 				{
@@ -632,7 +659,16 @@ Dialog:InventoryMedicalOpts(playerid, response, listitem, string:inputtext[])
 				}
 
 				SendClientMessage(playerid, COLOR_RP_PURPLE, "You use a %s to heal some of your injuries.", inventoryItems[player[playerid][chosenItemId]][itemNameSingular]);
-				player[playerid][health] = player[playerid][health] + inventoryItems[player[playerid][chosenItemId]][itemHealAmount];
+				
+				// Apply medic skill bonus (2% per level, up to 10%)
+				new Float:healAmount = float(inventoryItems[player[playerid][chosenItemId]][itemHealAmount]);
+				if(player[playerid][medicSkillLevel] > 0)
+				{
+					new Float:bonus = 1.0 + (float(player[playerid][medicSkillLevel]) * 0.02);
+					healAmount = healAmount * bonus;
+				}
+				
+				player[playerid][health] = player[playerid][health] + healAmount;
 
 				if(player[playerid][health] >= player[playerid][maxHealth])
 				{
@@ -1595,6 +1631,14 @@ Dialog:PerkMenu(playerid, response, listitem, string:inputtext[])
 			case H_PERK_MECHANIC:
 			{
 				TryUnlockMechanicPerk(playerid);
+			}
+			case H_PERK_MEDIC:
+			{
+				TryUnlockMedicPerk(playerid);
+			}
+			case H_PERK_GOURMET:
+			{
+				TryUnlockGourmetPerk(playerid);
 			}
 		}
 	}

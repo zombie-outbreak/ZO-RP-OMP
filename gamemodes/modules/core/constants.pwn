@@ -190,9 +190,11 @@
 // ============================================================================
 
 // Human Perks
-#define MAX_PERKS_HUM 2
+#define MAX_PERKS_HUM 4
 #define H_PERK_TINKERER 0
 #define H_PERK_MECHANIC 1
+#define H_PERK_MEDIC 2
+#define H_PERK_GOURMET 3
 
 // Zombie Perks
 #define MAX_PERKS_ZOM 11

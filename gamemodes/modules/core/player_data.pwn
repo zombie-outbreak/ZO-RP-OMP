@@ -78,6 +78,8 @@ enum E_PLAYERS
     // Human perks
     tinkererSkillLevel,
     mechanicSkillLevel,
+    medicSkillLevel,
+    gourmetSkillLevel,
     
     // Zombie Perks
     unlockedHpIncreaseSkill,
@@ -215,7 +217,9 @@ new expForNextLevel[MAX_LEVELS] =
 */
 new humanSkills[MAX_PERKS_HUM][] = {
     {"Tinkerer"},
-    {"Mechanic"}
+    {"Mechanic"},
+    {"Medic"},
+    {"Gourmet"}
 };
 
 /*
