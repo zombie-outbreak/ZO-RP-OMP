@@ -15,6 +15,8 @@ The following libraries are used. This repository includes the windows DLLs for 
 - [Open.MP server v1.4.0.2779](https://github.com/openmultiplayer/open.mp/releases/tag/v1.4.0.2779)
   - Download the Windows version to get the latest version of the PAWN compiler
 - [SA-MP-MySQL R41-4](https://github.com/pBlueG/SA-MP-MySQL/releases/tag/R41-4)
+  - The website source code is not currently open source (it might or might not become so).
+  - The zorp.sql file within scriptfiles contains a test level 5 admin account with the password: lolpass since the gamemode does not contain registration anymore
 - [Streamer Plugin v2.3.6](https://github.com/samp-incognito/samp-streamer-plugin/releases/tag/v2.9.6)
 - [samp-bcrypt v0.4.1](https://github.com/Sreyas-Sreelal/samp-bcrypt/releases/tag/0.4.1)
 - [Filemanager v1.5.1](https://github.com/JaTochNietDan/SA-MP-FileManager/releases/tag/1.5.1)
