@@ -1,0 +1,23 @@
+; MySQL Connection Configuration Template
+; Copy this file to mysql.ini and configure with your credentials
+; Keep mysql.ini secure and do not commit your live database credentials to version control
+
+; Database Server Settings
+hostname = localhost
+username = your_username
+password = your_password
+database = your_database
+
+; Connection Options
+auto_reconnect = 1
+pool_size = 2
+
+; ============================================================================
+; CONFIGURATION GUIDE
+; ============================================================================
+; hostname          - MySQL server hostname or IP address (e.g., localhost, 127.0.0.1)
+; username          - MySQL username with permissions to access the database
+; password      - MySQL password, if no password remove this entry
+; database      - Name of the database to connect to
+; auto_reconnect- Automatically reconnect if connection is lost (0 = false, 1 = true)
+; pool_size     - Number of concurrent connections in the pool (recommended: 2-5)

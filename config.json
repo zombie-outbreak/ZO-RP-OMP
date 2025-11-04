@@ -8,10 +8,10 @@
         "web_server_bind": ""
     },
     "banners": {
-        "dark": "https://zo-rp.com/cdn/omp/ompclient_logo.png",
-        "light": "https://zo-rp.com/cdn/omp/ompclient_logo.png"
+        "dark": "https://beta.zo-rp.com/assets/omp/ompclient_logo.png",
+        "light": "https://beta.zo-rp.com/assets/omp/ompclient_logo.png"
     },
-    "logo": "https://zo-rp.com/cdn/omp/zo_discordlogo.png",
+    "logo": "https://beta.zo-rp.com/assets/omp/zo_discordlogo.png",
     "discord": {
         "invite": "https://discord.com/invite/4J9KGyspU5"
     },
@@ -65,7 +65,7 @@
         "use_timestamp": true
     },
     "max_bots": 0,
-    "max_players": 100,
+    "max_players": 50,
     "name": "open.mp server",
     "network": {
         "acks_limit": 5000,
@@ -95,7 +95,7 @@
     "password": "",
     "pawn": {
         "legacy_plugins": [
-            "PawnPlus", "streamer", "samp_bcrypt", "FileManager", "ColAndreas", "textdraw-streamer"
+            "PawnPlus", "mysql", "streamer", "samp_bcrypt", "FileManager", "ColAndreas", "xml", "textdraw-streamer"
         ],
         "main_scripts": [
             "zorp 1"

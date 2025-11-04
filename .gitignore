@@ -1,2 +1,6 @@
 .amx
 log.txt
+/gamemodes/modules/archive/
+
+# MySQL Configuration (contains sensitive credentials)
+mysql.ini

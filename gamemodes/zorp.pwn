@@ -4,25 +4,21 @@
 * GNU General Public License v3.0
 */
 
-/*
-* Gamemode defines
-*/
-#include "modules/defines.pwn"
+// ============================================================================
+// CORE MODULES (Must be loaded first)
+// ============================================================================
+#include "modules/core/config.pwn"      // Server configuration
+#include "modules/core/constants.pwn"   // Game constants
+#include "modules/core/colors.pwn"      // Color definitions
 
-/*
-* The one library to rule them all
-*/
+// ============================================================================
+// THIRD-PARTY LIBRARIES
+// ============================================================================
 #include <open.mp>
-
-/*
-* YSI Libraries
-*/
-#include <YSI_Visual\y_commands>
-#include <YSI_Visual\y_dialog>
-
-/*
-* Other Libraries
-*/
+#include <a_mysql>
+#include <xml>
+#include <Pawn.CMD>
+#include <easyDialog>
 #include <samp_bcrypt>
 #include <filemanager>
 #include <streamer>
@@ -31,39 +27,40 @@
 #include <ndialog-pages>
 #include <eSelection>
 #include <colandreas>
+#include <textdraw-streamer> // Must be the final included library (as per https://github.com/nexquery/samp-textdraw-streamer)
 
-/*
-* Textdraw Streaming
-* Must be the final included library (as per https://github.com/nexquery/samp-textdraw-streamer)
-*/
-#include <textdraw-streamer>
+// ============================================================================
+// CORE DATA (After libraries, before systems)
+// ============================================================================
+#include "modules/core/database.pwn"    // MySQL connection handle
+#include "modules/core/player_data.pwn" // Player data structures
 
-/*
-* Variables
-*/
-#include "modules/variables.pwn"
+// ============================================================================
+// GAME SYSTEMS (Data structures must be loaded before utilities use them)
+// ============================================================================
+#include "modules/systems/inventory.pwn"    // Inventory and loot system
+#include "modules/systems/vehicles.pwn"     // Vehicle management
+#include "modules/systems/interiors.pwn"    // Property/interior system
+#include "modules/systems/crafting.pwn"     // Crafting system
+#include "modules/systems/factions.pwn"     // Faction and territory system
+#include "modules/systems/perks.pwn"        // Perk system (human and zombie)
 
-/*
-* Gamemode Function Declarations
-* Also contains general functions
-*/
-#include "modules/functions.pwn"
+// ============================================================================
+// UTILITY MODULES (Loaded after systems so they can access system data)
+// ============================================================================
+#include "modules/utilities/map.pwn"        // Map conversion and loading
+#include "modules/utilities/messaging.pwn"  // Chat and messaging system
+#include "modules/utilities/helpers.pwn"    // General helper functions
+#include "modules/utilities/sql.pwn"        // Database setup
+#include "modules/utilities/timers.pwn"     // Timer callbacks
+#include "modules/utilities/textdraws.pwn"  // HUD and textdraw management
+#include "modules/utilities/dialogs.pwn"    // Dialog handlers
 
-/*
-* Gamemode Modules
-* For specific functions
-*/
-#include "modules/map.pwn"
-#include "modules/sql.pwn"
-#include "modules/timers.pwn"
-#include "modules/textdraws.pwn"
-#include "modules/dialogs.pwn"
-
-/*
-* Command Modules
-*/
-#include "modules/player_cmds.pwn"
-#include "modules/admin_cmds.pwn"
+// ============================================================================
+// COMMANDS
+// ============================================================================
+#include "modules/commands/player_cmds.pwn" // Player commands
+#include "modules/commands/admin_cmds.pwn"  // Admin commands
 
 /*
 * Start gamemode
@@ -113,50 +110,43 @@ public OnGameModeInit()
     ParseMapFiles();
 
     /*
-    * Now load all of the other server data such as interiors, factions, items etc.
+    * Now load all of the other server data such as interiors, items etc.
     */
-    print("-------------------------------------");
+	print("-------------------------------------");
     new timeMs = GetTickCount();
 	for(new i = 0; i < MAX_SERVER_INTERIORS; i++)
     {
 		LoadInteriorData(i);
 	}
-    printf("|-> Interiors Loaded: %d/%d (%d ms)", serverInteriorCount, MAX_SERVER_INTERIORS, GetTickCount() - timeMs);
-
-    timeMs = GetTickCount();
-	for(new i = 0; i < MAX_FACTIONS; i++)
-	{
-		LoadFactionData(i);
-	}
-    printf("|-> Factions Loaded: %d/%d (%d ms)", serverFactionCount, MAX_FACTIONS, GetTickCount() - timeMs);
+    printf("|-> Interiors loaded in %d ms", GetTickCount() - timeMs);
     
     timeMs = GetTickCount();
     for(new i = 0; i < MAX_SCAV_AREAS; i++)
     {
         LoadScavArea(i);
     }
-    printf("|-> Scav Areas Loaded: %d/%d (%d ms)", scavAreaCount, MAX_SCAV_AREAS, GetTickCount() - timeMs);
+    printf("|-> Scav Areas loaded in %d ms", GetTickCount() - timeMs);
     
     timeMs = GetTickCount();
     for(new i = 0; i < MAX_ITEMS; i++)
     {
         LoadServerItems(i);
     }
-    printf("|-> Items Loaded: %d/%d (%d ms)", serverItemCount, MAX_ITEMS, GetTickCount() - timeMs);
+    printf("|-> Items loaded in %d ms", GetTickCount() - timeMs);
     
     timeMs = GetTickCount();
     for(new i = 0; i < MAX_LOOT_TABLES; i++)
     {
         LoadServerLootTable(i);
     }
-    printf("|-> Loot Tables Loaded: %d/%d (%d ms)", lootTableCount, MAX_LOOT_TABLES, GetTickCount() - timeMs);
+    printf("|-> Loot Tables loaded in %d ms", GetTickCount() - timeMs);
     
     timeMs = GetTickCount();
     for(new i = 0; i < MAX_FUEL_PUMPS; i++)
     {
         LoadFuelPumps(i);
     }
-    printf("|-> Fuel Pumps Loaded: %d/%d (%d ms)", fuelPumpCount, MAX_FUEL_PUMPS, GetTickCount() - timeMs);
+    printf("|-> Fuel Pumps loaded in %d ms", GetTickCount() - timeMs);
     print("-------------------------------------");
     
 	/*
@@ -175,21 +165,27 @@ public OnGameModeInit()
     SetTimer("PlayerChecks", 500, true);
 	SetTimer("ServerTime", 1000, true);
 	SetTimer("ServerWeather", 3600000, true);
+	
+	/*
+	* Initialize Crafting System
+	*/
+	InitializeCraftingSystem();
+	
+	/*
+	* Initialize Faction System
+	*/
+	InitializeFactionSystem();
 	return 1;
 }
 
 public OnGameModeExit()
 {
-	DB_Close(database);
+	mysql_close(database);
 	return 1;
 }
 
 public OnPlayerConnect(playerid)
 {
-	// no NPCs here... for now
-    if(IsPlayerNPC(playerid))
-		return Kick(playerid);
-        
     // check the user's client is an official SA-MP/OpenMP client
     // kick the player if not
     if(!IsPlayerUsingOfficialClient(playerid) || !IsPlayerUsingOmp(playerid))
@@ -197,6 +193,9 @@ public OnPlayerConnect(playerid)
         KickWithMessage(playerid, COLOR_ADMINMSG, "Please connect using an official copy of the SA-MP or OpenMP client.");
         return 0;
     }
+
+	// increase the mysql race check
+	mysqlRaceCheck[playerid] ++;
     
 	/*
 	* Reset player variables
@@ -249,8 +248,14 @@ public OnPlayerConnect(playerid)
 
 public OnPlayerDisconnect(playerid, reason)
 {
+	// increase the mysql race check
+	mysqlRaceCheck[playerid] ++;
+
 	DestroyHudForPlayer(playerid);
 	DestroyDialogueTextdraw(playerid);
+	
+	// Cancel any ongoing crafting
+	CancelCrafting(playerid);
 
 	/*
 	* Save character data if the player is spawned as one.
@@ -286,17 +291,24 @@ public OnPlayerSpawn(playerid)
     SetPlayerSkillLevel(playerid, WEAPONSKILL_AK47, 1);
     SetPlayerSkillLevel(playerid, WEAPONSKILL_M4, 1);
     SetPlayerSkillLevel(playerid, WEAPONSKILL_SNIPERRIFLE, 1);
+    
+    // Show faction territories
+    ShowTerritoriesToPlayer(playerid);
+    
     return 1;
 }
 
 public OnPlayerDeath(playerid, killerid, reason)
 {
-	if(player[playerid][hasDied]){
+	if(player[playerid][hasDied])
 		return 1;
-	}
+	
+	// Cancel any ongoing crafting
+	CancelCrafting(playerid);
+		
 	//combustperkcheck
-
-	if (player[playerid][iszombie]){
+	if (player[playerid][iszombie] == 0)
+	{
 		if (player[playerid][unlockedCombustSkill])
 		{
 			Combust(playerid);
@@ -304,28 +316,53 @@ public OnPlayerDeath(playerid, killerid, reason)
 		if (player[playerid][huntActive])
 		{
 			SetPlayerMarkerForPlayer(playerid, player[playerid][huntTarget], (GetPlayerColor(player[playerid][huntTarget]) & 0xFFFFFF00));
-			player[playerid][huntActive]=false;
+			player[playerid][huntActive] = false;
 			SendClientMessage(playerid, COLOR_RP_PURPLE, "You lost the scent.");
 		}
 		
 	}
     
-	if (player[killerid][huntTarget] == playerid && player[killerid][huntActive]){
-        SendClientMessage(killerid, COLOR_RP_PURPLE, "A successful hunt. You fill your voids with the life of your prey.");
-        SetPlayerHealth(killerid, player[killerid][maxHealth]);
-        UpdateHudElementForPlayer(killerid, HUD_HEALTH);
-        SetPlayerMarkerForPlayer(killerid, player[killerid][huntTarget], (GetPlayerColor(player[killerid][huntTarget]) & 0xFFFFFF00));
-        player[playerid][huntActive]=false;
-    }
+	if (killerid != INVALID_PLAYER_ID)
+    {
+		// Award EXP to zombie killers for killing humans
+		if(player[killerid][iszombie] == 1 && player[playerid][iszombie] == 0)
+		{
+			GivePlayerExp(killerid, 15);
+		}
+		
+		// Award EXP to humans for killing zombies
+		if(player[killerid][iszombie] == 0 && player[playerid][iszombie] == 1)
+		{
+			GivePlayerExp(killerid, 10);
+		}
+		
+		if(player[killerid][huntTarget] == playerid && player[killerid][huntActive])
+		{
+			SendClientMessage(killerid, COLOR_RP_PURPLE, "A successful hunt. You fill your voids with the life of your prey.");
+			SetPlayerHealth(killerid, player[killerid][maxHealth]);
+			UpdateHudElementForPlayer(killerid, HUD_HEALTH);
+			SetPlayerMarkerForPlayer(killerid, player[killerid][huntTarget], (GetPlayerColor(player[killerid][huntTarget]) & 0xFFFFFF00));
+			player[killerid][huntActive] = false;
+			
+			// Bonus EXP for successful hunt
+			if(player[killerid][iszombie] == 1)
+			{
+				GivePlayerExp(killerid, 10);
+			}
+		}
+	}
     
 	new players[MAX_PLAYERS], length;
     length = GetPlayers(players, sizeof(players));
 
-    for (new i = 0; i < length; i++) {
+    for (new i = 0; i < length; i++) 
+	{
         new pid = players[i];
-        if (pid == killerid) continue;
+        if (pid == killerid) 
+			continue;
 
-        if (player[pid][huntTarget] == playerid && player[pid][huntActive]) {
+        if (player[pid][huntTarget] == playerid && player[pid][huntActive])
+		{
             player[pid][huntActive] = false;
             SendClientMessage(pid, COLOR_RP_PURPLE, "Your prey has died. The trail fades cold.");
             SetPlayerMarkerForPlayer(pid, player[pid][huntTarget], (GetPlayerColor(pid) & 0xFFFFFF00)); // optional
@@ -336,15 +373,42 @@ public OnPlayerDeath(playerid, killerid, reason)
 	* Kill timers and reset spawned variable as well as hide the HUD
 	*/
 	player[playerid][spawned] = 0;
-	KillTimer(player[playerid][hungerTimer]);
-	KillTimer(player[playerid][thirstTimer]);
-	KillTimer(player[playerid][diseaseTimer]);
-	KillTimer(player[playerid][fuelTimer]);
-	KillTimer(player[playerid][fillVehicleTimer]);
+	if(player[playerid][hungerTimer])
+	{
+		KillTimer(player[playerid][hungerTimer]);
+	}
+
+	if(player[playerid][thirstTimer])
+	{
+		KillTimer(player[playerid][thirstTimer]);
+	}
+
+	if(player[playerid][diseaseTimer])
+	{
+		KillTimer(player[playerid][diseaseTimer]);
+	}
+
+	if(player[playerid][fuelTimer])
+	{
+		KillTimer(player[playerid][fuelTimer]);
+	}
+
+	if(player[playerid][fillVehicleTimer])
+	{
+		KillTimer(player[playerid][fillVehicleTimer]);
+	}
+
+	if(player[playerid][locationTimer])
+	{
+		KillTimer(player[playerid][locationTimer]);
+	}
+
 	HideHudForPlayer(playerid);
+	
 	// Set disease to 100
-	player[playerid][disease]=100;
+	player[playerid][disease] = 100;
 	UpdateHudElementForPlayer(playerid, HUD_DISEASE);
+
 	/*
 	* Set the player to spectate mode and set the timer to respawn
 	*/
@@ -359,32 +423,32 @@ public OnPlayerDeath(playerid, killerid, reason)
 public OnPlayerDamage(&playerid, &Float:amount, &issuerid, &WEAPON:weapon, &bodypart)
 {
     if(weapon == 0){
-        amount=10;
+        amount = 10;
     }
     //perks test 
     if(weapon == 0 && player[issuerid][unlockedUnarmedSkill]){
 		//multiply 5 with unarmed skill level (max: 25dmg bonus)
-        amount=amount+player[issuerid][unlockedUnarmedSkill]*3;
+        amount = amount + player[issuerid][unlockedUnarmedSkill] * 3;
     }
     if(weapon == 0 && player[issuerid][unlockedBorrowedStrengthSkillActive]){
-        amount = amount+player[issuerid][unlockedBorrowedStrengthSkillDamage];
+        amount = amount + player[issuerid][unlockedBorrowedStrengthSkillDamage];
     }
 	if(weapon == 0 && player[issuerid][unlockedCorneredSkill] && player[issuerid][health] < player[issuerid][maxHealth] * 0.3){
 		SendProxMessage(issuerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "A near-death desperation feeds savage blows.");
-		amount+= 20;
+		amount += 20;
 	}
 	//huntchecks
 	if(player[issuerid][huntActive] && player[issuerid][huntTarget] == playerid){
-		amount+=5;
+		amount += 5;
 	}
 	if(player[issuerid][huntActive] && player[issuerid][huntTarget] != playerid){
-		amount-=5;
+		amount -= 5;
 	}
 	if(player[playerid][huntActive] && player[issuerid][huntTarget] == issuerid){
-		amount-=5;
+		amount -= 5;
 	}
 	if(player[playerid][huntActive] && player[issuerid][huntTarget] != issuerid){
-		amount+=5;
+		amount += 5;
 	}
     //perks test
     return 1;
@@ -409,17 +473,15 @@ public OnPlayerText(playerid, text[])
 	return 0;
 }
 
-public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_ERRORS:success)
+public OnPlayerCommandPerformed(playerid, cmd[], params[], result, flags)
 {
-    switch(success)
-    {
-        case COMMAND_UNDEFINED:
-        {
-            SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Command does not exist!");
-        	SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Use /commands to see a list of commands.");
-        }
-    }
-    return COMMAND_OK;
+	if(result == -1)
+	{
+		SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Command does not exist!");
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Use /commands to see a list of commands.");
+		return 0; // command was handled
+	}
+    return 1;
 }
 
 public OnPlayerPickUpDynamicPickup(playerid, pickupid)
@@ -445,8 +507,6 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 					SetPlayerInterior(playerid, srvInterior[i][intWorld]);
 					SetPlayerVirtualWorld(playerid, srvInterior[i][intVirWorld]);
 					GameTextForPlayer(playerid, "You entered %s", 5000, 3, srvInterior[i][intName]);
-                    
-                    SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 				}
 				
 				if(player[playerid][antiMessageSpam] != 1)
@@ -480,8 +540,6 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 						SetPlayerInterior(playerid, srvInterior[i][intWorld]);
 						SetPlayerVirtualWorld(playerid, srvInterior[i][intVirWorld]);
 						GameTextForPlayer(playerid, "You entered %s", 5000, 3, srvInterior[i][intName]);
-                        
-                        SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 					}
 				}
 				else
@@ -494,8 +552,6 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 					SetPlayerInterior(playerid, srvInterior[i][intWorld]);
 					SetPlayerVirtualWorld(playerid, srvInterior[i][intVirWorld]);
 					GameTextForPlayer(playerid, "You entered %s", 5000, 3, srvInterior[i][intName]);
-                    
-                    SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 				}
 			}
 		}
@@ -509,8 +565,6 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 			SetPlayerInterior(playerid, srvInterior[i][intExitWorld]);
 			SetPlayerVirtualWorld(playerid, srvInterior[i][intExitVirWorld]);
 			GameTextForPlayer(playerid, "You exited %s", 5000, 3, srvInterior[i][intName]);
-            
-            SavePlayerCharacterLocation(playerid, player[playerid][chosenChar]);
 		}
 	}
 	return 1;
@@ -560,7 +614,12 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
             {
                 // show the fuel hud and start the vehicle timer
                 ShowHudForPlayer(playerid, HUD_VEHICLE);
-                player[playerid][fuelTimer] = SetTimerEx("FuelTimer", 25000, true, "dd", playerid, player[playerid][lastInVehId]);
+                player[playerid][fuelTimer] = SetTimerEx("FuelTimer", FUEL_TIMER, true, "dd", playerid, player[playerid][lastInVehId]);
+                SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "The engine is running.");
+            }
+            else
+            {
+                SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "The engine is off. Use /engine to attempt to start it.");
             }
         }
         else if(newstate == PLAYER_STATE_PASSENGER)
@@ -606,28 +665,28 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	//zedperk hotkeys
 	if (HOLDING( KEY_WALK | KEY_JUMP ))
 	{
-		if(player[playerid][iszombie] && player[playerid][unlockedSuperJumpSkill])
+		if(player[playerid][iszombie] == 1 && player[playerid][unlockedSuperJumpSkill])
 		{
             SuperJump(playerid);
 		}
 	}
 	if (HOLDING( KEY_WALK | KEY_AIM))
 	{
-		if(player[playerid][iszombie] && player[playerid][unlockedBiteSkill])
+		if(player[playerid][iszombie]  == 1 && player[playerid][unlockedBiteSkill])
 		{
             Bite(playerid);
 		}
 	}
 	if (HOLDING( KEY_WALK | KEY_FIRE))
 	{
-		if(player[playerid][iszombie] && player[playerid][unlockedStunSkill])
+		if(player[playerid][iszombie]  == 1 && player[playerid][unlockedStunSkill])
 		{
             Stun(playerid);
 		}
 	}
 	if (HOLDING( KEY_WALK | KEY_CROUCH))
 	{
-		if(player[playerid][iszombie] && player[playerid][unlockedGrabSkill])
+		if(player[playerid][iszombie]  == 1 && player[playerid][unlockedGrabSkill])
 		{
             Grab(playerid);
 		}
@@ -651,7 +710,7 @@ public OnPlayerUseVendingMachine(playerid, &Float:health_given)
 {
     health_given = 0; // don't give health
     
-    if((GetTickCount() - player[playerid][vendingAntiSpam]) < 30000) // guarentee no item found
+    if((GetTickCount() - player[playerid][vendingAntiSpam]) < VENDING_MACHINE_COOLDOWN) // guarentee no item found
         return SendClientMessage(playerid, COLOR_RP_PURPLE, "You shake the vending machine but can't get anything of use from it. ((Please wait 30 seconds between use.))");
     
     /*
