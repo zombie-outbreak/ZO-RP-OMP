@@ -99,6 +99,11 @@ public OnGameModeInit()
     SetCustomVendingMachines(true);
 
 	/*
+	* Load custom zombie skins
+	*/
+	AddCustomSkinModels();
+
+	/*
     * Get certain stats from the database
     */
     GetServerLoadStats();
