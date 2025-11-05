@@ -1896,6 +1896,25 @@ CreateTerritory(const name[], Float:minx, Float:miny, Float:maxx, Float:maxy, fa
 }
 
 /*
+* Check if any members of a faction are online
+*/
+bool:IsFactionMemberOnline(factionid)
+{
+    if(factionid == -1)
+        return false;
+    
+    for(new p = 0; p < MAX_PLAYERS; p++)
+    {
+        if(IsPlayerConnected(p) && player[p][isSpawned])
+        {
+            if(PlayerFaction[p][playerFactionId] == factionid)
+                return true;
+        }
+    }
+    return false;
+}
+
+/*
 * Callback when territory is created
 */
 public OnTerritoryCreated(territoryid)
@@ -1943,6 +1962,11 @@ StartTerritoryCapture(territoryid, attackingfactionid)
     
     if(Territories[territoryid][territoryBeingCaptured])
         return 0; // Already being captured
+    
+    // Check if defending faction has any members online
+    new defendingFactionId = Territories[territoryid][territoryFactionId];
+    if(defendingFactionId != -1 && !IsFactionMemberOnline(defendingFactionId))
+        return -1; // Return -1 to indicate no defenders online
     
     Territories[territoryid][territoryBeingCaptured] = true;
     Territories[territoryid][territoryCaptureProgress] = 0;
@@ -2543,7 +2567,8 @@ CMD:captureterritory(playerid, params[])
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "This territory is already being captured.");
     
     // Start capture
-    if(StartTerritoryCapture(territoryid, factionid))
+    new result = StartTerritoryCapture(territoryid, factionid);
+    if(result == 1)
     {
         new string[128];
         format(string, sizeof(string), "Started capturing %s! Stay in the area to capture it.", Territories[territoryid][territoryName]);
@@ -2551,6 +2576,10 @@ CMD:captureterritory(playerid, params[])
         
         // Show visual feedback (style 1 = bottom right corner)
         GameTextForPlayer(playerid, "~g~CAPTURE STARTED~n~~w~Stay in the zone!", 3000, 1);
+    }
+    else if(result == -1)
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Cannot capture this territory - no members of the defending faction are online.");
     }
     else
     {

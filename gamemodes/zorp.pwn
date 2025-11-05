@@ -165,6 +165,16 @@ public OnGameModeInit()
 	SetWeather(random(22)); // between 0 - 22
 
     /*
+    * Initialize Game Time System
+    */
+    GameTimeStartTick = GetTickCount();
+    GameTimeHour = SERVER_TIME_START_HOUR;
+    GameTimeMinute = 0;
+    GameTimeSecond = 0;
+    SetWorldTime(GameTimeHour);
+    printf("Game Time System initialized: Starting at %02d:00:00 with %dx multiplier", SERVER_TIME_START_HOUR, SERVER_TIME_MULTIPLIER);
+
+    /*
     * Timers
     */
     SetTimer("PlayerChecks", 500, true);

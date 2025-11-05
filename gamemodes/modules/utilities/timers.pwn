@@ -89,12 +89,25 @@ forward TimedSavePlayerCharacterLocation(playerid);
 public ServerTime()
 {
 	new string[64];
-    new hour, minute, second;
-    gettime(hour, minute, second);
+    
+    // Calculate elapsed time since server start
+    new currentTick = GetTickCount();
+    new elapsedSeconds = (currentTick - GameTimeStartTick) / 1000;
+    
+    // Apply time multiplier (faster day/night cycle)
+    new gameSeconds = elapsedSeconds * SERVER_TIME_MULTIPLIER;
+    
+    // Calculate total seconds from start
+    new totalSeconds = (SERVER_TIME_START_HOUR * 3600) + gameSeconds;
+    
+    // Calculate current game time
+    GameTimeSecond = totalSeconds % 60;
+    GameTimeMinute = (totalSeconds / 60) % 60;
+    GameTimeHour = (totalSeconds / 3600) % 24;
 
-    format(string,sizeof(string),"%02d:%02d:%02d", hour, minute, second);
+    format(string, sizeof(string), "%02d:%02d:%02d", GameTimeHour, GameTimeMinute, GameTimeSecond);
     TextDrawSetString(Clock, string);
-    SetWorldTime(hour);
+    SetWorldTime(GameTimeHour);
 
     for(new i = 0; i < MAX_PLAYERS; i++)
 	{
@@ -108,35 +121,7 @@ public ServerTime()
 
             if(GetPlayerState(i) != PLAYER_STATE_NONE)
             {
-                SetPlayerTime(i, hour, minute);
-            }
-            
-            // daily restart warnings at 30, 15, 10, 5, and 1 minutes
-            if(hour == 5 && minute == 30)
-            {
-                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 30 minutes.");
-            }
-            else if(hour == 5 && minute == 45)
-            {
-                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 15 minutes.");
-            }
-            else if(hour == 5 && minute == 50)
-            {
-                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 10 minutes.");
-            }
-            else if(hour == 5 && minute == 55)
-            {
-                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 5 minutes.");
-            }
-            else if(hour == 5 && minute == 59)
-            {
-                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server is restarting in 1 minute.");
-            }
-            
-            // final message
-            if(hour == 5 && minute == 59 && second == 50)
-            {
-                SendPlayerServerMessage(i, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Server restarting imminently.");
+                SetPlayerTime(i, GameTimeHour, GameTimeMinute);
             }
         }
 	}

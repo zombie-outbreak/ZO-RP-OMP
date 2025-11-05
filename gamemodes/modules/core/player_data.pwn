@@ -288,6 +288,15 @@ new PlayerText:healthText[MAX_PLAYERS];
 new Text:animhelper;
 new	Text:Clock;
 
+// ============================================================================
+// GAME TIME VARIABLES
+// ============================================================================
+
+new GameTimeHour = SERVER_TIME_START_HOUR; // Current game hour (0-23)
+new GameTimeMinute = 0; // Current game minute (0-59)
+new GameTimeSecond = 0; // Current game second (0-59)
+new GameTimeStartTick = 0; // Server tick when time system started
+
 /*
 * Quest Specific Textdraws
 */
