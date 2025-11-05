@@ -292,10 +292,11 @@ new	Text:Clock;
 // GAME TIME VARIABLES
 // ============================================================================
 
-new GameTimeHour = SERVER_TIME_START_HOUR; // Current game hour (0-23)
+new GameTimeHour; // Current game hour (0-23)
 new GameTimeMinute = 0; // Current game minute (0-59)
-new GameTimeSecond = 0; // Current game second (0-59)
 new GameTimeStartTick = 0; // Server tick when time system started
+new GameTimeStartHour = 0; // Initial hour when server started (for calculations)
+new GameTimeStartMinute = 0; // Initial minute when server started (for calculations)
 
 /*
 * Quest Specific Textdraws

@@ -168,11 +168,12 @@ public OnGameModeInit()
     * Initialize Game Time System
     */
     GameTimeStartTick = GetTickCount();
-    GameTimeHour = SERVER_TIME_START_HOUR;
-    GameTimeMinute = 0;
-    GameTimeSecond = 0;
+    GameTimeStartHour = random(24); // Random hour between 0-23
+    GameTimeStartMinute = random(60); // Random minute between 0-59
+    GameTimeHour = GameTimeStartHour;
+    GameTimeMinute = GameTimeStartMinute;
     SetWorldTime(GameTimeHour);
-    printf("Game Time System initialized: Starting at %02d:00:00 with %dx multiplier", SERVER_TIME_START_HOUR, SERVER_TIME_MULTIPLIER);
+    printf("Game Time System initialized: Starting at %02d:%02d with %dx multiplier", GameTimeHour, GameTimeMinute, SERVER_TIME_MULTIPLIER);
 
     /*
     * Timers

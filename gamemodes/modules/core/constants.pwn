@@ -116,7 +116,6 @@
 
 // Time System Configuration
 #define SERVER_TIME_MULTIPLIER 10 // How much faster than real time (10x = 2.4 hour real day = 24 hour game day)
-#define SERVER_TIME_START_HOUR 12 // Starting hour when server starts (12 = noon)
 
 #define HUNGER_TIMER_DURATION 30000 * 5 // 2.5 minutes
 #define THIRST_TIMER_DURATION 10000 * 5 // 50 seconds

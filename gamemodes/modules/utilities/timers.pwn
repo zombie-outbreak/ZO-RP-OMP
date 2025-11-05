@@ -97,15 +97,15 @@ public ServerTime()
     // Apply time multiplier (faster day/night cycle)
     new gameSeconds = elapsedSeconds * SERVER_TIME_MULTIPLIER;
     
-    // Calculate total seconds from start
-    new totalSeconds = (SERVER_TIME_START_HOUR * 3600) + gameSeconds;
+    // Calculate total seconds from start (using the initial start time set at server init)
+    new startSeconds = (GameTimeStartHour * 3600) + (GameTimeStartMinute * 60);
+    new totalSeconds = startSeconds + gameSeconds;
     
     // Calculate current game time
-    GameTimeSecond = totalSeconds % 60;
     GameTimeMinute = (totalSeconds / 60) % 60;
     GameTimeHour = (totalSeconds / 3600) % 24;
 
-    format(string, sizeof(string), "%02d:%02d:%02d", GameTimeHour, GameTimeMinute, GameTimeSecond);
+    format(string, sizeof(string), "%02d:%02d", GameTimeHour, GameTimeMinute);
     TextDrawSetString(Clock, string);
     SetWorldTime(GameTimeHour);
 
