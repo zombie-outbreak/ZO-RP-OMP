@@ -33,8 +33,8 @@
 #define SERVER_NAME	"Zombie Outbreak Roleplay [Account required on zo-rp.com]"
 #define SERVER_RCON	"changethisifgoingpublic" // the live server has one I set when I compile for release
 #define SERVER_PASSWORD	"0" // set to 0 for no server password, current live server is password protected
-#define SERVER_VERSION "Zombie Outbreak v0.1.1"
-#define SERVER_VERSION_SHORT "v0.1.1"
+#define SERVER_VERSION "Zombie Outbreak v0.1.1b"
+#define SERVER_VERSION_SHORT "v0.1.1b"
 #define SERVER_MAP "The Fallen World"
 #define SERVER_WEBSITE "https://beta.zo-rp.com"
 #define DISCORD_URL "https://discord.com/invite/4J9KGyspU5"

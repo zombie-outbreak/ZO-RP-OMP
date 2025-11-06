@@ -204,10 +204,10 @@ public OnPlayerConnect(playerid)
 {
     // check the user's client is an official SA-MP/OpenMP client
     // kick the player if not
-    if(!IsPlayerUsingOfficialClient(playerid) || !IsPlayerUsingOmp(playerid))
+    if(!IsPlayerUsingOmp(playerid))
     {
-        KickWithMessage(playerid, COLOR_ADMINMSG, "Please connect using an official copy of the SA-MP or OpenMP client.");
-        return 0;
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "We strongly advise use of the official OpenMP client to connect to this server.");
+		SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "If you run into any issues we cannot provide support for unofficial clients.");
     }
 
 	// increase the mysql race check
