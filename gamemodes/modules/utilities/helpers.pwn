@@ -487,7 +487,7 @@ GivePlayerExp(playerid, amount)
     
     // Save to database
     new query[128];
-    format(query, sizeof(query), "UPDATE `players` SET `exp` = %d WHERE `id` = %d", player[playerid][exp], player[playerid][ID]);
+    format(query, sizeof(query), "UPDATE `characters` SET `exp` = %d WHERE `id` = %d", player[playerid][exp], player[playerid][ID]);
     mysql_tquery(database, query);
     return 1;
 }

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    LOOT TABLE: Gas Station
+    Description: Items found at gas stations and fuel depots
+    Used by: SCAV_AREA_GASSTATION scavenging areas
+-->
+<loottable>
+    <name>Gas Station</name>
+    <description>Fuel, snacks, and automotive supplies found at gas stations</description>
+    
+    <items>
+        <!-- Very Common: Snacks and drinks (Weight: 60-80) -->
+        <item id="23" weight="80" min_quantity="1" max_quantity="3">Can of Soda</item>
+        <item id="2" weight="75" min_quantity="2" max_quantity="4">Candy Bar</item>
+        <item id="21" weight="70" min_quantity="1" max_quantity="3">Chocolate Bar</item>
+        <item id="44" weight="65" min_quantity="1" max_quantity="2">Chips</item>
+        <item id="19" weight="60" min_quantity="1" max_quantity="2">Bag of Chips</item>
+        
+        <!-- Common: Beverages (Weight: 40-55) -->
+        <item id="3" weight="55" min_quantity="1" max_quantity="3">Carton of Juice</item>
+        <item id="20" weight="50" min_quantity="1" max_quantity="2">Bottle of Water</item>
+        <item id="28" weight="45" min_quantity="1" max_quantity="2">Energy Drink</item>
+        <item id="27" weight="40" min_quantity="1" max_quantity="1">Coffee (Stamina Boost)</item>
+        
+        <!-- Uncommon: Useful items (Weight: 20-35) -->
+        <item id="50" weight="35" min_quantity="1" max_quantity="2">Matches</item>
+        <item id="51" weight="30" min_quantity="1" max_quantity="1">Lighter</item>
+        <item id="24" weight="25" min_quantity="1" max_quantity="1">Empty Canteen</item>
+        <item id="46" weight="20" min_quantity="1" max_quantity="1">Flashlight</item>
+        
+        <!-- Rare: Automotive/survival gear (Weight: 8-15) -->
+        <item id="47" weight="15" min_quantity="1" max_quantity="3">Battery</item>
+        <item id="34" weight="12" min_quantity="1" max_quantity="2">Duct Tape</item>
+        <item id="53" weight="10" min_quantity="1" max_quantity="1">Rope</item>
+        <item id="33" weight="8" min_quantity="10" max_quantity="30">9mm Ammo</item>
+        
+        <!-- Very Rare: Special items (Weight: 3-6) -->
+        <item id="52" weight="6" min_quantity="1" max_quantity="1">Backpack</item>
+        <item id="57" weight="5" min_quantity="1" max_quantity="1">Toolbox</item>
+        <item id="4" weight="4" min_quantity="25" max_quantity="100">Money</item>
+        <item id="11" weight="3" min_quantity="1" max_quantity="1">9mm Pistol</item>
+        
+        <!-- Ultra Rare: First aid (Weight: 1-2) -->
+        <item id="37" weight="2" min_quantity="1" max_quantity="1">First Aid Kit</item>
+        <item id="5" weight="1" min_quantity="1" max_quantity="2">Bandage</item>
+    </items>
+</loottable>

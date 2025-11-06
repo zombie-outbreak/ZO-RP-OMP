@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    LOOT TABLE: Food and Drink
+    Description: Food and beverages for sustenance
+    Used by: SCAV_AREA_FOODDRINK scavenging areas
+-->
+<loottable>
+    <name>Food and Drink</name>
+    <description>Food and beverage items found in kitchens, stores, and pantries</description>
+    
+    <items>
+        <!-- Very Common Low-Value Food (Weight: 50-80) -->
+        <item id="22" weight="80" min_quantity="2" max_quantity="5">Biscuit</item>
+        <item id="21" weight="70" min_quantity="1" max_quantity="3">Chocolate Bar</item>
+        <item id="2" weight="65" min_quantity="1" max_quantity="4">Candy Bar</item>
+        <item id="3" weight="60" min_quantity="1" max_quantity="3">Carton of Juice</item>
+        
+        <!-- Common Mid-Value Food (Weight: 35-50) -->
+        <item id="23" weight="50" min_quantity="1" max_quantity="3">Can of Soda</item>
+        <item id="20" weight="45" min_quantity="1" max_quantity="2">Bottle of Water</item>
+        <item id="44" weight="40" min_quantity="1" max_quantity="2">Chips</item>
+        <item id="45" weight="35" min_quantity="1" max_quantity="2">Granola Bar</item>
+        
+        <!-- Uncommon Preserved Food (Weight: 20-30) -->
+        <item id="42" weight="30" min_quantity="1" max_quantity="2">Canned Beans</item>
+        <item id="43" weight="28" min_quantity="1" max_quantity="2">Canned Soup</item>
+        <item id="19" weight="25" min_quantity="1" max_quantity="2">Bag of Chips</item>
+        <item id="41" weight="20" min_quantity="1" max_quantity="1">MRE (Meal Ready to Eat)</item>
+        
+        <!-- Rare Canteens &amp; Prepared Drinks (Weight: 10-15) -->
+        <item id="24" weight="15" min_quantity="1" max_quantity="1">Empty Canteen</item>
+        <item id="25" weight="12" min_quantity="1" max_quantity="1">Canteen of Dirty Water</item>
+        <item id="26" weight="10" min_quantity="1" max_quantity="1">Canteen of Clean Water</item>
+        
+        <!-- Very Rare Quality Items (Weight: 3-8) -->
+        <item id="27" weight="8" min_quantity="1" max_quantity="1">Coffee (Stamina Boost)</item>
+        <item id="28" weight="5" min_quantity="1" max_quantity="1">Energy Drink</item>
+        <item id="29" weight="3" min_quantity="1" max_quantity="1">Protein Bar</item>
+    </items>
+</loottable>

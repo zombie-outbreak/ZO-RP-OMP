@@ -44,6 +44,7 @@
 #include "modules/systems/crafting.pwn"     // Crafting system
 #include "modules/systems/factions.pwn"     // Faction and territory system
 #include "modules/systems/perks.pwn"        // Perk system (human and zombie)
+#include "modules/systems/shops.pwn"        // Shop system
 
 // ============================================================================
 // UTILITY MODULES (Loaded after systems so they can access system data)
@@ -140,11 +141,8 @@ public OnGameModeInit()
     printf("|-> Items loaded in %d ms", GetTickCount() - timeMs);
     
     timeMs = GetTickCount();
-    for(new i = 0; i < MAX_LOOT_TABLES; i++)
-    {
-        LoadServerLootTable(i);
-    }
-    printf("|-> Loot Tables loaded in %d ms", GetTickCount() - timeMs);
+    LoadLootTablesFromXML(); // New XML-based loot table system
+    printf("|-> Loot Tables loaded from XML in %d ms", GetTickCount() - timeMs);
     
     timeMs = GetTickCount();
     for(new i = 0; i < MAX_FUEL_PUMPS; i++)
@@ -152,6 +150,13 @@ public OnGameModeInit()
         LoadFuelPumps(i);
     }
     printf("|-> Fuel Pumps loaded in %d ms", GetTickCount() - timeMs);
+    
+    timeMs = GetTickCount();
+    for(new i = 0; i < MAX_SHOPS; i++)
+    {
+        LoadShops(i);
+    }
+    printf("|-> Shops loaded in %d ms", GetTickCount() - timeMs);
     print("-------------------------------------");
     
 	/*
@@ -204,9 +209,9 @@ public OnPlayerConnect(playerid)
 {
     // check the user's client is an official SA-MP/OpenMP client
     // kick the player if not
-    if(!IsPlayerUsingOmp(playerid))
+    if(!IsPlayerUsingOmp(playerid) || !IsPlayerUsingOfficialClient(playerid))
     {
-        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "We strongly advise use of the official OpenMP client to connect to this server.");
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "We strongly advise use of the official OpenMP client/Official 0.3DL to connect to this server.");
 		SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "If you run into any issues we cannot provide support for unofficial clients.");
     }
 
@@ -721,6 +726,19 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	{
 	    StopLoopingAnim(playerid);
         TextDrawHideForPlayer(playerid, animhelper);
+    }
+    
+    // Shop interaction
+    if(PRESSED(KEY_YES))
+    {
+        if(player[playerid][spawned])
+        {
+            new shopIndex = GetNearestShop(playerid);
+            if(shopIndex != INVALID_SHOP_ID)
+            {
+                ShowShopMenu(playerid, shopIndex);
+            }
+        }
     }
 	return 1;
 }

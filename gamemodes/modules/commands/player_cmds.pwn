@@ -20,9 +20,10 @@
 * - CMD:changepass - Change account password
 * - CMD:menu - Return to character selection
 * 
-* INVENTORY & INTERACTION:
+ * INVENTORY & INTERACTION:
 * - CMD:inv - Open inventory dialog
 * - CMD:search - Search nearby loot areas
+* - CMD:shop - Open shop menu (when near a shop)
 * - CMD:perks - Open perk menu
 * 
 * VEHICLE:
@@ -55,7 +56,8 @@
 * - Communication systems
 * - Roleplay animations
 * - Zombie special abilities
-* All commands use ZCMD processor and include appropriate permission checks.
+*
+* All commands use Pawn.CMD processor and include appropriate permission checks.
 */
 
 // ============================================================================
@@ -68,6 +70,9 @@
 // GENERAL COMMANDS
 // ============================================================================
 
+/*
+* INFORMATION & HELP
+*/
 CMD:commands(playerid, params[])
 {
     new message[2048];
@@ -171,6 +176,7 @@ CMD:commands(playerid, params[])
     strcat(message, "{FFFFFF}INVENTORY & INTERACTION:\n");
     strcat(message, "{CCCCCC}- /inv - Open your inventory\n");
     strcat(message, "{CCCCCC}- /search - Search nearby area for items\n");
+    strcat(message, "{CCCCCC}- /shop - Open shop menu (when near a shop)\n");
     strcat(message, "{CCCCCC}- /perks - Open perks menu to upgrade abilities\n\n");
     
     strcat(message, "{FFFFFF}VEHICLE:\n");
@@ -190,12 +196,18 @@ CMD:commands(playerid, params[])
     return 1;
 }
 
+/*
+* ACCOUNT MANAGEMENT
+*/
 CMD:changepass(playerid, params[])
 {
     Dialog_Show(playerid, ChangePasswordDialog, DIALOG_STYLE_PASSWORD, "Change Password", "Please enter a new password below:", "Confirm", "Close");
     return 1;
 }
 
+/*
+* CHARACTER MENU
+*/
 CMD:menu(playerid, params[])
 {
     if(!player[playerid][isSpawned])
@@ -258,9 +270,10 @@ CMD:menu(playerid, params[])
     return 1;
 }
 
-/*
-* Inventory
-*/
+// ============================================================================
+// INVENTORY & INTERACTION COMMANDS
+// ============================================================================
+
 CMD:inv(playerid, params[])
 {
     if(!player[playerid][isSpawned])
@@ -288,9 +301,53 @@ CMD:search(playerid, params[])
     return 1;
 }
 
-/*
-* Vehicle commands
-*/
+CMD:shop(playerid, params[])
+{
+    if(!player[playerid][spawned])
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You must be spawned to use this command.");
+    
+    new shopIndex = GetNearestShop(playerid);
+    
+    if(shopIndex == INVALID_SHOP_ID)
+        return SendClientMessage(playerid, COLOR_RED, "You are not near a shop. Look for the green 'Shop' text label.");
+    
+    ShowShopMenu(playerid, shopIndex);
+    return 1;
+}
+
+CMD:perks(playerid, params[])
+{
+    if(player[playerid][iszombie] == 1)
+    {
+        // Show zombie skill menu
+        new skillListZombie[256];
+
+        for (new i = 0; i < sizeof(zombieSkills); i++)
+        {
+            strcat(skillListZombie, zombieSkills[i]);
+            strcat(skillListZombie, "\n");
+        }
+
+        Dialog_Show(playerid, PerkMenu, DIALOG_STYLE_LIST, "Zombie Perks", skillListZombie, "Select", "Close");
+    }
+    else
+    {
+        // Show human skill menu
+        new skillListHuman[256];
+        for (new i = 0; i < sizeof(humanSkills); i++)
+        {
+            strcat(skillListHuman, humanSkills[i]);
+            strcat(skillListHuman, "\n");
+        }
+        Dialog_Show(playerid, PerkMenu, DIALOG_STYLE_LIST, "Human Perks", skillListHuman, "Select", "Close");
+    }
+    return 1;
+}
+
+// ============================================================================
+// VEHICLE COMMANDS
+// ============================================================================
+
 CMD:engine(playerid, params[])
 {
     if(player[playerid][iszombie] == 1)
@@ -336,9 +393,10 @@ CMD:fill(playerid, params[])
     return 1;
 }
 
-/*
-* Roleplay Chat Commands
-*/
+// ============================================================================
+// COMMUNICATION COMMANDS
+// ============================================================================
+
 CMD:s(playerid, params[])
 {
     if(isnull(params))
@@ -406,11 +464,13 @@ CMD:g(playerid, params[])
     return 1;
 }
 
-/*
-* Animation commands
-*/
+// ============================================================================
+// ANIMATION COMMANDS
+// ============================================================================
 
-// HANDSUP
+/*
+* GESTURES & ACTIONS
+*/
 CMD:handsup(playerid, params[])
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
@@ -420,7 +480,111 @@ CMD:handsup(playerid, params[])
 	return 1;
 }
 
-// CELLPHONE IN
+CMD:wave(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid, "ON_LOOKERS", "wave_loop", 4.0, 1, 0, 0, 0, 0); // Wave
+	return 1;
+}
+
+CMD:crossarms(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid, "COP_AMBIENT", "Coplook_loop", 4.0, 0, 1, 1, 1, -1); // Arms crossed
+	return 1;
+}
+
+CMD:laugh(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT)
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	OnePlayAnim(playerid, "RAPPING", "Laugh_01", 4.0, 0, 0, 0, 0, 0); // Laugh
+	return 1;
+}
+
+CMD:lookout(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	OnePlayAnim(playerid, "SHOP", "ROB_Shifty", 4.0, 0, 0, 0, 0, 0); // Rob Lookout
+	return 1;
+}
+
+CMD:fucku(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	OnePlayAnim(playerid,"PED","fucku",4.0,0,0,0,0,0);
+	return 1;
+}
+
+CMD:slapass(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	OnePlayAnim(playerid, "SWEET", "sweet_ass_slap", 4.0, 0, 0, 0, 0, 0); // Ass Slapping
+	return 1;
+}
+
+/*
+* SITTING & LAYING
+*/
+CMD:groundsit(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0); // Sit
+	return 1;
+}
+
+CMD:chairsit(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"BAR","dnk_stndF_loop",4.0,1,0,0,0,0);
+	return 1;
+}
+
+CMD:lay(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"BEACH", "bather", 4.0, 1, 0, 0, 0, 0); // Lay down
+	return 1;
+}
+
+CMD:inbedright(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"INT_HOUSE","BED_Loop_R",4.0,1,0,0,0,0);
+	return 1;
+}
+
+CMD:inbedleft(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"INT_HOUSE","BED_Loop_L",4.0,1,0,0,0,0);
+	return 1;
+}
+
+/*
+* PHONE & ITEMS
+*/
 CMD:cellin(playerid, params[])
 {
     if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
@@ -440,108 +604,9 @@ CMD:cellout(playerid, params[])
 	return 1;
 }
 
-// Drunk
-CMD:drunk(playerid, params[])
-{
-    if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"PED","WALK_DRUNK",4.0,1,1,1,1,0);
-	return 1;
-}
-
-// Place a Bomb
-CMD:bomb(playerid, params[])
-{
-    if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	ClearAnimations(playerid);
-	OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 4.0, 0, 0, 0, 0, 0); // Place Bomb
-	return 1;
-}
-
-// Police Arrest
-CMD:getarrested(playerid, params[])
-{
-    if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"ped", "ARRESTgun", 4.0, 0, 1, 1, 1, -1); // Gun Arrest
-	return 1;
-}
-
-// Laugh
-CMD:laugh(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT)
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	OnePlayAnim(playerid, "RAPPING", "Laugh_01", 4.0, 0, 0, 0, 0, 0); // Laugh
-	return 1;
-}
-
-// Rob Lookout
-CMD:lookout(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	OnePlayAnim(playerid, "SHOP", "ROB_Shifty", 4.0, 0, 0, 0, 0, 0); // Rob Lookout
-	return 1;
-}
-
-// Rob Threat
-CMD:robman(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid, "SHOP", "ROB_Loop_Threat", 4.0, 1, 0, 0, 0, 0); // Rob
-	return 1;
-}
-
-// Arms crossed
-CMD:crossarms(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid, "COP_AMBIENT", "Coplook_loop", 4.0, 0, 1, 1, 1, -1); // Arms crossed
-	return 1;
-}
-
-// Lay Down
-CMD:lay(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"BEACH", "bather", 4.0, 1, 0, 0, 0, 0); // Lay down
-	return 1;
-}
-
-// Take Cover
-CMD:hide(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid, "ped", "cower", 3.0, 1, 0, 0, 0, 0); // Taking Cover
-	return 1;
-}
-
-// Vomit
-CMD:vomit(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	OnePlayAnim(playerid, "FOOD", "EAT_Vomit_P", 3.0, 0, 0, 0, 0, 0); // Vomit BAH!
-	return 1;
-}
-
-// Eat
+/*
+* ACTIVITIES
+*/
 CMD:eat(playerid, params[])
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
@@ -551,47 +616,6 @@ CMD:eat(playerid, params[])
 	return 1;
 }
 
-// Wave
-CMD:wave(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid, "ON_LOOKERS", "wave_loop", 4.0, 1, 0, 0, 0, 0); // Wave
-	return 1;
-}
-
-// Slap Ass
-CMD:slapass(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	OnePlayAnim(playerid, "SWEET", "sweet_ass_slap", 4.0, 0, 0, 0, 0, 0); // Ass Slapping
-	return 1;
-}
-
-// Dealer
-CMD:deal(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	OnePlayAnim(playerid, "DEALER", "DEALER_DEAL", 4.0, 0, 0, 0, 0, 0); // Deal Drugs
-	return 1;
-}
-
-// Crack Dieing
-CMD:crack(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid, "CRACK", "crckdeth2", 4.0, 1, 0, 0, 0, 0); // Dieing of Crack
-	return 1;
-}
-
-// Male Smoking
 CMD:smokem(playerid, params[])
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
@@ -601,7 +625,6 @@ CMD:smokem(playerid, params[])
 	return 1;
 }
 
-// Female Smoking
 CMD:smokef(playerid, params[])
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
@@ -611,17 +634,6 @@ CMD:smokef(playerid, params[])
 	return 1;
 }
 
-// Sit
-CMD:groundsit(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"BEACH", "ParkSit_M_loop", 4.0, 1, 0, 0, 0, 0); // Sit
-	return 1;
-}
-
-// Idle Chat
 CMD:chat(playerid, params[])
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
@@ -631,58 +643,6 @@ CMD:chat(playerid, params[])
 	return 1;
 }
 
-// Fucku
-CMD:fucku(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	OnePlayAnim(playerid,"PED","fucku",4.0,0,0,0,0,0);
-	return 1;
-}
-
-// TaiChi
-CMD:taichi(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"PARK","Tai_Chi_Loop",4.0,1,0,0,0,0);
-	return 1;
-}
-
-// ChairSit
-CMD:chairsit(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"BAR","dnk_stndF_loop",4.0,1,0,0,0,0);
-	return 1;
-}
-
-// Would allow people to troll... but would be cool as a script controlled function - hence why they are not on the commands list
-// Bed Sleep R
-CMD:inbedright(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"INT_HOUSE","BED_Loop_R",4.0,1,0,0,0,0);
-	return 1;
-}
-
-// Bed Sleep L
-CMD:inbedleft(playerid, params[])
-{
-	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
-        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
-
-	LoopingAnim(playerid,"INT_HOUSE","BED_Loop_L",4.0,1,0,0,0,0);
-	return 1;
-}
-
-// START DANCING
 CMD:dance(playerid, params[])
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
@@ -706,37 +666,130 @@ CMD:dance(playerid, params[])
 	return 1;
 }
 
-/*
-* Perks/Skill commands
-*/
-CMD:perks(playerid, params[])
+CMD:taichi(playerid, params[])
 {
-    if(player[playerid][iszombie] == 1)
-    {
-        // Show zombie skill menu
-        new skillListZombie[256];
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
 
-        for (new i = 0; i < sizeof(zombieSkills); i++)
-        {
-            strcat(skillListZombie, zombieSkills[i]);
-            strcat(skillListZombie, "\n");
-        }
-
-        Dialog_Show(playerid, PerkMenu, DIALOG_STYLE_LIST, "Zombie Perks", skillListZombie, "Select", "Close");
-    }
-    else
-    {
-        // Show human skill menu
-        new skillListHuman[256];
-        for (new i = 0; i < sizeof(humanSkills); i++)
-        {
-            strcat(skillListHuman, humanSkills[i]);
-            strcat(skillListHuman, "\n");
-        }
-        Dialog_Show(playerid, PerkMenu, DIALOG_STYLE_LIST, "Human Perks", skillListHuman, "Select", "Close");
-    }
-    return 1;
+	LoopingAnim(playerid,"PARK","Tai_Chi_Loop",4.0,1,0,0,0,0);
+	return 1;
 }
+
+/*
+* SPECIAL/CRIMINAL
+*/
+CMD:robman(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid, "SHOP", "ROB_Loop_Threat", 4.0, 1, 0, 0, 0, 0); // Rob
+	return 1;
+}
+
+CMD:getarrested(playerid, params[])
+{
+    if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"ped", "ARRESTgun", 4.0, 0, 1, 1, 1, -1); // Gun Arrest
+	return 1;
+}
+
+CMD:graffiti(playerid, params[])
+{
+    if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"GRAFFITI","spraycan_fire",4.0,1,0,0,0,0);
+	return 1;
+}
+
+CMD:koface(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"PED","KO_shot_face",4.0,0,1,1,1,-1);
+	return 1;
+}
+
+CMD:kofront(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"PED","KO_shot_front",4.0,0,1,1,1,-1);
+	return 1;
+}
+
+CMD:koback(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"PED","KO_shot_stom",4.0,0,1,1,1,-1);
+	return 1;
+}
+
+CMD:drunk(playerid, params[])
+{
+    if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid,"PED","WALK_DRUNK",4.0,1,1,1,1,0);
+	return 1;
+}
+
+CMD:vomit(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	OnePlayAnim(playerid, "FOOD", "EAT_Vomit_P", 3.0, 0, 0, 0, 0, 0); // Vomit BAH!
+	return 1;
+}
+
+CMD:hide(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid, "ped", "cower", 3.0, 1, 0, 0, 0, 0); // Taking Cover
+	return 1;
+}
+
+CMD:bomb(playerid, params[])
+{
+    if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	ClearAnimations(playerid);
+	OnePlayAnim(playerid, "BOMBER", "BOM_Plant", 4.0, 0, 0, 0, 0, 0); // Place Bomb
+	return 1;
+}
+
+CMD:deal(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	OnePlayAnim(playerid, "DEALER", "DEALER_DEAL", 4.0, 0, 0, 0, 0, 0); // Deal Drugs
+	return 1;
+}
+
+CMD:crack(playerid, params[])
+{
+	if(GetPlayerState(playerid) != PLAYER_STATE_ONFOOT) 
+        return SendClientMessage(playerid, 0xAFAFAFAA, "You cannot use anims in the vehicles");
+
+	LoopingAnim(playerid, "CRACK", "crckdeth2", 4.0, 1, 0, 0, 0, 0); // Dieing of Crack
+	return 1;
+}
+
+// ============================================================================
+// ZOMBIE ABILITIES COMMANDS
+// ============================================================================
 
 CMD:bstr(playerid, params[])
 {

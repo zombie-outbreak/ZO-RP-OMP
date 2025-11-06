@@ -80,6 +80,7 @@ enum E_PLAYERS
     mechanicSkillLevel,
     medicSkillLevel,
     gourmetSkillLevel,
+    looterSkillLevel,
     
     // Zombie Perks
     unlockedHpIncreaseSkill,
@@ -220,7 +221,8 @@ new humanSkills[MAX_PERKS_HUM][] = {
     {"Tinkerer"},
     {"Mechanic"},
     {"Medic"},
-    {"Gourmet"}
+    {"Gourmet"},
+    {"Looter"}
 };
 
 /*

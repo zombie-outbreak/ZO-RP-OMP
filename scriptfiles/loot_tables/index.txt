@@ -1,0 +1,31 @@
+# Loot Table Index
+# 
+# This file lists all loot table XML files to be loaded by the server.
+# Files are loaded in the order listed here, which determines their SCAV_AREA ID:
+#   Line 1 (non-comment) = SCAV_AREA_SCRAP (ID: 0)
+#   Line 2 (non-comment) = SCAV_AREA_WEAPONS (ID: 1)
+#   Line 3 (non-comment) = SCAV_AREA_BODY (ID: 2)
+#   Line 4 (non-comment) = SCAV_AREA_FOODDRINK (ID: 3)
+#   Line 5 (non-comment) = SCAV_AREA_MEDICAL (ID: 4)
+#   Line 6 (non-comment) = SCAV_AREA_MONEY (ID: 5)
+#   Line 7 (non-comment) = SCAV_AREA_GASSTATION (ID: 6)
+#
+# To add a new loot table:
+# 1. Create the XML file in this directory
+# 2. Add the filename below (one per line)
+# 3. Use /reloadloottables in-game or restart server
+#
+# Lines starting with # are comments and will be ignored.
+# Empty lines are also ignored.
+
+# Core loot tables (DO NOT reorder these - scav areas depend on order!)
+scrap.xml
+weapons.xml
+body.xml
+food_drink.xml
+medical.xml
+money.xml
+gasstation.xml
+
+# Add new loot tables below this line
+# example_bunker.xml

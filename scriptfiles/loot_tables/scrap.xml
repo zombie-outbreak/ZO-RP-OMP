@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    LOOT TABLE: Scrap
+    Description: Common junk and crafting materials found in debris
+    Used by: SCAV_AREA_SCRAP scavenging areas
+-->
+<loottable>
+    <name>Scrap</name>
+    <description>Common junk and crafting materials</description>
+    
+    <!-- Each item has a weight (higher = more common) -->
+    <!-- The system calculates probability based on total weight -->
+    
+    <items>
+        <!-- Very Common (Weight: 30-50) -->
+        <item id="1" weight="50" min_quantity="1" max_quantity="5">Scrap</item>
+        <item id="30" weight="40" min_quantity="1" max_quantity="3">Scrap Cloth</item>
+        <item id="49" weight="35" min_quantity="1" max_quantity="2">Duct Tape</item>
+        <item id="48" weight="30" min_quantity="1" max_quantity="2">Rope</item>
+        
+        <!-- Common (Weight: 15-25) -->
+        <item id="47" weight="25" min_quantity="2" max_quantity="6">Battery</item>
+        <item id="50" weight="20" min_quantity="1" max_quantity="1">Matches</item>
+        <item id="51" weight="15" min_quantity="1" max_quantity="1">Lighter</item>
+        
+        <!-- Uncommon (Weight: 5-10) -->
+        <item id="24" weight="10" min_quantity="1" max_quantity="1">Empty Canteen</item>
+        <item id="46" weight="8" min_quantity="1" max_quantity="1">Flashlight</item>
+        <item id="60" weight="5" min_quantity="1" max_quantity="1">Compass</item>
+        
+        <!-- Rare (Weight: 1-3) -->
+        <item id="53" weight="3" min_quantity="1" max_quantity="1">Toolbox</item>
+        <item id="52" weight="2" min_quantity="1" max_quantity="1">Backpack</item>
+        <item id="4" weight="1" min_quantity="10" max_quantity="50">Money</item>
+    </items>
+</loottable>

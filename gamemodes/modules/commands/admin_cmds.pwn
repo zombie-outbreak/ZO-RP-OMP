@@ -25,45 +25,44 @@
 * - CMD:kick - Kick player from server
 * 
 * LEVEL 2 - MODERATOR:
-* - CMD:freeze - Freeze player
-* - CMD:unfreeze - Unfreeze player
-* - CMD:mute - Mute player
-* - CMD:unmute - Unmute player
-* - CMD:goto - Teleport to player
-* - CMD:gethere - Teleport player to you
-* - CMD:aarmour - Set player armour
-* - CMD:aheal - Heal player
+* - CMD:aban - Ban player account
 * 
-* LEVEL 3 - ADMIN:
-* - CMD:ban - Ban player
-* - CMD:unban - Unban account
-* - CMD:setlevel - Set player level
-* - CMD:givemoney - Give money to player
-* - CMD:giveitem - Give items to player
-* - CMD:setinterior - Change interior
-* - CMD:setvirtualworld - Change virtual world
+* LEVEL 3 - SENIOR ADMIN:
+* - CMD:ipban - Ban player by IP address
 * 
-* LEVEL 4 - SENIOR ADMIN:
-* - CMD:spawnvehicle - Spawn temporary vehicle
-* - CMD:deletevehicle - Delete spawned vehicle
-* - CMD:setskin - Change player skin
-* - CMD:setweather - Change weather
-* - CMD:settime - Change time
-* - CMD:createinterior - Create new interior
-* - CMD:createvendor - Create vending machine
+* LEVEL 4 - HEAD ADMIN:
+* - CMD:rconbanip - RCON ban an IP address
+* - CMD:unbanip - Unban an IP address
+* - CMD:giveplayeritem - Give items to player
+* - CMD:setplayeritem - Set player item quantity
+* - CMD:adminlogs - View recent admin action logs
+* - CMD:searchadminlogs - Search admin logs by username
+* - CMD:createshop - Create shop at your location
+* - CMD:deleteshop - Delete nearest shop
+* - CMD:editshop - Edit nearest shop's inventory
+* - CMD:setshopstock - Set item stock in shop
+* - CMD:listshops - List all shops
+* - CMD:gotoshop - Teleport to shop
 * 
-* LEVEL 5 - LEAD ADMIN:
-* - CMD:setadmin - Set admin level
-* - CMD:makechar - Create character for player
-* - CMD:deletechar - Delete player character
-* - CMD:createitem - Create new server item
-* - CMD:deleteitem - Delete server item
+* LEVEL 5 - MANAGEMENT:
 * - CMD:fly - Toggle flight mode (optional speed 1-15, default 8)
+* - CMD:createinterior - Create new interior
+* - CMD:icis - Interior creation steps
+* - CMD:setintvirworld - Set interior virtual world
+* - CMD:showinteriors - List all interiors
+* - CMD:cancelinterior - Cancel interior creation
+* - CMD:resetvworld - Reset your virtual world to 0
+* - CMD:scavcreate - Create scavenge area
+* - CMD:createitem - Create new server item
+* - CMD:reloadloottables - Reload loot tables from XML
+* - CMD:createpump - Create fuel pump
+* - CMD:reloadshops - Reload all shops from database
+* - CMD:heal - Heal yourself (TEST COMMAND)
 * 
 * DESCRIPTION:
 * Contains all administrative commands for server moderation and management.
 * Commands are level-restricted and include extensive permission checks.
-* All commands use ZCMD processor and log actions for accountability.
+* All commands use Pawn.CMD processor and log actions for accountability.
 */
 
 // ============================================================================
@@ -120,18 +119,12 @@ CMD:ahelp(playerid, params[])
             strcat(message, "{FFFFFF}MODERATION:\n");
             strcat(message, "{CCCCCC}- /slap [playerid] [reason] - Slap a player\n");
             strcat(message, "{CCCCCC}- /akill [playerid] [reason] - Kill a player\n");
-            strcat(message, "{CCCCCC}- /kick [playerid] [reason] - Kick a player from server\n\n");
-            
-            strcat(message, "{FFFFFF}TELEPORTATION:\n");
-            strcat(message, "{CCCCCC}- /mark - Save your current position\n");
-            strcat(message, "{CCCCCC}- /gotomark - Teleport to saved position\n");
-            strcat(message, "{CCCCCC}- /goto [playerid] - Teleport to a player\n");
-            strcat(message, "{CCCCCC}- /gethere [playerid] - Teleport player to you\n");
+            strcat(message, "{CCCCCC}- /kick [playerid] [reason] - Kick a player from server\n");
         }
-        case 2: // Admin
+        case 2: // Moderator
         {
-            format(title, sizeof(title), "Admin Commands - Level 2: Admin");
-            strcat(message, "{FF0000}=== LEVEL 2 - ADMIN ===\n\n");
+            format(title, sizeof(title), "Admin Commands - Level 2: Moderator");
+            strcat(message, "{FF0000}=== LEVEL 2 - MODERATOR ===\n\n");
             strcat(message, "{FFFFFF}BANNING:\n");
             strcat(message, "{CCCCCC}- /aban [playerid] [reason] - Ban player's account\n\n");
             
@@ -157,12 +150,20 @@ CMD:ahelp(playerid, params[])
             strcat(message, "{CCCCCC}- /unbanip [ip] - Unban an IP address\n\n");
             
             strcat(message, "{FFFFFF}ITEMS:\n");
-            strcat(message, "{CCCCCC}- /giveplayeritem [id] [itemid] [amount] - Give item to player\n");
-            strcat(message, "{CCCCCC}- /setplayeritem [id] [itemid] [amount] - Set item quantity\n\n");
-            
+            strcat(message, "{CCCCCC}- /giveplayeritem [playerid] [itemid] [amount] - Give item to player\n");
+            strcat(message, "{CCCCCC}- /setplayeritem [playerid] [itemid] [amount] - Set item quantity\n\n");
+
             strcat(message, "{FFFFFF}LOGS:\n");
             strcat(message, "{CCCCCC}- /adminlogs - View recent admin action logs\n");
             strcat(message, "{CCCCCC}- /searchadminlogs [username] - Search admin logs by admin\n\n");
+            
+            strcat(message, "{FFFFFF}SHOPS:\n");
+            strcat(message, "{CCCCCC}- /createshop [skin] - Create shop at your location\n");
+            strcat(message, "{CCCCCC}- /deleteshop - Delete nearest shop\n");
+            strcat(message, "{CCCCCC}- /editshop - Edit nearest shop's inventory\n");
+            strcat(message, "{CCCCCC}- /setshopstock [itemname] [qty] - Set item stock\n");
+            strcat(message, "{CCCCCC}- /listshops - List all shops\n");
+            strcat(message, "{CCCCCC}- /gotoshop [id] - Teleport to shop\n\n");
             
             strcat(message, "{AAAAAA}All Level 1-3 commands are also available.\n");
             strcat(message, "{AAAAAA}Use /ahelp [1-3] to view those commands.\n");
@@ -172,7 +173,7 @@ CMD:ahelp(playerid, params[])
             format(title, sizeof(title), "Admin Commands - Level 5: Management");
             strcat(message, "{FF0000}=== LEVEL 5 - MANAGEMENT ===\n\n");
             strcat(message, "{FFFFFF}UTILITY:\n");
-            strcat(message, "{FFFF00}- /fly - Toggle fly mode\n");
+            strcat(message, "{FFFF00}- /fly [speed] - Toggle fly mode (speed 1-15, default 8)\n");
             strcat(message, "{FFFF00}- /resetvworld - Reset your virtual world to 0\n");
             strcat(message, "{FFFF00}- /heal - Heal yourself (TEST COMMAND)\n\n");
             
@@ -187,17 +188,12 @@ CMD:ahelp(playerid, params[])
             strcat(message, "{FFFF00}- /scavcreate [type] - Create scavenge area\n");
             strcat(message, "{FFFF00}- /createpump - Create fuel pump at position\n\n");
             
-            strcat(message, "{FFFFFF}ITEMS & CRAFTING:\n");
+            strcat(message, "{FFFFFF}ITEMS & LOOT:\n");
             strcat(message, "{FFFF00}- /createitem - Create a new item\n");
-            strcat(message, "{FFFF00}- /addrecipe - Add crafting recipe\n");
-            strcat(message, "{FFFF00}- /createloottable [name] - Create loot table\n");
-            strcat(message, "{FFFF00}- /loottables - View all loot tables\n\n");
+            strcat(message, "{FFFF00}- /reloadloottables - Reload loot tables from XML\n\n");
             
-            strcat(message, "{FFFFFF}TERRITORIES:\n");
-            strcat(message, "{FFFF00}- /createterritory [name] [coords] - Create territory\n");
-            strcat(message, "{FFFF00}- /deleteterritory [name] - Delete territory\n");
-            strcat(message, "{FFFF00}- /editterritory [name] [option] [value] - Edit territory\n");
-            strcat(message, "{FFFF00}- /setterritoryowner [territory] [faction] - Set owner\n\n");
+            strcat(message, "{FFFFFF}SHOPS:\n");
+            strcat(message, "{FFFF00}- /reloadshops - Reload all shops from database\n\n");
             
             strcat(message, "{AAAAAA}All Level 1-4 commands are also available.\n");
             strcat(message, "{AAAAAA}Use /ahelp [1-4] to view those commands.\n");
@@ -209,10 +205,10 @@ CMD:ahelp(playerid, params[])
     return 1;
 }
 
-/*
-* Moderator
-* Level: 1
-*/
+// ============================================================================
+// LEVEL 1 - TRIAL ADMIN COMMANDS
+// ============================================================================
+
 CMD:a(playerid, params[])
 {
     if(player[playerid][admin] < 1)
@@ -297,92 +293,11 @@ CMD:kick(playerid, params[])
 	return 1;
 }
 
-CMD:mark(playerid, params[])
-{
-	if(player[playerid][admin] < 1)
-		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
+// ============================================================================
+// LEVEL 2 - MODERATOR COMMANDS
+// ============================================================================
 
-	GetPlayerPos(playerid, player[playerid][adminPos][0], player[playerid][adminPos][1], player[playerid][adminPos][2]);
-	GetPlayerFacingAngle(playerid, player[playerid][adminPos][3]);
-
-	PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0);
-	SendClientMessage(playerid, COLOR_ADMINMSG, "Saved current location.");
-	return 1;
-}
-
-CMD:gotomark(playerid, params[])
-{
-	if(player[playerid][admin] < 1)
-		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-
-	SetPlayerPos(playerid, player[playerid][adminPos][0], player[playerid][adminPos][1], player[playerid][adminPos][2]);
-	SetPlayerFacingAngle(playerid, player[playerid][adminPos][3]);
-	PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0);
-	SendClientMessage(playerid, COLOR_ADMINMSG, "You teleported to your last saved location.");
-    return 1;
-}
-
-CMD:goto(playerid, params[])
-{
-    new targetId;
-
-    if(player[playerid][admin] < 1)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-        
-    if(sscanf(params, "d", targetId))
-		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "USAGE: /goto [playerid]");
-
-    if(!IsPlayerConnected(targetId))
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Invalid player ID given.");
-
-    new Float:tmpPPos[3], tmpInt, tmpVirWorld;
-    GetPlayerPos(targetId, tmpPPos[0], tmpPPos[1], tmpPPos[2]);
-    tmpInt = GetPlayerInterior(targetId);
-    tmpVirWorld = GetPlayerVirtualWorld(targetId);
-
-    SetPlayerPos(playerid, tmpPPos[0], tmpPPos[1], tmpPPos[2]);
-    SetPlayerInterior(playerid, tmpInt);
-    SetPlayerVirtualWorld(playerid, tmpVirWorld);
-
-    SendClientMessage(targetId, COLOR_ADMINMSG, "%s has teleported to you!", player[playerid][Name]);
-	SendClientMessage(playerid, COLOR_ADMINMSG, "You teleported to %s's location!", player[targetId][Name]);
-	LogAdminCommand(playerid, "goto", "N/A", targetId);
-    return 1;
-}
-
-CMD:gethere(playerid, params[])
-{
-    new targetId;
-
-    if(player[playerid][admin] < 1)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-        
-    if(sscanf(params, "d", targetId))
-		return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "USAGE: /gethere [playerid]");
-
-    if(!IsPlayerConnected(targetId))
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Invalid player ID given.");
-
-    new Float:tmpPPos[3], tmpInt, tmpVirWorld;
-    GetPlayerPos(playerid, tmpPPos[0], tmpPPos[1], tmpPPos[2]);
-    tmpInt = GetPlayerInterior(playerid);
-    tmpVirWorld = GetPlayerVirtualWorld(playerid);
-
-    SetPlayerPos(targetId, tmpPPos[0], tmpPPos[1], tmpPPos[2]);
-    SetPlayerInterior(targetId, tmpInt);
-    SetPlayerVirtualWorld(targetId, tmpVirWorld);
-
-    SendClientMessage(targetId, COLOR_ADMINMSG, "%s has teleported you to them!", player[playerid][Name]);
-	SendClientMessage(playerid, COLOR_ADMINMSG, "You teleported %s to your location!", player[targetId][Name]);
-	LogAdminCommand(playerid, "gethere", "N/A", targetId);
-    return 1;
-}
-
-/*
-* Junior Admin
-* Level: 2
-*/
-CMD:aban(playerid, params[]) // account banning
+CMD:aban(playerid, params[])
 {
     new id, reason[76];
 
@@ -406,11 +321,11 @@ CMD:aban(playerid, params[]) // account banning
 	return 1;
 }
 
-/*
-* Admin
-* Level: 3
-*/
-CMD:ipban(playerid, params[]) // ip banning
+// ============================================================================
+// LEVEL 3 - SENIOR ADMIN COMMANDS
+// ============================================================================
+
+CMD:ipban(playerid, params[])
 {
     new id, reason[76];
 
@@ -429,10 +344,10 @@ CMD:ipban(playerid, params[]) // ip banning
 	return 1;
 }
 
-/*
-* Senior Admin
-* Level: 4
-*/
+// ============================================================================
+// LEVEL 4 - HEAD ADMIN COMMANDS
+// ============================================================================
+
 CMD:rconbanip(playerid, params[])
 {
     new tmpIP[16];
@@ -542,10 +457,206 @@ CMD:searchadminlogs(playerid, params[])
     return 1;
 }
 
+CMD:createshop(playerid, params[])
+{
+    if(player[playerid][admin] < 4)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You don't have permission to use this command.");
+    
+    new tmpSkin;
+    if(sscanf(params, "d", tmpSkin))
+        return SendClientMessage(playerid, COLOR_GREY, "USAGE: /createshop [skin]");
+    
+    if(tmpSkin < 0 || tmpSkin > 311)
+        return SendClientMessage(playerid, COLOR_RED, "Invalid skin ID (0-311).");
+    
+    new Float:x, Float:y, Float:z, Float:a;
+    GetPlayerPos(playerid, x, y, z);
+    GetPlayerFacingAngle(playerid, a);
+    new interior = GetPlayerInterior(playerid);
+    new virtualworld = GetPlayerVirtualWorld(playerid);
+    
+    new shopIndex = CreateShop(x, y, z, a, interior, virtualworld, tmpSkin);
+    
+    if(shopIndex == INVALID_SHOP_ID)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Failed to create shop. Shop limit may be reached.");
+        return 1;
+    }
+    
+    new message[128];
+    format(message, sizeof(message), "Shop ID %d created successfully. Use /editshop to set inventory.", 
+        shopInfo[shopIndex][shopId]);
+    SendClientMessage(playerid, COLOR_GREEN, message);
+    
+    return 1;
+}
+
+CMD:deleteshop(playerid, params[])
+{
+    if(player[playerid][admin] < 4)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You don't have permission to use this command.");
+    
+    new shopIndex = GetNearestShop(playerid);
+    
+    if(shopIndex == INVALID_SHOP_ID)
+        return SendClientMessage(playerid, COLOR_RED, "You are not near a shop.");
+    
+    new tmpShopId = shopInfo[shopIndex][shopId];
+    
+    if(DeleteShop(shopIndex))
+    {
+        new message[64];
+        format(message, sizeof(message), "Shop ID %d deleted successfully.", tmpShopId);
+        SendClientMessage(playerid, COLOR_GREEN, message);
+    }
+    else
+    {
+        SendClientMessage(playerid, COLOR_RED, "Failed to delete shop.");
+    }
+    
+    return 1;
+}
+
+CMD:editshop(playerid, params[])
+{
+    if(player[playerid][admin] < 4)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You don't have permission to use this command.");
+    
+    new shopIndex = GetNearestShop(playerid);
+    
+    if(shopIndex == INVALID_SHOP_ID)
+        return SendClientMessage(playerid, COLOR_RED, "You are not near a shop.");
+    
+    playerCurrentShop[playerid] = shopIndex;
+    
+    // Show edit menu
+    ShowShopEditMenu(playerid, shopIndex);
+    
+    return 1;
+}
+
 /*
-* Server Management
-* Level: 5
+* Show shop edit menu to admin
 */
+ShowShopEditMenu(playerid, shopIndex)
+{
+    if(shopIndex < 0 || shopIndex >= totalShops) return 0;
+    
+    new dialog[2048];
+    new title[64];
+    
+    format(title, sizeof(title), "Edit Shop ID %d", shopInfo[shopIndex][shopId]);
+    strcat(dialog, "{FFFFFF}Item\t{FFFF00}Current Stock\n");
+    
+    for(new i = 1; i < MAX_ITEMS; i++)
+    {
+        new line[128];
+        format(line, sizeof(line), "%s\t{FFFF00}%d\n",
+            inventoryItems[i][itemNameSingular],
+            shopInfo[shopIndex][shopInventory][i]
+        );
+        strcat(dialog, line);
+    }
+    
+    Dialog_Show(playerid, DIALOG_SHOP_EDIT, DIALOG_STYLE_TABLIST_HEADERS, title, dialog, "Edit", "Close");
+    return 1;
+}
+
+CMD:setshopstock(playerid, params[])
+{
+    if(player[playerid][admin] < 4)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You don't have permission to use this command.");
+    
+    new itemName[64], quantity;
+    if(sscanf(params, "s[64]d", itemName, quantity))
+        return SendClientMessage(playerid, COLOR_GREY, "USAGE: /setshopstock [itemname] [quantity]");
+    
+    new shopIndex = GetNearestShop(playerid);
+    
+    if(shopIndex == INVALID_SHOP_ID)
+        return SendClientMessage(playerid, COLOR_RED, "You are not near a shop.");
+    
+    new tmpItemId = ReturnItemIdByName(itemName);
+    
+    if(tmpItemId == 0)
+        return SendClientMessage(playerid, COLOR_RED, "Invalid item name.");
+    
+    if(quantity < 0)
+        return SendClientMessage(playerid, COLOR_RED, "Quantity must be 0 or greater.");
+    
+    shopInfo[shopIndex][shopInventory][tmpItemId] = quantity;
+    UpdateShopInventoryInDatabase(shopIndex, tmpItemId);
+    
+    new message[128];
+    format(message, sizeof(message), "Shop stock updated: %s = %d", 
+        inventoryItems[tmpItemId][itemNameSingular], quantity);
+    SendClientMessage(playerid, COLOR_GREEN, message);
+    
+    return 1;
+}
+
+CMD:listshops(playerid, params[])
+{
+    if(player[playerid][admin] < 4)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You don't have permission to use this command.");
+    
+    if(totalShops == 0)
+    {
+        SendClientMessage(playerid, COLOR_GREY, "No shops exist.");
+        return 1;
+    }
+    
+    new dialog[2048];
+    format(dialog, sizeof(dialog), "{FFFFFF}ID\t{FFFF00}Location\t{00FF00}Interior/VW\n");
+    
+    for(new i = 0; i < totalShops; i++)
+    {
+        new line[128];
+        format(line, sizeof(line), "{FFFFFF}%d\t{FFFF00}%.1f, %.1f, %.1f\t{00FF00}%d/%d\n",
+            shopInfo[i][shopId],
+            shopInfo[i][shopX],
+            shopInfo[i][shopY],
+            shopInfo[i][shopZ],
+            shopInfo[i][shopInterior],
+            shopInfo[i][shopVirtualWorld]
+        );
+        strcat(dialog, line);
+    }
+    
+    Dialog_Show(playerid, DIALOG_SHOP_LIST, DIALOG_STYLE_TABLIST_HEADERS, "Shops List", dialog, "Teleport", "Close");
+    
+    return 1;
+}
+
+CMD:gotoshop(playerid, params[])
+{
+    if(player[playerid][admin] < 4)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You don't have permission to use this command.");
+    
+    new tmpShopId;
+    if(sscanf(params, "d", tmpShopId))
+        return SendClientMessage(playerid, COLOR_GREY, "USAGE: /gotoshop [id]");
+    
+    new shopIndex = GetShopIndexById(tmpShopId);
+    
+    if(shopIndex == INVALID_SHOP_ID)
+        return SendClientMessage(playerid, COLOR_RED, "Invalid shop ID.");
+    
+    SetPlayerPos(playerid, shopInfo[shopIndex][shopX], shopInfo[shopIndex][shopY], shopInfo[shopIndex][shopZ]);
+    SetPlayerInterior(playerid, shopInfo[shopIndex][shopInterior]);
+    SetPlayerVirtualWorld(playerid, shopInfo[shopIndex][shopVirtualWorld]);
+    
+    new message[64];
+    format(message, sizeof(message), "Teleported to shop ID %d.", tmpShopId);
+    SendClientMessage(playerid, COLOR_GREEN, message);
+    
+    return 1;
+}
+
+// ============================================================================
+// LEVEL 5 - MANAGEMENT COMMANDS
+// ============================================================================
+
 CMD:fly(playerid, params[])
 {
     if(player[playerid][admin] < 5)
@@ -833,29 +944,13 @@ CMD:createitem(playerid, params[])
     return 1;
 }
 
-CMD:createloottable(playerid, params[])
-{
-    new tmpTableName[32];
-    
-    if(player[playerid][admin] < 5)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
-    
-    if(sscanf(params, "s[32]", tmpTableName)) 
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Syntax error. Correct usage: /createloottable [name]");
-        
-    if(lootTableCount >= MAX_LOOT_TABLES)
-        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "The server has reached its maximum amount of loot tables.");
-    
-    CreateServerLootTable(tmpTableName);
-    return 1;
-}
-
-CMD:loottables(playerid, params[])
+CMD:reloadloottables(playerid, params[])
 {
     if(player[playerid][admin] < 5)
         return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
         
-    PopulateLootTableList(playerid);
+    new count = LoadLootTablesFromXML();
+    SendClientMessageToAll(COLOR_SYSTEM, "Admin %s has reloaded %d loot tables from XML.", player[playerid][Name], count);
     return 1;
 }
 
@@ -870,6 +965,28 @@ CMD:createpump(playerid, params[])
     new Float:tmpPos[3];
     GetPlayerPos(playerid, tmpPos[0], tmpPos[1], tmpPos[2]);
     CreateFuelPump(tmpPos[0], tmpPos[1], tmpPos[2]);
+    return 1;
+}
+
+CMD:reloadshops(playerid, params[])
+{
+    if(player[playerid][admin] < 5)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You don't have permission to use this command.");
+    
+    // Destroy all current shops
+    for(new i = 0; i < MAX_SHOPS; i++)
+    {
+        DestroyShopActor(i);
+    }
+    
+    // Reload from database
+    for(new i = 0; i < MAX_SHOPS; i++)
+    {
+        LoadShops(i);
+    }
+
+    SendClientMessage(playerid, COLOR_GREEN, "All shops reloaded from database.");
+    
     return 1;
 }
 
@@ -892,4 +1009,5 @@ CMD:heal(playerid, params[])
     UpdateHudElementForPlayer(playerid, HUD_DISEASE);
 	return 1;
 }
+
 #endif // MODULE_ADMIN_COMMANDS_INCLUDED

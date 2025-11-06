@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    LOOT TABLE: Weapons and Ammo
+    Description: Firearms, melee weapons, and ammunition
+    Used by: SCAV_AREA_WEAPONS scavenging areas
+-->
+<loottable>
+    <name>Weapons and Ammo</name>
+    <description>Firearms, melee weapons, and ammunition</description>
+    
+    <items>
+        <!-- Ammunition - Most Common (Weight: 40-60) -->
+        <item id="7" weight="60" min_quantity="5" max_quantity="20">9mm Round</item>
+        <item id="9" weight="50" min_quantity="3" max_quantity="15">12 Gauge Shell</item>
+        <item id="18" weight="40" min_quantity="2" max_quantity="10">.44 Round</item>
+        <item id="35" weight="35" min_quantity="3" max_quantity="12">7.62mm Round</item>
+        <item id="37" weight="30" min_quantity="3" max_quantity="12">5.56mm Round</item>
+        
+        <!-- Melee Weapons - Common (Weight: 20-35) -->
+        <item id="5" weight="35" min_quantity="1" max_quantity="1">Baseball Bat</item>
+        <item id="16" weight="30" min_quantity="1" max_quantity="1">Shovel</item>
+        <item id="31" weight="25" min_quantity="1" max_quantity="1">Knife</item>
+        <item id="29" weight="20" min_quantity="1" max_quantity="1">Nite Stick</item>
+        
+        <!-- Basic Firearms - Uncommon (Weight: 10-18) -->
+        <item id="6" weight="18" min_quantity="1" max_quantity="1">9mm Pistol</item>
+        <item id="8" weight="15" min_quantity="1" max_quantity="1">Shotgun</item>
+        <item id="15" weight="12" min_quantity="1" max_quantity="1">Uzi</item>
+        <item id="17" weight="10" min_quantity="1" max_quantity="1">Desert Eagle</item>
+        
+        <!-- Advanced Firearms - Rare (Weight: 3-8) -->
+        <item id="33" weight="8" min_quantity="1" max_quantity="1">Silenced Pistol</item>
+        <item id="40" weight="6" min_quantity="1" max_quantity="1">Hunting Rifle</item>
+        <item id="34" weight="5" min_quantity="1" max_quantity="1">AK-47</item>
+        <item id="36" weight="4" min_quantity="1" max_quantity="1">M4</item>
+        
+        <!-- Special/Very Rare (Weight: 1-2) -->
+        <item id="39" weight="10" min_quantity="1" max_quantity="5">Sniper Round</item>
+        <item id="32" weight="3" min_quantity="1" max_quantity="1">Chainsaw</item>
+        <item id="38" weight="2" min_quantity="1" max_quantity="1">Sniper Rifle</item>
+        <item id="57" weight="1" min_quantity="1" max_quantity="1">Body Armor</item>
+    </items>
+</loottable>

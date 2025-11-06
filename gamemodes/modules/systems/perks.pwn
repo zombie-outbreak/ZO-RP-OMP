@@ -18,6 +18,7 @@
 * - TryUnlockMechanicPerk() - Unlock/upgrade mechanic perk (5 levels, 5% repair discount)
 * - TryUnlockMedicPerk() - Unlock/upgrade medic perk (5 levels, 2% healing boost per level)
 * - TryUnlockGourmetPerk() - Unlock/upgrade gourmet perk (5 levels, 2% food/drink boost per level)
+* - TryUnlockLooterPerk() - Unlock/upgrade looter perk (5 levels, 15% base -> 65% at max level)
 * 
 * Zombie Perks:
 * - TryUpgradeHpSkill() - Increase max HP by 10% (5 levels)
@@ -270,6 +271,60 @@ TryUnlockGourmetPerk(playerid)
                 SendClientMessage(playerid, COLOR_GREEN, "Gourmet skill 4/5 - 8% increased benefits from food and drink");
         case 5: SendClientMessage(playerid, COLOR_RP_PURPLE, "You are a survival gourmet, able to thrive on minimal rations."),
                 SendClientMessage(playerid, COLOR_GREEN, "Gourmet skill 5/5 - 10% increased benefits from food and drink");
+    }
+    return 1;
+}
+
+TryUnlockLooterPerk(playerid)
+{
+    if (player[playerid][looterSkillLevel] >= 5)
+    {
+        SendClientMessage(playerid, COLOR_YELLOW, "You have already unlocked the maximum level of this skill.");
+        return 0;
+    }
+
+    // Calculate required points for next level (level 1 = 1 point, level 2 = 2 points, etc.)
+    new nextLevel = player[playerid][looterSkillLevel] + 1;
+    new requiredPoints = nextLevel;
+
+    // Check if player has enough perk points
+    if (player[playerid][perkPoints] < requiredPoints)
+    {
+        new string[128];
+        format(string, sizeof(string), "You need %d perk point%s to unlock level %d of this skill.", 
+            requiredPoints, (requiredPoints == 1) ? "" : "s", nextLevel);
+        SendClientMessage(playerid, COLOR_YELLOW, string);
+        return 0;
+    }
+
+    // Reduce perk points
+    player[playerid][perkPoints] -= requiredPoints;
+
+    // Increase the looter skill level by 1
+    player[playerid][looterSkillLevel]++;
+
+    // Update database
+    new query[256];
+    mysql_format(database, query, sizeof(query),
+        "UPDATE `characters` SET `looterskilllevel` = `looterskilllevel` + 1, `perkpoints` = `perkpoints` - %d WHERE `owner` = %d AND `name` = '%e'",
+        requiredPoints, player[playerid][ID], player[playerid][chosenChar]);
+    mysql_tquery(database, query);
+
+    // Update HUD to show new perk points
+    UpdateHudElementForPlayer(playerid, HUD_INFO);
+
+    switch (player[playerid][looterSkillLevel])
+    {
+        case 1: SendClientMessage(playerid, COLOR_RP_PURPLE, "You've learned to spot useful items more easily."),
+                SendClientMessage(playerid, COLOR_GREEN, "Looter skill 1/5 - 30% success rate when scavenging");
+        case 2: SendClientMessage(playerid, COLOR_RP_PURPLE, "Your trained eye rarely misses hidden supplies."),
+                SendClientMessage(playerid, COLOR_GREEN, "Looter skill 2/5 - 40% success rate when scavenging");
+        case 3: SendClientMessage(playerid, COLOR_RP_PURPLE, "You can find valuable items where others see nothing."),
+                SendClientMessage(playerid, COLOR_GREEN, "Looter skill 3/5 - 50% success rate when scavenging");
+        case 4: SendClientMessage(playerid, COLOR_RP_PURPLE, "Your scavenging instincts are finely honed."),
+                SendClientMessage(playerid, COLOR_GREEN, "Looter skill 4/5 - 58% success rate when scavenging");
+        case 5: SendClientMessage(playerid, COLOR_RP_PURPLE, "You are a master scavenger, finding treasures in the wasteland."),
+                SendClientMessage(playerid, COLOR_GREEN, "Looter skill 5/5 - 65% success rate when scavenging");
     }
     return 1;
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    LOOT TABLE: Medical
+    Description: Medical supplies and health items
+    Used by: SCAV_AREA_MEDICAL scavenging areas
+-->
+<loottable>
+    <name>Medical</name>
+    <description>Medical supplies found in hospitals, clinics, and first aid stations</description>
+    
+    <items>
+        <!-- Very Common Basic Supplies (Weight: 60-90) -->
+        <item id="5" weight="90" min_quantity="2" max_quantity="5">Bandage</item>
+        <item id="48" weight="75" min_quantity="1" max_quantity="3">Painkillers</item>
+        <item id="30" weight="60" min_quantity="1" max_quantity="4">Scrap Cloth</item>
+        
+        <!-- Common Medical Items (Weight: 30-50) -->
+        <item id="6" weight="50" min_quantity="1" max_quantity="2">Gauze</item>
+        <item id="7" weight="40" min_quantity="1" max_quantity="2">Adhesive Bandage</item>
+        <item id="49" weight="35" min_quantity="1" max_quantity="1">Disinfectant</item>
+        <item id="34" weight="30" min_quantity="1" max_quantity="2">Duct Tape</item>
+        
+        <!-- Uncommon Medical Gear (Weight: 15-25) -->
+        <item id="8" weight="25" min_quantity="1" max_quantity="1">Medical Kit</item>
+        <item id="40" weight="20" min_quantity="1" max_quantity="1">Splint</item>
+        <item id="37" weight="18" min_quantity="1" max_quantity="1">First Aid Kit</item>
+        <item id="38" weight="15" min_quantity="1" max_quantity="2">Morphine</item>
+        
+        <!-- Rare Antibiotics &amp; Advanced Items (Weight: 5-10) -->
+        <item id="39" weight="10" min_quantity="1" max_quantity="1">Antibiotics</item>
+        <item id="9" weight="8" min_quantity="1" max_quantity="1">Suture Kit</item>
+        <item id="57" weight="6" min_quantity="1" max_quantity="1">Blood Bag</item>
+        <item id="36" weight="5" min_quantity="1" max_quantity="1">Adrenaline Shot</item>
+        
+        <!-- Very Rare Specialized Equipment (Weight: 1-3) -->
+        <item id="58" weight="3" min_quantity="1" max_quantity="1">Defibrillator</item>
+        <item id="59" weight="2" min_quantity="1" max_quantity="1">Surgery Kit</item>
+        <item id="47" weight="1" min_quantity="1" max_quantity="1">Battery</item>
+    </items>
+</loottable>

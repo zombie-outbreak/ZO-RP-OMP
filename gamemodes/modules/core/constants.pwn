@@ -84,6 +84,11 @@
 #define MAX_VENDORS 20
 #define MAX_LOOT_TABLES 50
 
+// Shop System
+#define MAX_SHOPS 100
+#define INVALID_SHOP_ID -1
+#define SHOP_INTERACTION_RANGE 2.0
+
 // Inventory Categories
 #define INV_CATEGORY_UNKNOWN -1
 #define CATEGORY_GENERAL 0
@@ -193,11 +198,12 @@
 // ============================================================================
 
 // Human Perks
-#define MAX_PERKS_HUM 4
+#define MAX_PERKS_HUM 5
 #define H_PERK_TINKERER 0
 #define H_PERK_MECHANIC 1
 #define H_PERK_MEDIC 2
 #define H_PERK_GOURMET 3
+#define H_PERK_LOOTER 4
 
 // Zombie Perks
 #define MAX_PERKS_ZOM 11

@@ -55,6 +55,13 @@
 * - OnFuelPumpLoaded(pumpId) - Load fuel pump data
 * - OnFuelPumpCountLoaded() - Count total fuel pumps
 * 
+* SHOP SYSTEM:
+* - LoadShops(shopid) - Load shop from database by ID
+* - OnShopsLoaded(shopid) - Shop data load callback
+* - SaveShopToDatabase(shopIndex) - Save/update shop to database
+* - UpdateShopInventoryInDatabase(shopIndex, itemid) - Update single item in shop inventory
+* - DeleteShopFromDatabase(shopid) - Delete shop from database
+* 
 * ADMIN/LOGGING:
 * - OnAdminLogsRetrieved(adminid, limit) - Retrieve admin action logs
 * 
@@ -781,6 +788,7 @@ public OnServerItemLoaded(item)
         inventoryItems[item][isUsable] = bool:tempInt;
         
         cache_get_value_name_int(0, "maxresource", inventoryItems[item][itemMaxResource]);
+        cache_get_value_name_int(0, "itemvalue", inventoryItems[item][itemValue]);
     }
     return 1;
 }
@@ -800,20 +808,16 @@ CreateServerItem(const nameSingular[], const namePlural[], const itemDesc[], cat
 }
 
 /*
-* Loot Tables
-*/
-CreateServerLootTable(const tableName[])
-{
-    new query[256];
-    mysql_format(database, query, sizeof(query), 
-        "INSERT INTO `loottable` (`name`) VALUES ('%e')", tableName);
-    mysql_tquery(database, query);
+ * ============================================================================
+ * DEPRECATED LOOT TABLE FUNCTIONS
+ * ============================================================================
+ * These functions are no longer used as of the XML loot table system migration.
+ * They have been commented out but preserved for reference.
+ * The new system uses LoadLootTablesFromXML() in modules/systems/inventory.pwn
+ * ============================================================================
+ */
 
-    // update the array size
-    lootTableCount = lootTableCount + 1;
-    return 1;
-}
-
+/*
 LoadServerLootTable(lootTableId)
 {
     new query[256];
@@ -906,6 +910,7 @@ public OnLootTableChanceListLoaded(playerid)
     ShowPlayerDialogPages(playerid, "ShowLootTableChanceList", DIALOG_STYLE_LIST, "Select an Item ID to edit", "Select", "Quit", 10);
     return 1;
 }
+*/
 
 /*
 * Character Inventory
@@ -1278,5 +1283,130 @@ public OnShowInteriorsList(playerid)
     ShowPlayerDialogPages(playerid, "ShowInteriorsDialog", DIALOG_STYLE_LIST, "Server Interiors", "Select", "Close", 15);
     return 1;
 }
+
+// ============================================================================
+// SHOP DATABASE FUNCTIONS
+// ============================================================================
+
+/*
+* Load shop from database by ID
+*/
+LoadShops(shopid)
+{
+    new query[256];
+    mysql_format(database, query, sizeof(query), 
+        "SELECT * FROM `shops` WHERE `id` = %d LIMIT 1", shopid);
+    mysql_tquery(database, query, "OnShopsLoaded", "d", shopid);
+    return 1;
+}
+
+forward OnShopsLoaded(shopid);
+public OnShopsLoaded(shopid)
+{
+    if(cache_num_rows() > 0)
+    {
+        cache_get_value_name_int(0, "id", shopInfo[shopid][shopId]);
+        cache_get_value_name_int(0, "actor_skin", shopInfo[shopid][shopActorSkin]);
+        cache_get_value_name_float(0, "shopx", shopInfo[shopid][shopX]);
+        cache_get_value_name_float(0, "shopy", shopInfo[shopid][shopY]);
+        cache_get_value_name_float(0, "shopz", shopInfo[shopid][shopZ]);
+        cache_get_value_name_float(0, "shopa", shopInfo[shopid][shopA]);
+        cache_get_value_name_int(0, "shopint", shopInfo[shopid][shopInterior]);
+        cache_get_value_name_int(0, "shopworld", shopInfo[shopid][shopVirtualWorld]);
+        
+        // Load shop money (default to 1000 if column doesn't exist yet)
+        new money;
+        cache_get_value_name_int(0, "money", money);
+        shopInfo[shopid][shopMoney] = (money > 0) ? money : 1000;
+        
+        // Load inventory for each item
+        for(new j = 1; j < MAX_ITEMS; j++)
+        {
+            new fieldName[16];
+            format(fieldName, sizeof(fieldName), "item%d", j);
+            cache_get_value_name_int(0, fieldName, shopInfo[shopid][shopInventory][j]);
+        }
+        
+        // Create actor for shop
+        CreateShopActor(shopid);
+        
+        // Track total shops loaded
+        if(shopid >= totalShops)
+        {
+            totalShops = shopid + 1;
+        }
+    }
+    return 1;
+}
+
+/*
+* Save shop to database
+*/
+SaveShopToDatabase(shopIndex)
+{
+    if(shopIndex < 0 || shopIndex >= MAX_SHOPS) return 0;
+    
+    new query[512];
+    format(query, sizeof(query), 
+        "INSERT INTO `shops` (`id`, `actor_skin`, `shopx`, `shopy`, `shopz`, `shopa`, `shopint`, `shopworld`, `money`) VALUES (%d, %d, %f, %f, %f, %f, %d, %d, %d)",
+        shopInfo[shopIndex][shopId],
+        shopInfo[shopIndex][shopActorSkin],
+        shopInfo[shopIndex][shopX],
+        shopInfo[shopIndex][shopY],
+        shopInfo[shopIndex][shopZ],
+        shopInfo[shopIndex][shopA],
+        shopInfo[shopIndex][shopInterior],
+        shopInfo[shopIndex][shopVirtualWorld],
+        shopInfo[shopIndex][shopMoney]
+    );
+    
+    mysql_tquery(database, query);
+    return 1;
+}
+
+/*
+* Update single item in shop inventory
+* Only updates the specific item that changed, not all 149 items
+*/
+UpdateShopInventoryInDatabase(shopIndex, itemid)
+{
+    if(shopIndex < 0 || shopIndex >= totalShops) return 0;
+    if(itemid < 1 || itemid >= MAX_ITEMS) return 0;
+    
+    new query[128];
+    format(query, sizeof(query), 
+        "UPDATE `shops` SET `item%d`=%d WHERE `id`=%d", 
+        itemid, shopInfo[shopIndex][shopInventory][itemid], shopInfo[shopIndex][shopId]);
+    
+    mysql_tquery(database, query);
+    return 1;
+}
+
+/*
+* Update shop money in database
+*/
+UpdateShopMoneyInDatabase(shopIndex)
+{
+    if(shopIndex < 0 || shopIndex >= totalShops) return 0;
+    
+    new query[128];
+    format(query, sizeof(query), 
+        "UPDATE `shops` SET `money`=%d WHERE `id`=%d", 
+        shopInfo[shopIndex][shopMoney], shopInfo[shopIndex][shopId]);
+    
+    mysql_tquery(database, query);
+    return 1;
+}
+
+/*
+* Delete shop from database
+*/
+DeleteShopFromDatabase(shopid)
+{
+    new query[128];
+    format(query, sizeof(query), "DELETE FROM `shops` WHERE `id`=%d", shopid);
+    mysql_tquery(database, query);
+}
+
 
 #endif // MODULE_SQL_INCLUDED

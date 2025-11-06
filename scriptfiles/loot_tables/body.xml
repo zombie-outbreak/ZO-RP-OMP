@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    LOOT TABLE: Body
+    Description: Items found on corpses and zombies
+    Used by: SCAV_AREA_BODY scavenging areas
+-->
+<loottable>
+    <name>Body</name>
+    <description>Items found on corpses and zombie bodies</description>
+    
+    <items>
+        <!-- Very Common Junk (Weight: 50-80) -->
+        <item id="1" weight="80" min_quantity="1" max_quantity="3">Scrap</item>
+        <item id="30" weight="70" min_quantity="1" max_quantity="4">Scrap Cloth</item>
+        <item id="4" weight="60" min_quantity="5" max_quantity="30">Money</item>
+        
+        <!-- Common Food/Drink (Weight: 30-45) -->
+        <item id="2" weight="45" min_quantity="1" max_quantity="2">Candy Bar</item>
+        <item id="3" weight="40" min_quantity="1" max_quantity="2">Carton of Juice</item>
+        <item id="21" weight="35" min_quantity="1" max_quantity="2">Chocolate Bar</item>
+        <item id="22" weight="30" min_quantity="1" max_quantity="3">Biscuit</item>
+        
+        <!-- Uncommon Items (Weight: 15-25) -->
+        <item id="24" weight="25" min_quantity="1" max_quantity="1">Empty Canteen</item>
+        <item id="20" weight="20" min_quantity="1" max_quantity="1">Bottle of Water</item>
+        <item id="25" weight="18" min_quantity="1" max_quantity="1">Canteen of Dirty Water</item>
+        <item id="50" weight="15" min_quantity="1" max_quantity="1">Matches</item>
+        
+        <!-- Rare Valuables (Weight: 5-12) -->
+        <item id="47" weight="12" min_quantity="1" max_quantity="3">Battery</item>
+        <item id="51" weight="10" min_quantity="1" max_quantity="1">Lighter</item>
+        <item id="46" weight="8" min_quantity="1" max_quantity="1">Flashlight</item>
+        <item id="60" weight="6" min_quantity="1" max_quantity="1">Compass</item>
+        <item id="55" weight="5" min_quantity="1" max_quantity="1">Radio</item>
+        
+        <!-- Very Rare (Weight: 1-3) -->
+        <item id="54" weight="3" min_quantity="1" max_quantity="1">Binoculars</item>
+        <item id="52" weight="2" min_quantity="1" max_quantity="1">Backpack</item>
+        <item id="56" weight="1" min_quantity="1" max_quantity="1">Gas Mask</item>
+    </items>
+</loottable>

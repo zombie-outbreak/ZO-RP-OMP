@@ -269,6 +269,48 @@ Dialog:InventoryItemMain(playerid, response, listitem, string:inputtext[])
 	return 1;
 }
 
+DialogPages:InventoryItemMainPages(playerid, response, listitem, string:inputtext[])
+{
+	new category = GetPVarInt(playerid, "InventoryCategory");
+	
+	if(!response) // Clicked "Go Back"
+	{
+		DeletePVar(playerid, "InventoryCategory");
+		Dialog_Show(playerid, InventoryMain, DIALOG_STYLE_LIST, "Select A Category", "General\nFood\nDrink\nMedical\nWeapons\nAmmo", "Select", "Close");
+		return 1;
+	}
+	
+	// Find which item was selected by counting items in the category
+	new currentItem = 0;
+	for(new i = 1; i < MAX_ITEMS; i++)
+	{
+		if(playerInventory[playerid][i] >= 1 && inventoryItems[i][itemCategory] == category)
+		{
+			if(currentItem == listitem)
+			{
+				// Store the selected item
+				format(player[playerid][chosenItem], 128, "%s", inventoryItems[i][itemNameSingular]);
+				player[playerid][chosenItemId] = i;
+				
+				// Show relevant dialog depending on item category
+				switch(inventoryItems[i][itemCategory])
+				{
+					case CATEGORY_GENERAL: Dialog_Show(playerid, InventoryGeneralOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
+					case CATEGORY_FOOD: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
+					case CATEGORY_DRINK: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
+					case CATEGORY_MEDICAL: Dialog_Show(playerid, InventoryMedicalOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
+					case CATEGORY_WEAPONS: Dialog_Show(playerid, InventoryWeaponsOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nEquip\nUnequip", "Select", "Back");
+					case CATEGORY_AMMO: Dialog_Show(playerid, InventoryAmmoOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop", "Select", "Back");
+				}
+				return 1;
+			}
+			currentItem++;
+		}
+	}
+	
+	return 1;
+}
+
 Dialog:InventoryGeneralOpts(playerid, response, listitem, string:inputtext[])
 {
 	if(!response)
@@ -1019,8 +1061,12 @@ public OnInteriorDeleteData(playerid, const intname[])
 }
 
 /*
-* Loot tables
+* Loot tables - DEPRECATED
+* Note: These admin dialogs are deprecated as loot tables are now managed via XML files.
+* Admins should edit the XML files in scriptfiles/loot_tables/ instead.
+* See LOOT_SYSTEM_README.md for documentation on the new system.
 */
+/*
 Dialog:EditLootTableChanceNode(playerid, response, listitem, string:inputtext[])
 {   
     if(!response)
@@ -1038,21 +1084,6 @@ Dialog:EditLootTableChanceNode(playerid, response, listitem, string:inputtext[])
     return 1;
 }
 
-/*
-* Paged Dialogs
-*/
-DialogPages:ShowInteriorsDialog(playerid, response, listitem, inputtext[])
-{
-	if(!response)
-		return 1;
-
-	new string[128];
-    format(player[playerid][tmpIntName], 64, "%s", inputtext);
-	format(string, sizeof(string), "%s Options", inputtext);
-	Dialog_Show(playerid, InteriorOptions, DIALOG_STYLE_LIST, string, "Change Name\nSet Virtual World\nDelete", "Select", "Close");
-	return 1;
-}
-
 DialogPages:ShowLootTableAdminList(playerid, response, listitem, inputtext[])
 {
 	if(!response)
@@ -1068,134 +1099,159 @@ DialogPages:ShowLootTableChanceList(playerid, response, listitem, inputtext[])
 {
 	if(!response)
 		return 1;
+*/
 
+/*
+* Paged Dialogs
+*/
+DialogPages:ShowInteriorsDialog(playerid, response, listitem, inputtext[])
+{
+	if(!response)
+		return 1;
+
+	new string[128];
+    format(player[playerid][tmpIntName], 64, "%s", inputtext);
+	format(string, sizeof(string), "%s Options", inputtext);
+	Dialog_Show(playerid, InteriorOptions, DIALOG_STYLE_LIST, string, "Change Name\nSet Virtual World\nDelete", "Select", "Close");
+	return 1;
+}
+
+/*
+// Deprecated loot table dialog continuation - commented out
 	player[playerid][admChosenChanceNode] = listitem;
     Dialog_Show(playerid, EditLootTableChanceNode, DIALOG_STYLE_INPUT, "Loot Table Chance Node", "Input a valid item ID for this node. It will then be added to the loot table.", "Confirm", "Back");
 	return 1;
 }
+*/
 
 /*
 * Dynamic Dialog Functions
 */
 ShowInventoryItemListByCategory(playerid, category)
 {
-	new invString[1024], string[128], itemQuantity[10];
+	new string[128];
+	
+	// Store current category for pages handler
+	SetPVarInt(playerid, "InventoryCategory", category);
+
+	// Add header row first for TABLIST_HEADERS
+	AddDialogListitem(playerid, "{FFFFFF}Item Name\t{FFFF00}Quantity");
 
 	switch(category)
 	{
 		case CATEGORY_GENERAL:
 		{
 			format(string, sizeof string, "%s's General Items", player[playerid][chosenChar]);
-    		format(invString, sizeof invString, "Item Name\tQuantity\n");
 
 			for(new i = 1; i < MAX_ITEMS; i++) // valid item ids start from 1 not 0
 			{
 				if(playerInventory[playerid][i] >= 1 && inventoryItems[i][itemCategory] == CATEGORY_GENERAL)
 				{
-					strcat(invString, inventoryItems[i][itemNameSingular]);
-					strcat(invString, "\t");
-					format(itemQuantity, sizeof itemQuantity, "%d", playerInventory[playerid][i]);
-					strcat(invString, itemQuantity);
-					strcat(invString, "\n");
+					new line[128];
+					format(line, sizeof(line), "%s\t{FFFF00}%d",
+						inventoryItems[i][itemNameSingular],
+						playerInventory[playerid][i]
+					);
+					AddDialogListitem(playerid, line);
 				}
 			}
 
-			Dialog_Show(playerid, InventoryItemMain, DIALOG_STYLE_TABLIST, string, invString, "Select", "Go Back");
+			ShowPlayerDialogPages(playerid, "InventoryItemMainPages", DIALOG_STYLE_TABLIST_HEADERS, string, "Select", "Go Back", 15);
 		}
 		case CATEGORY_FOOD:
 		{
 			format(string, sizeof string, "%s's Food Items", player[playerid][chosenChar]);
-			format(invString, sizeof invString, "Item Name\tQuantity\n");
 
 			for(new i = 1; i < MAX_ITEMS; i++) // valid item ids start from 1 not 0
 			{
 				if(playerInventory[playerid][i] >= 1 && inventoryItems[i][itemCategory] == CATEGORY_FOOD)
 				{
-					strcat(invString, inventoryItems[i][itemNameSingular]);
-					strcat(invString, "\t");
-					format(itemQuantity, sizeof itemQuantity, "%d", playerInventory[playerid][i]);
-					strcat(invString, itemQuantity);
-					strcat(invString, "\n");
+					new line[128];
+					format(line, sizeof(line), "%s\t{FFFF00}%d",
+						inventoryItems[i][itemNameSingular],
+						playerInventory[playerid][i]
+					);
+					AddDialogListitem(playerid, line);
 				}
 			}
 
-			Dialog_Show(playerid, InventoryItemMain, DIALOG_STYLE_TABLIST, string, invString, "Select", "Go Back");
+			ShowPlayerDialogPages(playerid, "InventoryItemMainPages", DIALOG_STYLE_TABLIST_HEADERS, string, "Select", "Go Back", 15);
 		}
 		case CATEGORY_DRINK:
 		{
 			format(string, sizeof string, "%s's Drink Items", player[playerid][chosenChar]);
-			format(invString, sizeof invString, "Item Name\tQuantity\n");
 
 			for(new i = 1; i < MAX_ITEMS; i++) // valid item ids start from 1 not 0
 			{
 				if(playerInventory[playerid][i] >= 1 && inventoryItems[i][itemCategory] == CATEGORY_DRINK)
 				{
-					strcat(invString, inventoryItems[i][itemNameSingular]);
-					strcat(invString, "\t");
-					format(itemQuantity, sizeof itemQuantity, "%d", playerInventory[playerid][i]);
-					strcat(invString, itemQuantity);
-					strcat(invString, "\n");
+					new line[128];
+					format(line, sizeof(line), "%s\t{FFFF00}%d",
+						inventoryItems[i][itemNameSingular],
+						playerInventory[playerid][i]
+					);
+					AddDialogListitem(playerid, line);
 				}
 			}
 
-			Dialog_Show(playerid, InventoryItemMain, DIALOG_STYLE_TABLIST, string, invString, "Select", "Go Back");
+			ShowPlayerDialogPages(playerid, "InventoryItemMainPages", DIALOG_STYLE_TABLIST_HEADERS, string, "Select", "Go Back", 15);
 		}
 		case CATEGORY_MEDICAL:
 		{
 			format(string, sizeof string, "%s's Medical Items", player[playerid][chosenChar]);
-			format(invString, sizeof invString, "Item Name\tQuantity\n");
 
 			for(new i = 1; i < MAX_ITEMS; i++) // valid item ids start from 1 not 0
 			{
 				if(playerInventory[playerid][i] >= 1 && inventoryItems[i][itemCategory] == CATEGORY_MEDICAL)
 				{
-					strcat(invString, inventoryItems[i][itemNameSingular]);
-					strcat(invString, "\t");
-					format(itemQuantity, sizeof itemQuantity, "%d", playerInventory[playerid][i]);
-					strcat(invString, itemQuantity);
-					strcat(invString, "\n");
+					new line[128];
+					format(line, sizeof(line), "%s\t{FFFF00}%d",
+						inventoryItems[i][itemNameSingular],
+						playerInventory[playerid][i]
+					);
+					AddDialogListitem(playerid, line);
 				}
 			}
 
-			Dialog_Show(playerid, InventoryItemMain, DIALOG_STYLE_TABLIST, string, invString, "Select", "Go Back");
+			ShowPlayerDialogPages(playerid, "InventoryItemMainPages", DIALOG_STYLE_TABLIST_HEADERS, string, "Select", "Go Back", 15);
 		}
 		case CATEGORY_WEAPONS:
 		{
 			format(string, sizeof string, "%s's Weapons", player[playerid][chosenChar]);
-			format(invString, sizeof invString, "Item Name\tQuantity\n");
 
 			for(new i = 1; i < MAX_ITEMS; i++) // valid item ids start from 1 not 0
 			{
 				if(playerInventory[playerid][i] >= 1 && inventoryItems[i][itemCategory] == CATEGORY_WEAPONS)
 				{
-					strcat(invString, inventoryItems[i][itemNameSingular]);
-					strcat(invString, "\t");
-					format(itemQuantity, sizeof itemQuantity, "%d", playerInventory[playerid][i]);
-					strcat(invString, itemQuantity);
-					strcat(invString, "\n");
+					new line[128];
+					format(line, sizeof(line), "%s\t{FFFF00}%d",
+						inventoryItems[i][itemNameSingular],
+						playerInventory[playerid][i]
+					);
+					AddDialogListitem(playerid, line);
 				}
 			}
 
-			Dialog_Show(playerid, InventoryItemMain, DIALOG_STYLE_TABLIST, string, invString, "Select", "Go Back");
+			ShowPlayerDialogPages(playerid, "InventoryItemMainPages", DIALOG_STYLE_TABLIST_HEADERS, string, "Select", "Go Back", 15);
 		}
 		case CATEGORY_AMMO:
 		{
 			format(string, sizeof string, "%s's Ammo", player[playerid][chosenChar]);
-			format(invString, sizeof invString, "Item Name\tQuantity\n");
 
 			for(new i = 1; i < MAX_ITEMS; i++) // valid item ids start from 1 not 0
 			{
 				if(playerInventory[playerid][i] >= 1 && inventoryItems[i][itemCategory] == CATEGORY_AMMO)
 				{
-					strcat(invString, inventoryItems[i][itemNameSingular]);
-					strcat(invString, "\t");
-					format(itemQuantity, sizeof itemQuantity, "%d", playerInventory[playerid][i]);
-					strcat(invString, itemQuantity);
-					strcat(invString, "\n");
+					new line[128];
+					format(line, sizeof(line), "%s\t{FFFF00}%d",
+						inventoryItems[i][itemNameSingular],
+						playerInventory[playerid][i]
+					);
+					AddDialogListitem(playerid, line);
 				}
 			}
 
-			Dialog_Show(playerid, InventoryItemMain, DIALOG_STYLE_TABLIST, string, invString, "Select", "Go Back");
+			ShowPlayerDialogPages(playerid, "InventoryItemMainPages", DIALOG_STYLE_TABLIST_HEADERS, string, "Select", "Go Back", 15);
 		}
 	}
 	return 1;
@@ -1640,6 +1696,10 @@ Dialog:PerkMenu(playerid, response, listitem, string:inputtext[])
 			{
 				TryUnlockGourmetPerk(playerid);
 			}
+			case H_PERK_LOOTER:
+			{
+				TryUnlockLooterPerk(playerid);
+			}
 		}
 	}
     return 1;
@@ -1649,6 +1709,346 @@ Dialog:PerkMenu(playerid, response, listitem, string:inputtext[])
 Dialog:MessageBoxKick(playerid, response, listitem, string:inputtext[])
 {
     Kick(playerid);
+    return 1;
+}
+
+// ============================================================================
+// SHOP DIALOGS
+// ============================================================================
+
+Dialog:DIALOG_SHOP_MAIN(playerid, response, listitem, inputtext[])
+{
+    new shopIndex = playerCurrentShop[playerid];
+    
+    if(!response) // Clicked "Close"
+    {
+        playerCurrentShop[playerid] = INVALID_SHOP_ID;
+        return 1;
+    }
+    
+    if(shopIndex == INVALID_SHOP_ID) return 0;
+    
+    switch(listitem)
+    {
+        case 0: // Buy Items
+        {
+            ShowShopBuyMenu(playerid, shopIndex);
+        }
+        case 1: // Sell Items
+        {
+            ShowShopSellMenu(playerid, shopIndex);
+        }
+        case 2: // Exit Shop
+        {
+            playerCurrentShop[playerid] = INVALID_SHOP_ID;
+            SendClientMessage(playerid, COLOR_GREY, "You closed the shop menu.");
+        }
+    }
+    
+    return 1;
+}
+
+DialogPages:ShowShopBuyMenuPages(playerid, response, listitem, string:inputtext[])
+{
+    new shopIndex = playerCurrentShop[playerid];
+    
+    if(!response) // Clicked "Back"
+    {
+        if(shopIndex != INVALID_SHOP_ID)
+            ShowShopMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    if(shopIndex == INVALID_SHOP_ID) return 0;
+    
+    // Find which item was selected
+    new currentItem = 0;
+    for(new i = 1; i < MAX_ITEMS; i++)
+    {
+        if(shopInfo[shopIndex][shopInventory][i] > 0)
+        {
+            if(currentItem == listitem)
+            {
+                // Store selected item for quantity input
+                SetPVarInt(playerid, "ShopBuyItemId", i);
+                
+                // Show quantity input dialog
+                new dialog[256];
+                format(dialog, sizeof(dialog), 
+                    "{FFFFFF}You are purchasing: {FFFF00}%s\n\
+                    {FFFFFF}Price per unit: {00FF00}$%d\n\
+                    {FFFFFF}Available stock: {FFFF00}%d\n\n\
+                    How many would you like to buy?",
+                    inventoryItems[i][itemNameSingular],
+                    inventoryItems[i][itemValue],
+                    shopInfo[shopIndex][shopInventory][i]
+                );
+                
+                Dialog_Show(playerid, DIALOG_SHOP_BUY_QUANTITY, DIALOG_STYLE_INPUT, "Purchase Item", dialog, "Buy", "Cancel");
+                return 1;
+            }
+            currentItem++;
+        }
+    }
+    
+    return 1;
+}
+
+Dialog:DIALOG_SHOP_BUY_QUANTITY(playerid, response, listitem, inputtext[])
+{
+    new shopIndex = playerCurrentShop[playerid];
+    
+    if(!response) // Clicked "Cancel"
+    {
+        DeletePVar(playerid, "ShopBuyItemId");
+        if(shopIndex != INVALID_SHOP_ID)
+            ShowShopBuyMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    new tmpItemId = GetPVarInt(playerid, "ShopBuyItemId");
+    DeletePVar(playerid, "ShopBuyItemId");
+    
+    if(shopIndex == INVALID_SHOP_ID || tmpItemId == 0) return 0;
+    
+    new quantity;
+    if(sscanf(inputtext, "d", quantity))
+    {
+        SendClientMessage(playerid, COLOR_RED, "Invalid quantity. Please enter a number.");
+        ShowShopBuyMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    if(quantity <= 0)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Quantity must be greater than 0.");
+        ShowShopBuyMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    // Attempt purchase
+    if(BuyShopItem(playerid, shopIndex, tmpItemId, quantity))
+    {
+        // Success - show buy menu again
+        ShowShopBuyMenu(playerid, shopIndex);
+    }
+    else
+    {
+        // Failed - show buy menu again
+        ShowShopBuyMenu(playerid, shopIndex);
+    }
+    
+    return 1;
+}
+
+DialogPages:ShowShopSellMenuPages(playerid, response, listitem, string:inputtext[])
+{
+    new shopIndex = playerCurrentShop[playerid];
+    
+    if(!response) // Clicked "Back"
+    {
+        if(shopIndex != INVALID_SHOP_ID)
+            ShowShopMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    if(shopIndex == INVALID_SHOP_ID) return 0;
+    
+    // Find which item was selected
+    new currentItem = 0;
+    new moneyItemId = ReturnItemIdByName("Money");
+    
+    for(new i = 1; i < MAX_ITEMS; i++)
+    {
+        // Skip Money item
+        if(i == moneyItemId) continue;
+        
+        if(playerInventory[playerid][i] > 0)
+        {
+            if(currentItem == listitem)
+            {
+                // Store selected item for quantity input
+                SetPVarInt(playerid, "ShopSellItemId", i);
+                
+                // Calculate sell price (50% of item value, minimum $1)
+                new sellPrice = inventoryItems[i][itemValue] > 0 ? floatround(inventoryItems[i][itemValue] * 0.5) : 1;
+                
+                // Show quantity input dialog
+                new dialog[256];
+                format(dialog, sizeof(dialog), 
+                    "{FFFFFF}You are selling: {FFFF00}%s\n\
+                    {FFFFFF}Price per unit: {00FF00}$%d\n\
+                    {FFFFFF}You have: {FFFF00}%d\n\n\
+                    How many would you like to sell?",
+                    inventoryItems[i][itemNameSingular],
+                    sellPrice,
+                    playerInventory[playerid][i]
+                );
+                
+                Dialog_Show(playerid, DIALOG_SHOP_SELL_QUANTITY, DIALOG_STYLE_INPUT, "Sell Item", dialog, "Sell", "Cancel");
+                return 1;
+            }
+            currentItem++;
+        }
+    }
+    
+    return 1;
+}
+
+Dialog:DIALOG_SHOP_SELL_QUANTITY(playerid, response, listitem, inputtext[])
+{
+    new shopIndex = playerCurrentShop[playerid];
+    
+    if(!response) // Clicked "Cancel"
+    {
+        DeletePVar(playerid, "ShopSellItemId");
+        if(shopIndex != INVALID_SHOP_ID)
+            ShowShopSellMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    new tmpItemId = GetPVarInt(playerid, "ShopSellItemId");
+    DeletePVar(playerid, "ShopSellItemId");
+    
+    if(shopIndex == INVALID_SHOP_ID || tmpItemId == 0) return 0;
+    
+    new quantity;
+    if(sscanf(inputtext, "d", quantity))
+    {
+        SendClientMessage(playerid, COLOR_RED, "Invalid quantity. Please enter a number.");
+        ShowShopSellMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    if(quantity <= 0)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Quantity must be greater than 0.");
+        ShowShopSellMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    // Attempt sale
+    if(SellShopItem(playerid, shopIndex, tmpItemId, quantity))
+    {
+        // Success - show sell menu again
+        ShowShopSellMenu(playerid, shopIndex);
+    }
+    else
+    {
+        // Failed - show sell menu again
+        ShowShopSellMenu(playerid, shopIndex);
+    }
+    
+    return 1;
+}
+
+Dialog:DIALOG_SHOP_EDIT(playerid, response, listitem, inputtext[])
+{
+    if(!response) // Clicked "Close"
+    {
+        playerCurrentShop[playerid] = INVALID_SHOP_ID;
+        return 1;
+    }
+    
+    new shopIndex = playerCurrentShop[playerid];
+    if(shopIndex == INVALID_SHOP_ID) return 0;
+    
+    // Selected item is at index listitem + 1 (since we start from item 1)
+    new tmpItemId = listitem + 1;
+    
+    if(tmpItemId >= MAX_ITEMS)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Invalid item selection.");
+        return 1;
+    }
+    
+    // Store item ID for quantity input
+    SetPVarInt(playerid, "ShopEditItemId", tmpItemId);
+    
+    // Show quantity input dialog
+    new dialog[256];
+    format(dialog, sizeof(dialog), 
+        "{FFFFFF}Editing stock for: {FFFF00}%s\n\
+        {FFFFFF}Current stock: {FFFF00}%d\n\n\
+        Enter new stock quantity (0 to remove from shop):",
+        inventoryItems[itemId][itemNameSingular],
+        shopInfo[shopIndex][shopInventory][itemId]
+    );
+    
+    Dialog_Show(playerid, DIALOG_SHOP_EDIT_QUANTITY, DIALOG_STYLE_INPUT, "Edit Shop Stock", dialog, "Set", "Cancel");
+    
+    return 1;
+}
+
+Dialog:DIALOG_SHOP_EDIT_QUANTITY(playerid, response, listitem, inputtext[])
+{
+    new shopIndex = playerCurrentShop[playerid];
+    
+    if(!response) // Clicked "Cancel"
+    {
+        DeletePVar(playerid, "ShopEditItemId");
+        if(shopIndex != INVALID_SHOP_ID)
+            ShowShopEditMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    new tmpItemId = GetPVarInt(playerid, "ShopEditItemId");
+    DeletePVar(playerid, "ShopEditItemId");
+    
+    if(shopIndex == INVALID_SHOP_ID || tmpItemId == 0) return 0;
+    
+    new quantity;
+    if(sscanf(inputtext, "d", quantity))
+    {
+        SendClientMessage(playerid, COLOR_RED, "Invalid quantity. Please enter a number.");
+        ShowShopEditMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    if(quantity < 0)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Quantity cannot be negative.");
+        ShowShopEditMenu(playerid, shopIndex);
+        return 1;
+    }
+    
+    // Update shop stock
+    shopInfo[shopIndex][shopInventory][itemId] = quantity;
+    UpdateShopInventoryInDatabase(shopIndex, itemId);
+    
+    new message[128];
+    format(message, sizeof(message), "Stock updated: %s = %d", 
+        inventoryItems[itemId][itemNameSingular], quantity);
+    SendClientMessage(playerid, COLOR_GREEN, message);
+    
+    // Show edit menu again
+    ShowShopEditMenu(playerid, shopIndex);
+    
+    return 1;
+}
+
+Dialog:DIALOG_SHOP_LIST(playerid, response, listitem, inputtext[])
+{
+    if(!response) // Clicked "Close"
+    {
+        return 1;
+    }
+    
+    if(listitem >= totalShops)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Invalid shop selection.");
+        return 1;
+    }
+    
+    // Teleport to shop
+    SetPlayerPos(playerid, shopInfo[listitem][shopX], shopInfo[listitem][shopY], shopInfo[listitem][shopZ]);
+    SetPlayerInterior(playerid, shopInfo[listitem][shopInterior]);
+    SetPlayerVirtualWorld(playerid, shopInfo[listitem][shopVirtualWorld]);
+    
+    new message[64];
+    format(message, sizeof(message), "Teleported to shop ID %d.", shopInfo[listitem][shopId]);
+    SendClientMessage(playerid, COLOR_GREEN, message);
+    
     return 1;
 }
 

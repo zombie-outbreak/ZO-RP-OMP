@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    LOOT TABLE: Money
+    Description: Cash and valuables found in safes, registers, and money stashes
+    Used by: SCAV_AREA_MONEY scavenging areas
+-->
+<loottable>
+    <name>Money</name>
+    <description>Currency and valuables found in financial locations</description>
+    
+    <items>
+        <!-- Very Common: Decent cash - compensates for low find rate (Weight: 70-90) -->
+        <item id="4" weight="90" min_quantity="100" max_quantity="300">Money</item>
+        <item id="4" weight="80" min_quantity="150" max_quantity="350">Money</item>
+        
+        <!-- Common: Good cash haul (Weight: 50-70) -->
+        <item id="4" weight="70" min_quantity="250" max_quantity="500">Money</item>
+        <item id="4" weight="60" min_quantity="300" max_quantity="600">Money</item>
+        
+        <!-- Uncommon: Large cash (Weight: 30-40) -->
+        <item id="4" weight="40" min_quantity="500" max_quantity="800">Money</item>
+        <item id="4" weight="30" min_quantity="600" max_quantity="1000">Money</item>
+        
+        <!-- Rare: Very large cash (Weight: 15-20) -->
+        <item id="4" weight="20" min_quantity="800" max_quantity="1500">Money</item>
+        <item id="4" weight="15" min_quantity="1000" max_quantity="1800">Money</item>
+        
+        <!-- Very Rare: Jackpot cash (Weight: 5-8) -->
+        <item id="4" weight="8" min_quantity="1500" max_quantity="2500">Money</item>
+        <item id="4" weight="5" min_quantity="2000" max_quantity="3500">Money</item>
+    </items>
+</loottable>
