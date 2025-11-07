@@ -173,7 +173,43 @@ INSERT INTO `crafting_recipes` (`id`, `name`, `description`, `input_item1`, `inp
 (1, 'Bandage', 'Basic medical item for healing wounds', 30, 10, -1, 0, -1, 0, -1, 0, -1, 0, 10, 1, 0, 5000, 0, 1),
 (2, 'Empty Canteen', 'A canteen to store liquids in', 1, 50, -1, 0, -1, 0, -1, 0, -1, 0, 24, 1, 1, 8000, 1, 1),
 (3, 'Small Medical Kit', 'Advanced medical supplies', 10, 2, 14, 2, 13, 1, -1, 0, -1, 0, 12, 1, 2, 10000, 0, 1),
-(4, 'Rations', 'A pack of basic rations', 2, 5, 3, 5, -1, 0, -1, 0, -1, 0, 19, 1, 1, 6000, 1, 1);
+(4, 'Rations', 'A pack of basic rations', 2, 5, 3, 5, -1, 0, -1, 0, -1, 0, 19, 1, 1, 6000, 1, 1),
+(5, 'Large Medical Kit', 'Comprehensive medical supplies', 12, 2, 10, 3, 13, 2, 14, 2, -1, 0, 11, 1, 3, 15000, 0, 1),
+(6, 'Baseball Bat', 'Improvised melee weapon', 1, 30, 48, 1, -1, 0, -1, 0, -1, 0, 5, 1, 1, 7000, 1, 1),
+(7, 'Nite Stick', 'Police baton weapon', 1, 25, 48, 1, -1, 0, -1, 0, -1, 0, 29, 1, 1, 6000, 1, 1),
+(8, 'Knife', 'Sharp melee weapon', 1, 15, -1, 0, -1, 0, -1, 0, -1, 0, 31, 1, 0, 4000, 1, 1),
+(9, 'Shovel', 'Digging tool and weapon', 1, 40, -1, 0, -1, 0, -1, 0, -1, 0, 16, 1, 1, 8000, 1, 1),
+(10, 'Canteen of Water', 'Fill canteen with clean water', 24, 1, 20, 1, -1, 0, -1, 0, -1, 0, 23, 1, 0, 2000, 1, 1),
+(11, 'Chainsaw', 'Powerful close-range weapon', 1, 100, 28, 1, 49, 2, -1, 0, -1, 0, 32, 1, 5, 20000, 1, 1),
+(12, 'Toolbox', 'Assemble basic tools', 1, 80, 48, 2, 49, 1, -1, 0, -1, 0, 53, 1, 2, 12000, 1, 1),
+(13, 'Backpack', 'Craft storage equipment', 30, 50, 48, 3, -1, 0, -1, 0, -1, 0, 52, 1, 1, 10000, 1, 1),
+(14, 'Rope', 'Craft rope from cloth', 30, 30, -1, 0, -1, 0, -1, 0, -1, 0, 48, 1, 0, 5000, 1, 1),
+(15, 'Sleeping Bag', 'Portable sleeping gear', 30, 40, 48, 2, -1, 0, -1, 0, -1, 0, 58, 1, 1, 9000, 1, 1),
+(16, 'Tent', 'Shelter from elements', 30, 80, 48, 4, 1, 50, -1, 0, -1, 0, 59, 1, 2, 15000, 1, 1),
+(17, 'Flashlight', 'Light source device', 1, 20, 47, 2, -1, 0, -1, 0, -1, 0, 46, 1, 1, 6000, 1, 1),
+(18, 'Body Armor', 'Protective vest', 30, 100, 1, 80, -1, 0, -1, 0, -1, 0, 57, 1, 3, 18000, 1, 1),
+(19, 'Gas Mask', 'Protective breathing equipment', 30, 60, 1, 40, -1, 0, -1, 0, -1, 0, 56, 1, 2, 12000, 1, 1),
+(20, 'Fuel Can', 'Container for fuel', 1, 60, -1, 0, -1, 0, -1, 0, -1, 0, 28, 1, 1, 8000, 1, 1),
+(21, 'Medical Syringe', 'Injectable medicine', 10, 1, 14, 3, -1, 0, -1, 0, -1, 0, 13, 2, 1, 7000, 0, 1),
+(22, 'Radio', 'Communication device', 1, 70, 47, 4, -1, 0, -1, 0, -1, 0, 55, 1, 2, 13000, 1, 1),
+(23, 'Binoculars', 'Viewing equipment', 1, 30, -1, 0, -1, 0, -1, 0, -1, 0, 54, 1, 1, 7000, 1, 1),
+(24, 'Compass', 'Navigation tool', 1, 15, -1, 0, -1, 0, -1, 0, -1, 0, 60, 1, 0, 4000, 1, 1),
+(25, 'MRE', 'Military ration pack', 2, 10, 3, 10, 22, 5, -1, 0, -1, 0, 45, 1, 2, 10000, 1, 1),
+(26, 'Canned Beans', 'Preserve food in can', 2, 8, 1, 5, -1, 0, -1, 0, -1, 0, 41, 1, 1, 6000, 1, 1),
+(27, 'Canned Soup', 'Prepare canned soup', 2, 10, 3, 5, 1, 3, -1, 0, -1, 0, 42, 1, 1, 7000, 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `character_recipes`
+--
+
+CREATE TABLE `character_recipes` (
+  `id` int(11) NOT NULL,
+  `character_name` varchar(24) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `unlocked_date` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -887,6 +923,14 @@ ALTER TABLE `crafting_recipes`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `character_recipes`
+--
+ALTER TABLE `character_recipes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `character_name` (`character_name`),
+  ADD KEY `recipe_id` (`recipe_id`);
+
+--
 -- Indexes for table `factions`
 --
 ALTER TABLE `factions`
@@ -1008,7 +1052,13 @@ ALTER TABLE `characters`
 -- AUTO_INCREMENT for table `crafting_recipes`
 --
 ALTER TABLE `crafting_recipes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT for table `character_recipes`
+--
+ALTER TABLE `character_recipes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `factions`
@@ -1056,7 +1106,7 @@ ALTER TABLE `inventory`
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `loottable`
