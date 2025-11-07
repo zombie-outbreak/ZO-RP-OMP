@@ -35,7 +35,6 @@
 #if !defined MODULE_CRAFTING_INCLUDED
 #define MODULE_CRAFTING_INCLUDED
 
-#define MAX_RECIPES             100     // Maximum number of crafting recipes
 #define MAX_RECIPE_INPUTS       5       // Maximum input items per recipe
 #define CRAFT_MENU_CATEGORY     0       // Show by category
 #define CRAFT_MENU_ALL          1       // Show all recipes
@@ -78,6 +77,196 @@ new PlayerCraftingRecipe[MAX_PLAYERS];
 // Crafting callbacks
 forward OnPlayerFinishCraft(playerid, recipeid);
 forward OnRecipesLoaded();
+forward OnPlayerRecipesLoaded(playerid);
+
+// ============================================================================
+// RECIPE UNLOCK FUNCTIONS
+// ============================================================================
+
+/*
+* Load player's unlocked recipes from database
+*/
+LoadPlayerRecipes(playerid)
+{
+    // Reset unlocked recipes
+    for(new i = 0; i < MAX_RECIPES; i++)
+    {
+        player[playerid][unlockedRecipes][i] = 0;
+    }
+    player[playerid][unlockedRecipeCount] = 0;
+    
+    new query[256];
+    mysql_format(database, query, sizeof(query),
+        "SELECT `recipe_id` FROM `character_recipes` WHERE `character_name` = '%e'",
+        player[playerid][chosenChar]);
+    mysql_tquery(database, query, "OnPlayerRecipesLoaded", "d", playerid);
+    
+    return 1;
+}
+
+/*
+* Callback when player recipes are loaded
+*/
+public OnPlayerRecipesLoaded(playerid)
+{
+    new rows = cache_num_rows();
+    
+    player[playerid][unlockedRecipeCount] = 0;
+    
+    for(new i = 0; i < rows; i++)
+    {
+        new recipeid;
+        cache_get_value_name_int(i, "recipe_id", recipeid);
+        
+        // Find the recipe index in our loaded recipes
+        for(new j = 0; j < RecipeCount; j++)
+        {
+            if(CraftingRecipes[j][recipeId] == recipeid)
+            {
+                player[playerid][unlockedRecipes][j] = 1;
+                player[playerid][unlockedRecipeCount]++;
+                break;
+            }
+        }
+    }
+    
+    return 1;
+}
+
+/*
+* Unlock a recipe for a player
+*/
+UnlockRecipe(playerid, recipeid)
+{
+    if(recipeid < 0 || recipeid >= RecipeCount)
+        return 0;
+    
+    // Check if already unlocked
+    if(player[playerid][unlockedRecipes][recipeid] == 1)
+        return 0;
+    
+    // Unlock the recipe
+    player[playerid][unlockedRecipes][recipeid] = 1;
+    player[playerid][unlockedRecipeCount]++;
+    
+    // Save to database
+    new query[256];
+    mysql_format(database, query, sizeof(query),
+        "INSERT INTO `character_recipes` (`character_name`, `recipe_id`, `unlocked_date`) VALUES ('%e', %d, %d)",
+        player[playerid][chosenChar], CraftingRecipes[recipeid][recipeId], gettime());
+    mysql_tquery(database, query);
+    
+    return 1;
+}
+
+/*
+* Check if player has recipe unlocked
+*/
+bool:HasRecipeUnlocked(playerid, recipeid)
+{
+    if(recipeid < 0 || recipeid >= RecipeCount)
+        return false;
+    
+    return (player[playerid][unlockedRecipes][recipeid] == 1);
+}
+
+/*
+* Find recipe index by output item ID
+* Returns -1 if no recipe found
+*/
+GetRecipeByOutputItem(itemid)
+{
+    for(new i = 0; i < RecipeCount; i++)
+    {
+        if(CraftingRecipes[i][recipeOutputItem] == itemid && CraftingRecipes[i][recipeActive])
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/*
+* Break down an item - either unlock recipe + give XP or give scrap
+* Returns 1 on success, 0 on failure
+*/
+BreakDownItem(playerid, itemid)
+{
+    if(!IsPlayerConnected(playerid))
+        return 0;
+    
+    // List of items that cannot be broken down (raw materials, currency, etc.)
+    new nonBreakableItems[] = {1, 4, 30}; // Scrap (1), Money (4), Scrap Cloth (30)
+    for(new i = 0; i < sizeof(nonBreakableItems); i++)
+    {
+        if(itemid == nonBreakableItems[i])
+        {
+            SendClientMessage(playerid, COLOR_RED, "This item cannot be broken down.");
+            return 0;
+        }
+    }
+    
+    // Remove the item from inventory
+    playerInventory[playerid][itemid]--;
+    UpdateCharacterInventoryEntry(playerid, itemid);
+    
+    // Find recipe that produces this item
+    new recipeid = GetRecipeByOutputItem(itemid);
+    
+    if(recipeid == -1)
+    {
+        // No recipe exists - give small amount of scrap (1-2)
+        new scrapAmount = 1 + random(2);
+        new scrapId = 1; // Scrap item ID
+        
+        playerInventory[playerid][scrapId] += scrapAmount;
+        UpdateCharacterInventoryEntry(playerid, scrapId);
+        
+        new message[128];
+        format(message, sizeof(message), "You broke down the %s and received %d scrap.", 
+            inventoryItems[itemid][itemNameSingular], scrapAmount);
+        SendClientMessage(playerid, COLOR_GREEN, message);
+        SendProxMessage(playerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "breaks down an item for parts.");
+        return 1;
+    }
+    
+    // Recipe exists - check if player has it unlocked
+    if(HasRecipeUnlocked(playerid, recipeid))
+    {
+        // Give scrap based on recipe difficulty (skill required)
+        new scrapAmount = CraftingRecipes[recipeid][recipeSkillRequired] > 0 ? CraftingRecipes[recipeid][recipeSkillRequired] : 1;
+        new scrapId = 1; // Scrap item ID
+        
+        playerInventory[playerid][scrapId] += scrapAmount;
+        UpdateCharacterInventoryEntry(playerid, scrapId);
+        
+        new message[128];
+        format(message, sizeof(message), "You broke down the %s and received %d scrap.", 
+            inventoryItems[itemid][itemNameSingular], scrapAmount);
+        SendClientMessage(playerid, COLOR_GREEN, message);
+        SendProxMessage(playerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "breaks down an item for parts.");
+    }
+    else
+    {
+        // Unlock recipe and give XP based on recipe difficulty
+        UnlockRecipe(playerid, recipeid);
+        
+        // Calculate XP based on skill_required (5 XP per skill level, minimum 1 XP)
+        new expAmount = CraftingRecipes[recipeid][recipeSkillRequired] > 0 ? (CraftingRecipes[recipeid][recipeSkillRequired] * 5) : 1;
+        GivePlayerExp(playerid, expAmount);
+        
+        new message[128];
+        format(message, sizeof(message), "You broke down the %s and learned how to craft it! (+%d EXP)", 
+            inventoryItems[itemid][itemNameSingular], expAmount);
+        SendClientMessage(playerid, COLOR_GREEN, message);
+        
+        format(message, sizeof(message), "Recipe Unlocked: %s", CraftingRecipes[recipeid][recipeName]);
+        SendClientMessage(playerid, COLOR_YELLOW, message);
+        SendProxMessage(playerid, COLOR_RP_PURPLE, 30.0, PROXY_MSG_TYPE_OTHER, "carefully studies and breaks down an item.");
+    }
+    
+    return 1;
+}
 
 // ============================================================================
 // CRAFTING MANAGEMENT FUNCTIONS
@@ -438,6 +627,10 @@ ShowCraftingMenu(playerid, category = -1)
         if(category != -1 && CraftingRecipes[i][recipeCategory] != category)
             continue;
         
+        // Check if player has this recipe unlocked
+        if(!HasRecipeUnlocked(playerid, i))
+            continue;
+        
         // Check if player can craft (has items and tinkerer skill level)
         new bool:canCraft = PlayerHasRecipeItems(playerid, i);
         new bool:hasSkillLevel = (player[playerid][tinkererSkillLevel] >= CraftingRecipes[i][recipeSkillRequired]);
@@ -474,11 +667,15 @@ DialogPages:ShowCraftingMenuPages(playerid, response, listitem, string:inputtext
     if(!response)
         return 1;
     
-    // Find the recipe at the selected listitem position
+    // Find the recipe at the selected listitem position (only counting unlocked recipes)
     new count = 0;
     for(new i = 0; i < RecipeCount; i++)
     {
         if(!CraftingRecipes[i][recipeActive])
+            continue;
+        
+        // Skip locked recipes
+        if(!HasRecipeUnlocked(playerid, i))
             continue;
         
         if(count == listitem)
@@ -655,6 +852,119 @@ CMD:addrecipe(playerid, params[])
     format(string, sizeof(string), "Recipe '%s' added successfully! Recipe ID: %d", name, recipeid);
     SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_SUCCESS, string);
     SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Recipe has been saved to the database and is now available.");
+    
+    return 1;
+}
+
+// Recipe unlock commands
+CMD:unlockrecipe(playerid, params[])
+{
+    if(player[playerid][admin] < 3)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have permission to use this command.");
+    
+    new targetid, recipeid;
+    if(sscanf(params, "ud", targetid, recipeid))
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Usage: /unlockrecipe [playerid/name] [recipeid]");
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "Use /listrecipes to see all recipe IDs.");
+        return 1;
+    }
+    
+    if(!IsPlayerConnected(targetid))
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Invalid player ID.");
+    
+    if(!player[targetid][isSpawned])
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Target player must be spawned.");
+    
+    // Find recipe by database ID
+    new recipeIndex = -1;
+    for(new i = 0; i < RecipeCount; i++)
+    {
+        if(CraftingRecipes[i][recipeId] == recipeid)
+        {
+            recipeIndex = i;
+            break;
+        }
+    }
+    
+    if(recipeIndex == -1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Invalid recipe ID.");
+    
+    if(HasRecipeUnlocked(targetid, recipeIndex))
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Player already has this recipe unlocked.");
+    
+    UnlockRecipe(targetid, recipeIndex);
+    
+    new string[128];
+    format(string, sizeof(string), "You have unlocked the recipe '%s' for %s.", 
+        CraftingRecipes[recipeIndex][recipeName], player[targetid][charname]);
+    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_SUCCESS, string);
+    
+    format(string, sizeof(string), "Admin %s has unlocked the recipe '%s' for you!", 
+        player[playerid][Name], CraftingRecipes[recipeIndex][recipeName]);
+    SendPlayerServerMessage(targetid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_SUCCESS, string);
+    
+    return 1;
+}
+
+CMD:listrecipes(playerid, params[])
+{
+    if(player[playerid][admin] < 3)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have permission to use this command.");
+    
+    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_INFO, "=== All Recipes ===");
+    
+    new string[128];
+    for(new i = 0; i < RecipeCount; i++)
+    {
+        if(!CraftingRecipes[i][recipeActive])
+            continue;
+        
+        format(string, sizeof(string), "ID: %d | Name: %s | Skill Req: %d", 
+            CraftingRecipes[i][recipeId], 
+            CraftingRecipes[i][recipeName],
+            CraftingRecipes[i][recipeSkillRequired]);
+        SendClientMessage(playerid, COLOR_WHITE, string);
+    }
+    
+    return 1;
+}
+
+CMD:unlockallrecipes(playerid, params[])
+{
+    if(player[playerid][admin] < 5)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have permission to use this command.");
+    
+    new targetid;
+    if(sscanf(params, "u", targetid))
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Usage: /unlockallrecipes [playerid/name]");
+    
+    if(!IsPlayerConnected(targetid))
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Invalid player ID.");
+    
+    if(!player[targetid][isSpawned])
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Target player must be spawned.");
+    
+    new count = 0;
+    for(new i = 0; i < RecipeCount; i++)
+    {
+        if(!CraftingRecipes[i][recipeActive])
+            continue;
+        
+        if(!HasRecipeUnlocked(targetid, i))
+        {
+            UnlockRecipe(targetid, i);
+            count++;
+        }
+    }
+    
+    new string[128];
+    format(string, sizeof(string), "Unlocked %d recipes for %s.", count, player[targetid][charname]);
+    SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_SUCCESS, string);
+    
+    format(string, sizeof(string), "Admin %s has unlocked all recipes for you! (%d recipes)", 
+        player[playerid][Name], count);
+    SendPlayerServerMessage(targetid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_SUCCESS, string);
     
     return 1;
 }

@@ -53,6 +53,7 @@
 * - CMD:cancelinterior - Cancel interior creation
 * - CMD:resetvworld - Reset your virtual world to 0
 * - CMD:scavcreate - Create scavenge area
+* - CMD:scavdelete - Delete nearest scavenge area
 * - CMD:createitem - Create new server item
 * - CMD:reloadloottables - Reload loot tables from XML
 * - CMD:createpump - Create fuel pump
@@ -186,6 +187,7 @@ CMD:ahelp(playerid, params[])
             
             strcat(message, "{FFFFFF}WORLD CREATION:\n");
             strcat(message, "{FFFF00}- /scavcreate [type] - Create scavenge area\n");
+            strcat(message, "{FFFF00}- /scavdelete - Delete nearest scavenge area\n");
             strcat(message, "{FFFF00}- /createpump - Create fuel pump at position\n\n");
             
             strcat(message, "{FFFFFF}ITEMS & LOOT:\n");
@@ -929,6 +931,37 @@ CMD:scavcreate(playerid, params[])
     
     // create the scav area
     CreateScavArea(tmpPos[0], tmpPos[1], tmpPos[2], GetPlayerInterior(playerid), GetPlayerVirtualWorld(playerid), tmpType);
+    return 1;
+}
+
+CMD:scavdelete(playerid, params[])
+{
+    if(player[playerid][admin] < 5)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_DENIED, "You do not have a high enough admin rank to use this command.");
+    
+    new scavIndex = GetNearestScavArea(playerid);
+    
+    if(scavIndex == -1)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You are not near any scav area.");
+    
+    new Float:distance = GetPlayerDistanceFromPoint(playerid, scavArea[scavIndex][scavPos][0], scavArea[scavIndex][scavPos][1], scavArea[scavIndex][scavPos][2]);
+    
+    if(distance > 5.0)
+        return SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "You are too far from the nearest scav area. Get within 5 meters.");
+    
+    new tmpScavId = scavArea[scavIndex][scavId];
+    
+    if(DeleteScavArea(scavIndex))
+    {
+        new message[64];
+        format(message, sizeof(message), "Scav area ID %d deleted successfully.", tmpScavId);
+        SendClientMessage(playerid, COLOR_GREEN, message);
+    }
+    else
+    {
+        SendPlayerServerMessage(playerid, COLOR_SYSTEM, PLR_SERVER_MSG_TYPE_ERROR, "Failed to delete scav area.");
+    }
+    
     return 1;
 }
 

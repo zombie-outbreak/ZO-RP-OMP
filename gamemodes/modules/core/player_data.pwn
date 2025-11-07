@@ -149,6 +149,12 @@ enum E_PLAYERS
     zombieSurvivalTicks, // Tracks survival time for periodic EXP as zombie
 
     /*
+    * Crafting System
+    */
+    unlockedRecipes[MAX_RECIPES], // Bitwise storage of unlocked recipes (1 = unlocked, 0 = locked)
+    unlockedRecipeCount, // Count of unlocked recipes
+
+    /*
     * Admin fly
     */
     bool:isflying,

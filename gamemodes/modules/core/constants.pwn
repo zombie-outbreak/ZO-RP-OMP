@@ -102,6 +102,7 @@
 #define CHANCE 100
 #define DEFAULT_HEALAMOUNT -1
 #define DEFAULT_AMMO -1
+#define MAX_RECIPES 100 // Maximum number of crafting recipes
 
 // Scavenging Area Types (also used for Loot Table IDs)
 #define SCAV_AREA_SCRAP 0

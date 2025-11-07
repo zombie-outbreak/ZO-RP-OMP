@@ -320,12 +320,27 @@ CMD:perks(playerid, params[])
     if(player[playerid][iszombie] == 1)
     {
         // Show zombie skill menu
-        new skillListZombie[256];
+        new skillListZombie[512], tempStr[64];
 
         for (new i = 0; i < sizeof(zombieSkills); i++)
         {
-            strcat(skillListZombie, zombieSkills[i]);
-            strcat(skillListZombie, "\n");
+            new tmplevel[16];
+            switch(i)
+            {
+                case 0: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][unlockedHpIncreaseSkill]);
+                case 1: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedJumpSkill] ? "Unlocked" : "Locked");
+                case 2: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][unlockedUnarmedSkill]);
+                case 3: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][unlockedBiteSkill]);
+                case 4: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedCombustSkill] ? "Unlocked" : "Locked");
+                case 5: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedStunSkill] ? "Unlocked" : "Locked");
+                case 6: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedGrabSkill] ? "Unlocked" : "Locked");
+                case 7: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedBorrowedStrengthSkill] ? "Unlocked" : "Locked");
+                case 8: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedSuperJumpSkill] ? "Unlocked" : "Locked");
+                case 9: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedCorneredSkill] ? "Unlocked" : "Locked");
+                case 10: format(tmplevel, sizeof(tmplevel), " [%s]", player[playerid][unlockedHuntSkill] ? "Unlocked" : "Locked");
+            }
+            format(tempStr, sizeof(tempStr), "%s%s\n", zombieSkills[i], tmplevel);
+            strcat(skillListZombie, tempStr);
         }
 
         Dialog_Show(playerid, PerkMenu, DIALOG_STYLE_LIST, "Zombie Perks", skillListZombie, "Select", "Close");
@@ -333,11 +348,20 @@ CMD:perks(playerid, params[])
     else
     {
         // Show human skill menu
-        new skillListHuman[256];
+        new skillListHuman[512], tempStr[64];
         for (new i = 0; i < sizeof(humanSkills); i++)
         {
-            strcat(skillListHuman, humanSkills[i]);
-            strcat(skillListHuman, "\n");
+            new tmplevel[16];
+            switch(i)
+            {
+                case 0: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][tinkererSkillLevel]);
+                case 1: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][mechanicSkillLevel]);
+                case 2: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][medicSkillLevel]);
+                case 3: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][gourmetSkillLevel]);
+                case 4: format(tmplevel, sizeof(tmplevel), " [%d/5]", player[playerid][looterSkillLevel]);
+            }
+            format(tempStr, sizeof(tempStr), "%s%s\n", humanSkills[i], tmplevel);
+            strcat(skillListHuman, tempStr);
         }
         Dialog_Show(playerid, PerkMenu, DIALOG_STYLE_LIST, "Human Perks", skillListHuman, "Select", "Close");
     }

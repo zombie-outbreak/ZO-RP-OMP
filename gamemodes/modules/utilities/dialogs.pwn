@@ -259,12 +259,12 @@ Dialog:InventoryItemMain(playerid, response, listitem, string:inputtext[])
 	*/
 	switch(inventoryItems[player[playerid][chosenItemId]][itemCategory])
 	{
-		case CATEGORY_GENERAL: Dialog_Show(playerid, InventoryGeneralOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-		case CATEGORY_FOOD: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-		case CATEGORY_DRINK: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-		case CATEGORY_MEDICAL: Dialog_Show(playerid, InventoryMedicalOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-		case CATEGORY_WEAPONS: Dialog_Show(playerid, InventoryWeaponsOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nEquip\nUnequip", "Select", "Back");
-		case CATEGORY_AMMO: Dialog_Show(playerid, InventoryAmmoOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop", "Select", "Back");
+		case CATEGORY_GENERAL: Dialog_Show(playerid, InventoryGeneralOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+		case CATEGORY_FOOD: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+		case CATEGORY_DRINK: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+		case CATEGORY_MEDICAL: Dialog_Show(playerid, InventoryMedicalOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+		case CATEGORY_WEAPONS: Dialog_Show(playerid, InventoryWeaponsOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nEquip\nUnequip\nBreak Down", "Select", "Back");
+		case CATEGORY_AMMO: Dialog_Show(playerid, InventoryAmmoOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nBreak Down", "Select", "Back");
 	}
 	return 1;
 }
@@ -295,12 +295,12 @@ DialogPages:InventoryItemMainPages(playerid, response, listitem, string:inputtex
 				// Show relevant dialog depending on item category
 				switch(inventoryItems[i][itemCategory])
 				{
-					case CATEGORY_GENERAL: Dialog_Show(playerid, InventoryGeneralOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-					case CATEGORY_FOOD: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-					case CATEGORY_DRINK: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-					case CATEGORY_MEDICAL: Dialog_Show(playerid, InventoryMedicalOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse", "Select", "Back");
-					case CATEGORY_WEAPONS: Dialog_Show(playerid, InventoryWeaponsOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nEquip\nUnequip", "Select", "Back");
-					case CATEGORY_AMMO: Dialog_Show(playerid, InventoryAmmoOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop", "Select", "Back");
+					case CATEGORY_GENERAL: Dialog_Show(playerid, InventoryGeneralOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+					case CATEGORY_FOOD: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+					case CATEGORY_DRINK: Dialog_Show(playerid, InventoryFoodDrinkOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+					case CATEGORY_MEDICAL: Dialog_Show(playerid, InventoryMedicalOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nUse\nBreak Down", "Select", "Back");
+					case CATEGORY_WEAPONS: Dialog_Show(playerid, InventoryWeaponsOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nEquip\nUnequip\nBreak Down", "Select", "Back");
+					case CATEGORY_AMMO: Dialog_Show(playerid, InventoryAmmoOpts, DIALOG_STYLE_LIST, "Select an option", "Description\nGive\nDrop\nBreak Down", "Select", "Back");
 				}
 				return 1;
 			}
@@ -409,9 +409,16 @@ Dialog:InventoryGeneralOpts(playerid, response, listitem, string:inputtext[])
                     return 1;
                 }
                 
-                // has passed all the checks so ask the player whether they wish to fix their vehicle
-                format(string, sizeof(string), "Would you like to try and fix your vehicle?\nIt will cost %d scrap.", scrapRequired);
+				// has passed all the checks so ask the player whether they wish to fix their vehicle
+				format(string, sizeof(string), "Would you like to try and fix your vehicle?\nIt will cost %d scrap.", scrapRequired);
 				Dialog_Show(playerid, ScrapOptions, DIALOG_STYLE_MSGBOX, "Fix vehicle?", string, "Yes", "No");
+			}
+		}
+		case 4: // break down
+		{
+			if(BreakDownItem(playerid, player[playerid][chosenItemId]))
+			{
+				ShowInventoryItemListByCategory(playerid, CATEGORY_GENERAL);
 			}
 		}
 	}
@@ -633,6 +640,14 @@ Dialog:InventoryFoodDrinkOpts(playerid, response, listitem, string:inputtext[])
 				}
 			}
 		}
+		case 4: // break down
+		{
+			new category = inventoryItems[player[playerid][chosenItemId]][itemCategory];
+			if(BreakDownItem(playerid, player[playerid][chosenItemId]))
+			{
+				ShowInventoryItemListByCategory(playerid, category);
+			}
+		}
 	}
 	return 1;
 }
@@ -723,6 +738,14 @@ Dialog:InventoryMedicalOpts(playerid, response, listitem, string:inputtext[])
 				ShowInventoryItemListByCategory(playerid, CATEGORY_MEDICAL);
 			}
 		}
+		case 4: // break down
+		{
+			new category = inventoryItems[player[playerid][chosenItemId]][itemCategory];
+			if(BreakDownItem(playerid, player[playerid][chosenItemId]))
+			{
+				ShowInventoryItemListByCategory(playerid, category);
+			}
+		}
 	}
 	return 1;
 }
@@ -798,6 +821,13 @@ Dialog:InventoryWeaponsOpts(playerid, response, listitem, string:inputtext[])
 			UpdatePlayerWepslotEntry(inventoryItems[player[playerid][chosenItemId]][itemWepSlot], WEAPON_FIST, player[playerid][chosenChar]);
 			ShowInventoryItemListByCategory(playerid, CATEGORY_WEAPONS);
 		}
+		case 5: // break down
+		{
+			if(BreakDownItem(playerid, player[playerid][chosenItemId]))
+			{
+				ShowInventoryItemListByCategory(playerid, CATEGORY_WEAPONS);
+			}
+		}
 	}
 	return 1;
 }
@@ -821,6 +851,13 @@ Dialog:InventoryAmmoOpts(playerid, response, listitem, string:inputtext[])
 		case 2: // drop
 		{
 			Dialog_Show(playerid, InventoryDropAmount, DIALOG_STYLE_INPUT, "Input an amount to drop", "Input an amount of items you wish to drop.", "Confirm", "Go Back");
+		}
+		case 3: // break down
+		{
+			if(BreakDownItem(playerid, player[playerid][chosenItemId]))
+			{
+				ShowInventoryItemListByCategory(playerid, CATEGORY_AMMO);
+			}
 		}
 	}
 	return 1;
@@ -1061,47 +1098,6 @@ public OnInteriorDeleteData(playerid, const intname[])
 }
 
 /*
-* Loot tables - DEPRECATED
-* Note: These admin dialogs are deprecated as loot tables are now managed via XML files.
-* Admins should edit the XML files in scriptfiles/loot_tables/ instead.
-* See LOOT_SYSTEM_README.md for documentation on the new system.
-*/
-/*
-Dialog:EditLootTableChanceNode(playerid, response, listitem, string:inputtext[])
-{   
-    if(!response)
-        return 1;
-        
-    if(strval(inputtext) < 0 || strval(inputtext) > MAX_ITEMS - 1)
-    {
-        SendClientMessage(playerid, COLOR_RED, "Invalid item ID. Values between 0 & %d only.", MAX_ITEMS - 1);
-        Dialog_Show(playerid, EditLootTableChanceNode, DIALOG_STYLE_INPUT, "Loot Table Chance Node", "Input a valid item ID for this node. It will then be added to the loot table.", "Confirm", "Back");
-        return 1;
-    }
-    
-    UpdateLootTableEntry(player[playerid][admChosenTableName], player[playerid][admChosenTableId], player[playerid][admChosenChanceNode], strval(inputtext));
-    PopulateLootTableList(playerid);
-    return 1;
-}
-
-DialogPages:ShowLootTableAdminList(playerid, response, listitem, inputtext[])
-{
-	if(!response)
-		return 1;
-
-    player[playerid][admChosenTableId] = listitem;
-	format(player[playerid][admChosenTableName], 32, "%s", inputtext);
-    PopulateLootTableChanceList(playerid, player[playerid][admChosenTableName]);
-	return 1;
-}
-
-DialogPages:ShowLootTableChanceList(playerid, response, listitem, inputtext[])
-{
-	if(!response)
-		return 1;
-*/
-
-/*
 * Paged Dialogs
 */
 DialogPages:ShowInteriorsDialog(playerid, response, listitem, inputtext[])
@@ -1115,14 +1111,6 @@ DialogPages:ShowInteriorsDialog(playerid, response, listitem, inputtext[])
 	Dialog_Show(playerid, InteriorOptions, DIALOG_STYLE_LIST, string, "Change Name\nSet Virtual World\nDelete", "Select", "Close");
 	return 1;
 }
-
-/*
-// Deprecated loot table dialog continuation - commented out
-	player[playerid][admChosenChanceNode] = listitem;
-    Dialog_Show(playerid, EditLootTableChanceNode, DIALOG_STYLE_INPUT, "Loot Table Chance Node", "Input a valid item ID for this node. It will then be added to the loot table.", "Confirm", "Back");
-	return 1;
-}
-*/
 
 /*
 * Dynamic Dialog Functions

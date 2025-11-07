@@ -425,6 +425,7 @@ public OnCharacterDataReceived(playerid, raceCheck)
         if(player[playerid][iszombie] == 0)
         {
             LoadCharacterInventory(playerid);
+            LoadPlayerRecipes(playerid); // Load unlocked recipes
         }
         
         /*
@@ -704,6 +705,7 @@ public OnScavAreaLoaded(scavAreaId)
 {
 	if(cache_num_rows() > 0)
     {
+        scavArea[scavAreaId][scavId] = scavAreaId;
         cache_get_value_name_float(0, "posx", scavArea[scavAreaId][scavPos][0]);
         cache_get_value_name_float(0, "posy", scavArea[scavAreaId][scavPos][1]);
         cache_get_value_name_float(0, "posz", scavArea[scavAreaId][scavPos][2]);
@@ -738,6 +740,7 @@ public OnScavAreaCreated(Float:scavPosX, Float:scavPosY, Float:scavPosZ, scavInt
     scavAreaCount = scavAreaCount + 1;
     
     // set the data for this new scav area
+    scavArea[tmpScavId][scavId] = tmpScavId;
     scavArea[tmpScavId][scavPos][0] = scavPosX;
     scavArea[tmpScavId][scavPos][1] = scavPosY;
     scavArea[tmpScavId][scavPos][2] = scavPosZ;
@@ -749,6 +752,71 @@ public OnScavAreaCreated(Float:scavPosX, Float:scavPosY, Float:scavPosZ, scavInt
     // create the text label
     scavTextLabel[tmpScavId] = CreateDynamic3DTextLabel("/search", COLOR_GREEN, scavPosX, scavPosY, scavPosZ, 20.0, 
         .testlos = 1, .worldid = scavVirWorld, .interiorid = scavIntWorld);
+    return 1;
+}
+
+/*
+* Get nearest scav area to player
+*/
+GetNearestScavArea(playerid)
+{
+    new Float:playerPos[3];
+    GetPlayerPos(playerid, playerPos[0], playerPos[1], playerPos[2]);
+    
+    new Float:closestDist = 999999.0;
+    new closestIndex = -1;
+    
+    for(new i = 0; i < MAX_SCAV_AREAS; i++)
+    {
+        if(!scavArea[i][areaActive])
+            continue;
+            
+        new Float:distance = GetPlayerDistanceFromPoint(playerid, scavArea[i][scavPos][0], scavArea[i][scavPos][1], scavArea[i][scavPos][2]);
+        
+        if(distance < closestDist)
+        {
+            closestDist = distance;
+            closestIndex = i;
+        }
+    }
+    
+    return closestIndex;
+}
+
+/*
+* Delete scav area
+*/
+DeleteScavArea(scavIndex)
+{
+    if(scavIndex < 0 || scavIndex >= MAX_SCAV_AREAS)
+        return 0;
+        
+    if(!scavArea[scavIndex][areaActive])
+        return 0;
+    
+    new tmpScavId = scavArea[scavIndex][scavId];
+    
+    // Delete from database
+    new query[128];
+    mysql_format(database, query, sizeof(query), "DELETE FROM `scavareas` WHERE `id` = %d", tmpScavId);
+    mysql_tquery(database, query);
+    
+    // Destroy 3D text label
+    DestroyDynamic3DTextLabel(scavTextLabel[scavIndex]);
+    
+    // Mark as inactive
+    scavArea[scavIndex][areaActive] = false;
+    scavArea[scavIndex][scavId] = 0;
+    scavArea[scavIndex][scavPos][0] = 0.0;
+    scavArea[scavIndex][scavPos][1] = 0.0;
+    scavArea[scavIndex][scavPos][2] = 0.0;
+    scavArea[scavIndex][scavInterior] = 0;
+    scavArea[scavIndex][scavWorld] = 0;
+    scavArea[scavIndex][scavType] = 0;
+    
+    // Decrease count
+    scavAreaCount--;
+    
     return 1;
 }
 
